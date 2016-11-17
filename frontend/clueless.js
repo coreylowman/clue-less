@@ -5,6 +5,7 @@ function establishWebsocket() {
   //establish connection at localhost:3000
     var connection = new WebSocket('ws://127.0.0.1:3000');
 
+  //takes care of any initial action upon opening of websocket
     connection.onopen = function () {
       console.log('opened');
       //webpage will update status from Connecting to Connected
@@ -27,6 +28,13 @@ function establishWebsocket() {
         }
         // handle incoming message
     };
+
+  return connection;
 }
 
-establishWebsocket();
+var websocket = establishWebsocket();
+
+//example of sending JSON object to the server
+websocket.onopen = function(){
+  websocket.send(JSON.stringify({test:'test'}));
+};

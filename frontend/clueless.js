@@ -7,6 +7,7 @@ function establishWebsocket() {
 
     connection.onopen = function () {
       console.log('opened');
+      //webpage will update status from Connecting to Connected
       document.getElementById('status').innerHTML = 'Connected';
       // connection is opened and ready to use
     };

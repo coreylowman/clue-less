@@ -1,10 +1,11 @@
 package edu.jhu.server;
 
+import java.util.List;
+
 import edu.jhu.server.data.CaseFile;
 
 public class CardShuffler {
-  // TODO need to add List<Player> players parameter to this function
-  public static CaseFile shuffleAndDealCards() {
+  public static CaseFile shuffleAndDealCards(List<Player> players) {
     return null;
   }
 }

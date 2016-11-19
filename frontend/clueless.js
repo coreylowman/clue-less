@@ -38,3 +38,13 @@ var websocket = establishWebsocket();
 websocket.onopen = function(){
   websocket.send(JSON.stringify({test:'test'}));
 };
+
+
+// moves character HTML element into destination HTML element
+// refer to style.css for names
+// eg
+// moveTo('col_mustard', 'study');
+
+function moveTo(character, destination){
+  document.getElementById(destination).appendChild(document.getElementById(character));
+}

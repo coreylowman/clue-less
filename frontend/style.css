@@ -74,3 +74,51 @@
     border: 2px solid blue;
     padding: 0px;
 }
+#miss_scarlett {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: red;
+}
+#prof_plum {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: purple;
+}
+#col_mustard {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: yellow;
+}
+#mrs_peacock {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: blue;
+}
+#mr_green {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: green;
+}
+#mrs_white {
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    border: black;
+}

@@ -9,45 +9,43 @@
     <body>
       <div id="status">Connecting...</div>
 	<!-- page content -->
-	<table id="board">
-	    <tr>
-		<td id="study" class="ILocation Room">Study</td>
-		<td id="hallway_1" class="ILocation Hallway_horz"></td>
-		<td id="hall" class="ILocation Room" >Hall</td>
-		<td id="hallway_2" class="ILocation Hallway_horz"></td>
-		<td id="lounge" class="ILocation Room">Lounge</td>
-	    </tr>
-	    <tr>
-		<td id="hallway_3" class="ILocation Hallway_vert"></td>
-		<td></td>
-		<td id="hallway_4" class="ILocation Hallway_vert"></td>
-		<td></td>
-		<td id="hallway_5" class="ILocation Hallway_vert"></td>
-		<td></td>
-	    </tr>
-	    <tr>
-		<td id="library" class="ILocation Room">Library</td>
-		<td id="hallway_6" class="ILocation Hallway_horz"></td>
-		<td id="billiard_room" class="ILocation Room" >Billiard Room</td>
-		<td id="hallway_7" class="ILocation Hallway_horz"></td>
-		<td id="dining_room" class="ILocation Room">Dining Room</td>
-	    </tr>
-	    <tr>
-		<td id="hallway_8" class="ILocation Hallway_vert"></td>
-		<td></td>
-		<td id="hallway_9" class="ILocation Hallway_vert"></td>
-		<td></td>
-		<td id="hallway_10" class="ILocation Hallway_vert"></td>
-		<td></td>
-	    </tr>
-	    <tr>
-		<td id="conservatory" class="ILocation Room">Conservatory</td>
-		<td id="hallway_11" class="ILocation Hallway_horz"></td>
-		<td id="ballroom" class="ILocation Room" >Ballroom</td>
-		<td id="hallway_12" class="ILocation Hallway_horz"></td>
-		<td id="kitchen" class="ILocation Room">Kitchen</td>
-	    </tr>
-	</table>
+  <table id="board" width="800" height="600">
+            <tr>
+                <td id="study" class="room">Study</td>
+                <td><div id="s_h" class="horizontal_hallway"></div></td>
+                <td class="room">Hall</td>
+                <td><div class="horizontal_hallway"></div></td>
+                <td class="room">Lounge</td>
+            </tr>
+            <tr>
+                <td><div id="s_l" class="vert_hallway"></div></td>
+                <td></td>
+                <td><div class="vert_hallway"></div></td>
+                <td></td>
+                <td><div class="vert_hallway"></div></td>
+            </tr>
+            <tr>
+                <td class="room">Library</td>
+                <td><div class="horizontal_hallway"></div></td>
+                <td class="room">Billiard Room</td>
+                <td><div class="horizontal_hallway"></div></td>
+                <td class="room">Dining Room</td>
+                </tr>
+            <tr>
+                <td><div class="vert_hallway"></div></td>
+                <td></td>
+                <td><div class="vert_hallway"></div></td>
+                <td></td>
+                <td><div class="vert_hallway"></div></td>
+            </tr>
+            <tr>
+                <td class="room">Conservatory</td>
+                <td><div class="horizontal_hallway"></div></td>
+                <td class="room">Ballroom</td>
+                <td><div class="horizontal_hallway"></div></td>
+                <td class="room">Kitchen</td>
+            </tr>
+        </table> 
  <button onclick="makeSelectable()">test move</button>
         <form>
             <select id="suggest_suspect">

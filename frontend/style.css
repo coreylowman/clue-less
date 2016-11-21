@@ -75,6 +75,7 @@
     padding: 0px;
 }
 #miss_scarlett {
+    margin: auto;
     width: 40px;
     height: 40px;
     -webkit-border-radius: 25px;
@@ -83,6 +84,7 @@
     background: red;
 }
 #prof_plum {
+    margin: auto;
     width: 40px;
     height: 40px;
     -webkit-border-radius: 25px;
@@ -91,6 +93,7 @@
     background: purple;
 }
 #col_mustard {
+    margin: auto;
     width: 40px;
     height: 40px;
     -webkit-border-radius: 25px;
@@ -99,6 +102,7 @@
     background: yellow;
 }
 #mrs_peacock {
+    margin: auto;
     width: 40px;
     height: 40px;
     -webkit-border-radius: 25px;
@@ -107,6 +111,7 @@
     background: blue;
 }
 #mr_green {
+    margin: auto;
     width: 40px;
     height: 40px;
     -webkit-border-radius: 25px;
@@ -115,6 +120,7 @@
     background: green;
 }
 #mrs_white {
+    margin: auto;
     width: 38px;
     height: 38px;
     -webkit-border-radius: 25px;

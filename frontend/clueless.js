@@ -48,3 +48,27 @@ websocket.onopen = function(){
 function moveTo(character, destination){
   document.getElementById(destination).appendChild(document.getElementById(character));
 }
+
+function genDestinationIdFunc(roomId){
+  var roomIdFunc = function(event){
+    console.log(roomId)
+  }
+  return roomIdFunc;
+};
+
+
+function setDestinationIdFuncs(destinationClass) {
+  var destinations = document.getElementsByClassName(destinationClass);
+  for(var i = 0; i < destinations.length; i++){
+    var destinationIdFunc = genDestinationIdFunc(destinations[i].id);
+    destinations[i].addEventListener("click", destinationIdFunc);
+  }
+};
+
+function init(){
+  setDestinationIdFuncs("room");
+  setDestinationIdFuncs("horizontal_hallway");
+  setDestinationIdFuncs("vert_hallway");
+}
+
+init();

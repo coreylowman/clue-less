@@ -49,26 +49,33 @@ function moveTo(character, destination){
   document.getElementById(destination).appendChild(document.getElementById(character));
 }
 
-function genDestinationIdFunc(roomId){
-  var roomIdFunc = function(event){
-    console.log(roomId)
+// generates an id specific function for each element
+// presently console logs name of element
+// TODO send id to websocket
+
+function genElementIdFunc(elementId){
+  var elementIdFunc = function(event){
+    console.log(elementId)
   }
-  return roomIdFunc;
+  return elementIdFunc;
+};
+
+// add id-specific onclick functionality to HTML elements by classname
+
+function addIdSpecificOnclickByClass(classname) {
+  var elements = document.getElementsByClassName(classname);
+  for(var i = 0; i < elements.length; i++){
+    var elementIdFunc = genElementIdFunc(elements[i].id);
+    elements[i].addEventListener("click", elementIdFunc);
+  }
 };
 
 
-function setDestinationIdFuncs(destinationClass) {
-  var destinations = document.getElementsByClassName(destinationClass);
-  for(var i = 0; i < destinations.length; i++){
-    var destinationIdFunc = genDestinationIdFunc(destinations[i].id);
-    destinations[i].addEventListener("click", destinationIdFunc);
-  }
-};
 
 function init(){
-  setDestinationIdFuncs("room");
-  setDestinationIdFuncs("horizontal_hallway");
-  setDestinationIdFuncs("vert_hallway");
+  addIdSpecificOnclickByClass("room");
+  addIdSpecificOnclickByClass("horizontal_hallway");
+  addIdSpecificOnclickByClass("vert_hallway");
 }
 
 init();

@@ -38,15 +38,14 @@ public class Board {
         {"kitchen", "ballroom"}, {"ballroom", "billiardroom"}, {"ballroom", "conservatory"},
         {"conservatory", "library"}, {"library", "billiardroom"}};
     for (String[] roomNames : hallways) {
-      Hallway hallway =
-          new Hallway(roomNames[0] + "_" + roomNames[1], roomNames[1] + "_" + roomNames[0]);
+      Hallway hallway = new Hallway(roomNames[0], roomNames[1]);
       locations.put(hallway, new ArrayList<IBoardPiece>());
       connectedLocations.put(hallway, new ArrayList<ILocation>());
     }
 
     // connect the hallways & rooms
     for (String[] roomNames : hallways) {
-      Hallway hallway = Hallway.get(roomNames[0] + "_" + roomNames[1]);
+      Hallway hallway = Hallway.get(roomNames[0], roomNames[1]);
       Room room1 = Room.get(roomNames[0]);
       Room room2 = Room.get(roomNames[1]);
       connectedLocations.get(hallway).add(room1);

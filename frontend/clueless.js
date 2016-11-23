@@ -37,6 +37,7 @@ var websocket = establishWebsocket();
 //example of sending JSON object to the server
 websocket.onopen = function(){
   websocket.send(JSON.stringify({test:'test'}));
+  document.getElementById('status').innerHTML = 'Connected';
 };
 
 

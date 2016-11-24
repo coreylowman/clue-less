@@ -11,14 +11,28 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 public class ClueLessServer {
 
+  static int id;
+  static Game currentGame;
+
   public static void main(String[] args) throws Exception {
+    id = 0;
+    currentGame = new Game();
+
     try {
       WebSocketHandler wsHandler = new WebSocketHandler() {
         @Override
         public void configure(WebSocketServletFactory factory) {
           factory.setCreator(new WebSocketCreator() {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-              return new Player();
+              Player player = new Player("player" + String.valueOf(id++));
+
+              if (currentGame.isStarted() || currentGame.isFull()) {
+                currentGame = new Game();
+              }
+
+              currentGame.addPlayer(player);
+
+              return player;
             }
           });
         }

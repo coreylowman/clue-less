@@ -36,7 +36,7 @@ var websocket = establishWebsocket();
 
 //example of sending JSON object to the server
 websocket.onopen = function(){
-  websocket.send(JSON.stringify({test:'test'}));
+  websocket.send(JSON.stringify({eventType:'TEST'}));
 };
 
 
@@ -79,3 +79,31 @@ function init(){
 }
 
 init();
+
+function sendChat(){
+  var chatEvent = {eventType: "CHAT", body: ""};
+  var chatInput = document.getElementById("chat_input");
+  chatEvent.body = chatInput.value;
+  chatInput.value = '';
+  websocket.send(JSON.stringify(chatEvent));
+}
+
+websocket.onmessage = function(message){
+  console.log(message);
+  handleEvent(JSON.parse(message.data));
+}
+
+function handleEvent(event){
+  switch(event.eventType){
+    case "TEST":
+    console.log("this is only a test")
+    break;
+    case "CHAT":
+    document.getElementById("chat_text").value += event.body + "\n";
+    console.log(chat_text);
+    break;
+    default:
+    console.log("Invalid eventType received");
+    break;
+  }
+}

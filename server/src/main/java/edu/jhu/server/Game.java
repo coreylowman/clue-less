@@ -41,6 +41,7 @@ public class Game {
 
   public void addPlayer(Player player) {
     players.add(player);
+    player.setGame(this);
   }
 
   public void notifyPlayers(JSONObject event) {

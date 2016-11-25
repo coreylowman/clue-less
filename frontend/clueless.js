@@ -103,6 +103,9 @@ function handleEvent(event){
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;
+    case "INVALIDREQUEST":
+    alert("You cannot do that. " + event.reason);
+    break;
     default:
     console.log("Invalid eventType received");
     break;
@@ -111,8 +114,7 @@ function handleEvent(event){
 
 function suggest(){
   var suggestion = {eventType: "SUGGESTION", suspect: "", weapon: ""};
-
-  var suggestFormElements = document.getElementById("suggest_form").elements;
+  var suggestFormElements = document.getElementById("suggest_form").elements
   suggestion.suspect = suggestFormElements[0].value;
   suggestion.weapon = suggestFormElements[1].value;
   websocket.send(JSON.stringify(suggestion));

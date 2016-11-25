@@ -35,6 +35,16 @@ public class Game {
   public boolean isFull() {
     return this.players.size() == 6;
   }
+  
+  // This breaks things if you don't give it a valid tag
+  private Player getPlayerByTag(String tag) {
+	  for (Player player : players) {
+		  if (player.getTag() == tag) {
+			  return player;
+		  }
+	  }
+	  return null;
+  }
 
   public void start() {
     this.currentTurnIndex = 0;
@@ -52,6 +62,23 @@ public class Game {
       player.sendEvent(event);
     }
   }
+  
+  private JSONObject makeChatMessage(String body) {
+	  JSONObject chat = new JSONObject();
+	  chat.put("eventType", "CHAT");
+	  chat.put("author", "Game");
+	  chat.put("body", body);
+	  return chat;
+  }
+  
+  private JSONObject makeInvalidRequestMessage(String player, String reason){
+	  JSONObject invalidRequest = new JSONObject();
+	  invalidRequest.put("eventType", "INVALIDREQUEST");
+	  invalidRequest.put("author", "Game");
+	  invalidRequest.put("reason", reason);
+	  invalidRequest.put("player", player);
+	  return invalidRequest;
+  }
 
   public void handleEvent(JSONObject event) {
 	  String eventType = event.getString("eventType");
@@ -64,8 +91,22 @@ public class Game {
 	  		notifyPlayers(event);
 	  		break;
 	  	case SUGGESTION:
-	  		System.out.println("Suggestion!");
+	  		Player suggester = getPlayerByTag(event.getString("author"));
+	  		if (board.isSuggestionValid(suggester)) {
+	  			JSONObject chat = makeChatMessage(suggester.getTag() +
+	  					" suggests that it was " + 
+	  					event.get("suspect") + 
+	  					" with the " + 
+	  					event.get("weapon") +
+	  					" in the " +
+	  					board.getPieceLocation(suggester.getSuspect()).toString());
+	  			handleEvent(chat);
+	  		} else {
+	  			handleEvent(makeInvalidRequestMessage(event.getString("author"), "You are not in a room."));
+	  		}
 	  		break;
+	  	case INVALIDREQUEST:
+	  		getPlayerByTag(event.getString("player")).sendEvent(event);
 	  	default:
 	  		System.out.println("invalid event type");
 	  		break;

@@ -60,8 +60,10 @@ public class Game {
 	  		System.out.println("test event");
 	  		break;
 	  	case CHAT:
-	  		System.out.println(event.getString("body"));
 	  		notifyPlayers(event);
+	  		break;
+	  	case SUGGESTION:
+	  		System.out.println("Suggestion!");
 	  		break;
 	  	default:
 	  		System.out.println("invalid event type");

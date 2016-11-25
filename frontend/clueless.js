@@ -99,7 +99,7 @@ function handleEvent(event){
     console.log("this is only a test")
     break;
     case "CHAT":
-    document.getElementById("chat_text").value += event.body + "\n";
+    document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;
     default:

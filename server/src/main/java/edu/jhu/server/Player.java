@@ -40,11 +40,7 @@ public class Player extends WebSocketAdapter {
   }
 
   private void log(String message) {
-	  System.out.println("log1");
-	  System.out.println(this.getSession());
-	  System.out.println("log2");
 	  System.out.println("'" + tag + "' (" + session.getRemoteAddress().toString() + ") " + message);
-	  System.out.println("log3");
   }
 
   public void sendEvent(JSONObject event) {
@@ -76,6 +72,9 @@ public class Player extends WebSocketAdapter {
   @Override
   public void onWebSocketText(final String message) {
     log("Message: " + message);
-    game.handleEvent(new JSONObject(message));
+    JSONObject JSONMessage = new JSONObject(message);
+    JSONMessage.append("author", this.tag);
+    JSONMessage.put("author", this.tag);
+    game.handleEvent(JSONMessage);
   }
 }

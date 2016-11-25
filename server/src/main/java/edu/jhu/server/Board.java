@@ -65,6 +65,16 @@ public class Board {
       Weapon weapon = new Weapon(name);
     }
   }
+  
+  // Function needs to actually check if player's piece is in a room
+  public boolean isSuggestionValid(Player suggester) {
+	  return false;
+  }
+  
+  // currently a dummy function, actually needs to get a room according to suspect
+  public Room getPieceLocation(Suspect suspect){
+	  return Room.get("hall");
+  }
 
   public boolean isMoveValid(IBoardPiece piece, ILocation destination) {
     return getValidMoves(piece).contains(destination);

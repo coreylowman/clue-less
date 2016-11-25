@@ -9,6 +9,9 @@ import org.json.JSONObject;
 import edu.jhu.server.data.CaseFile;
 
 public class Game {
+	private enum EventType {
+		TEST, CHAT, GAMESTART, SUGGESTION, TURNNOTIFICATION
+	}
   private int currentTurnIndex;
   private List<Player> players;
   private CaseFile secretCards;
@@ -51,6 +54,20 @@ public class Game {
   }
 
   public void handleEvent(JSONObject event) {
-
+	  String eventType = event.getString("eventType");
+	  switch (EventType.valueOf(eventType)) {
+	  	case TEST:
+	  		System.out.println("test event");
+	  		break;
+	  	case CHAT:
+	  		System.out.println(event.getString("body"));
+	  		for (int i = 0; i < players.size(); i++){
+	  			players.get(i).sendEvent(event);
+	  		}
+	  		break;
+	  	default:
+	  		System.out.println("invalid event type");
+	  		break;
+	  }
   }
 }

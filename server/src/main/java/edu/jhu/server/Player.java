@@ -20,7 +20,7 @@ public class Player extends WebSocketAdapter {
   private Suspect suspect;
 
   public Player(String tag) {
-    this.tag = tag;
+	  this.tag = tag;
   }
 
   public void setGame(Game game) {
@@ -40,7 +40,11 @@ public class Player extends WebSocketAdapter {
   }
 
   private void log(String message) {
-    System.out.println("'" + tag + "' (" + session.getRemoteAddress().toString() + ") " + message);
+	  System.out.println("log1");
+	  System.out.println(this.getSession());
+	  System.out.println("log2");
+	  System.out.println("'" + tag + "' (" + session.getRemoteAddress().toString() + ") " + message);
+	  System.out.println("log3");
   }
 
   public void sendEvent(JSONObject event) {
@@ -59,8 +63,9 @@ public class Player extends WebSocketAdapter {
 
   @Override
   public void onWebSocketConnect(Session session) {
-    log("WebSocket connected.");
-    this.session = session;
+	  this.session = session;
+	  log("WebSocket connected.");
+
   }
 
   @Override

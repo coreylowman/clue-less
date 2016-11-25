@@ -25,7 +25,6 @@ public class ClueLessServer {
           factory.setCreator(new WebSocketCreator() {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
               Player player = new Player("player" + String.valueOf(id++));
-
               if (currentGame.isStarted() || currentGame.isFull()) {
                 currentGame = new Game();
               }

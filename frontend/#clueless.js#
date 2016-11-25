@@ -82,7 +82,7 @@ function init(){
 init();
 
 function sendChat(){
-  var chatEvent = {eventType: "CHAT_NOTIFICATION", body: ""};
+  var chatEvent = {eventType: "CHAT", body: ""};
   var chatInput = document.getElementById("chat_input");
   chatEvent.body = chatInput.value;
   chatInput.value = '';
@@ -99,7 +99,7 @@ function handleEvent(event){
     case "TEST":
     console.log("this is only a test")
     break;
-    case "CHAT_NOTIFICATION":
+    case "CHAT":
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;
@@ -111,8 +111,7 @@ function handleEvent(event){
 
 function suggest(){
   var suggestion = {eventType: "SUGGESTION", suspect: "", weapon: ""};
-
-  var suggestFormElements = document.getElementById("suggest_form").elements;
+  var suggestFormElements = document.getElementById("suggest_form").elements
   suggestion.suspect = suggestFormElements[0].value;
   suggestion.weapon = suggestFormElements[1].value;
   websocket.send(JSON.stringify(suggestion));

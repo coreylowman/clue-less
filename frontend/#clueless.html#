@@ -109,8 +109,7 @@
   <div id="chat_container">
 
     <div>
-      <textarea readonly id="chat_text">
-      </textarea>
+      <textarea readonly id="chat_text"></textarea>
     </div>
     <div>
       <input id="chat_input" type="text">

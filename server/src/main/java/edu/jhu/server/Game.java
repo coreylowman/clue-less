@@ -61,9 +61,7 @@ public class Game {
 	  		break;
 	  	case CHAT:
 	  		System.out.println(event.getString("body"));
-	  		for (int i = 0; i < players.size(); i++){
-	  			players.get(i).sendEvent(event);
-	  		}
+	  		notifyPlayers(event);
 	  		break;
 	  	default:
 	  		System.out.println("invalid event type");

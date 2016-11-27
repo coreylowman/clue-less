@@ -82,7 +82,7 @@ function init(){
 init();
 
 function sendChat(){
-  var chatEvent = {eventType: "CHAT", body: ""};
+  var chatEvent = {eventType: "CHAT_NOTIFICATION", body: ""};
   var chatInput = document.getElementById("chat_input");
   chatEvent.body = chatInput.value;
   chatInput.value = "";
@@ -102,7 +102,7 @@ function handleEvent(event){
     case "TEST":
     console.log("this is only a test")
     break;
-    case "CHAT":
+    case "CHAT_NOTIFICATION":
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;

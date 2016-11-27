@@ -10,7 +10,7 @@ import edu.jhu.server.data.CaseFile;
 
 public class Game {
 	private enum EventType {
-		TEST, CHAT, GAMESTART, SUGGESTION, TURNNOTIFICATION
+		TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_NOTIFICATION, TURN_NOTIFICATION
 	}
   private int currentTurnIndex;
   private List<Player> players;
@@ -59,7 +59,7 @@ public class Game {
 	  	case TEST:
 	  		System.out.println("test event");
 	  		break;
-	  	case CHAT:
+	  	case CHAT_NOTIFICATION:
 	  		System.out.println(event.getString("body"));
 	  		notifyPlayers(event);
 	  		break;

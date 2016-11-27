@@ -35,6 +35,14 @@ public class Player extends WebSocketAdapter {
     this.cards = cards;
   }
 
+  public List<ICard> getCards() {
+    return this.cards;
+  }
+
+  public boolean hasCard(ICard card) {
+    return cards.contains(card);
+  }
+
   public List<ICard> provideEvidence(CaseFile caseFile) {
     return new ArrayList<ICard>();
   }

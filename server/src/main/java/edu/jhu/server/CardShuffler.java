@@ -46,7 +46,10 @@ public class CardShuffler {
       i = (i + 1) % players.size();
     }
 
-    // TODO deal cards to players
+    for (i = 0; i < players.size(); i++) {
+      Player player = players.get(i);
+      player.setCards(hands.get(i));
+    }
 
     return secretCards;
   }

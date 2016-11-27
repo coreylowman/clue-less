@@ -1,3 +1,5 @@
+var isMyTurn = false;
+
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -115,11 +117,19 @@ function handleEvent(event){
   }
 }
 
-function suggest(){
-  var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
-  var suggestFormElements = document.getElementById("suggest_form").elements
-  suggestion.suspect = suggestFormElements[0].value;
-  suggestion.weapon = suggestFormElements[1].value;
-  websocket.send(JSON.stringify(suggestion));
-;
+function notPlayerTurn(){
+  var event = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "It's not your turn."};
+  handleEvent(event);
 }
+
+function suggest(){
+  if (isMyTurn){
+    var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
+    var suggestFormElements = document.getElementById("suggest_form").elements
+    suggestion.suspect = suggestFormElements[0].value;
+    suggestion.weapon = suggestFormElements[1].value;
+    websocket.send(JSON.stringify(suggestion));
+  }else{
+    notPlayerTurn();
+  }
+};

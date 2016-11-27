@@ -86,7 +86,6 @@ public class Game {
 	  	case TEST:
 	  		System.out.println("test event");
 	  		break;
-
 	  	case CHAT_NOTIFICATION:
 	  		notifyPlayers(event);
 	  		break;

@@ -1,12 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>title</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="clueless.js"></script>
-  </head>
-  <body>
-    <!-- page content -->
-  </body>
+    <head>
+	<meta charset="utf-8">
+	<title>title</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="clueless.js" defer></script>
+    </head>
+    <body>
+      <div id="status">Connecting...</div>
+	<!-- page content -->
+  <table id="board" width="800" height="600">
+            <tr>
+                <td id="study" class="room">Study</td>
+                <td><div id="s_h" class="horizontal_hallway"></div></td>
+                <td id="hall" class="room">Hall</td>
+                <td><div id="h_l" class="horizontal_hallway"><div id="miss_scarlett"></div></div></td>
+                <td id="lounge" class="room">Lounge</td>
+            </tr>
+            <tr>
+                <td><div id="s_l" class="vert_hallway"><div id="prof_plum"></div></div></td>
+                <td></td>
+                <td><div id="h_bi" class="vert_hallway"></div></td>
+                <td></td>
+                <td><div id="l_d" class="vert_hallway"><div id="col_mustard"></div></div></td>
+            </tr>
+            <tr>
+                <td id="library" class="room">Library</td>
+                <td><div id="l_bi" class="horizontal_hallway"></div></td>
+                <td id="billiard" class="room">Billiard Room</td>
+                <td><div id="bi_d" class="horizontal_hallway"></div></td>
+                <td id="dining" class="room">Dining Room</td>
+                </tr>
+            <tr>
+                <td><div id="l_c" class="vert_hallway"><div id="mrs_peacock"></div></div></td>
+                <td></td>
+                <td><div id="bi_ba" class="vert_hallway"></div></td>
+                <td></td>
+                <td><div id="d_k" class="vert_hallway"></div></td>
+            </tr>
+            <tr>
+                <td id="conservatory" class="room">Conservatory</td>
+                <td><div id="c_ba" class="horizontal_hallway"><div id="mr_green"></div></div></td>
+                <td id="ballroom" class="room">Ballroom</td>
+                <td><div id="ba_k" class="horizontal_hallway"><div id="mrs_white"></div></div></td>
+                <td id="kitchen" class="room">Kitchen</td>
+            </tr>
+        </table> 
+  <button onclick="makeSelectable()">test move</button>
+  <form>
+    <select id="suggest_suspect">
+      <option>Mrs. Peacock</option>
+      <option>Professor Plum</option>
+      <option>Miss Scarlet</option>
+      <option>Mr. Green</option>
+      <option>Mrs. White</option>
+      <option>Colonel Mustard</option>
+    </select>
+    <select id="suggest_weapon">
+      <option>Knife</option>
+      <option>Rope</option>
+      <option>Revolver</option>
+      <option>Candlestick</option>
+      <option>Lead pipe</option>
+      <option>Wrench</option>
+    </select>
+    <button onclick="suggest()">Suggest</button>
+  </form>
+  <form>
+    <select id="accuse_suspect">
+      <option>Mrs. Peacock</option>
+      <option>Professor Plum</option>
+      <option>Miss Scarlet</option>
+      <option>Mr. Green</option>
+      <option>Mrs. White</option>
+      <option>Colonel Mustard</option>
+    </select>
+    <select id="accuse_weapon">
+      <option>Knife</option>
+      <option>Rope</option>
+      <option>Revolver</option>
+      <option>Candlestick</option>
+      <option>Lead pipe</option>
+      <option>Wrench</option>
+    </select>
+    <select id="accuse_room">
+      <option>Billiard Room</option>
+      <option>Consveratory</option>
+      <option>Library</option>
+      <option>Kitchen</option>
+      <option>Lounge</option>
+      <option>Ball Room</option>
+      <option>Dining Room</option>
+      <option>Study</option>
+      <option>Hall</option>
+    </select>
+    <button onclick="accuse()">Accuse</button>
+  </form>
+  <div id="hand_container">
+    <div id="hand">
+      <div class="card">Card1</div>
+      <div class="card">Card2</div>
+      <div class="card">Card3</div>
+      <div class="card">Card4</div>
+      <div class="card">Card5</div>
+      <div class="card">Card6</div>
+    </div>
+  </div>
+  <div id="chat_container">
+    <div>
+      <p id="chat_text">
+        Bob: Hello<br>
+        Jerry: sup<br>
+        Jason: lets get it started in here<br>
+        Corey: a;sldfj;aosidfj;aoisdjf; oija;soidjf;qwen kxjcnlaskjdfhlauwlenr<br>
+        Foo: ;asid<br>
+        Bar: a;osid<br>
+        Squid: moo<br>
+        Cow: bubble<br>
+      </p>
+    </div>
+    <div>
+      <input id="chat_input" type="text">
+    </div>
+  </div>
+  <div id="notepad">
+    <input type="checkbox" name="suspects">Mrs. Peacock<br>
+    <input type="checkbox" name="suspects">Professor Plum<br>
+    <input type="checkbox" name="suspects">Miss Scarlet<br>
+    <input type="checkbox" name="suspects">Mr. Green<br>
+    <input type="checkbox" name="suspects">Mrs. White<br>
+    <input type="checkbox" name="suspects">Colonel Mustard<br>
+    <br>
+    <input type="checkbox" name="weapons">Knife<br>
+    <input type="checkbox" name="weapons">Rope<br>
+    <input type="checkbox" name="weapons">Revolver<br>
+    <input type="checkbox" name="weapons">Candlestick<br>
+    <input type="checkbox" name="weapons">Lead pipe<br>
+    <input type="checkbox" name="weapons">Wrench<br>
+    <br>
+    <input type="checkbox" name="rooms">Billiard Room<br>
+    <input type="checkbox" name="rooms">Consveratory<br>
+    <input type="checkbox" name="rooms">Library<br>
+    <input type="checkbox" name="rooms">Kitchen<br>
+    <input type="checkbox" name="rooms">Lounge<br>
+    <input type="checkbox" name="rooms">Ball Room<br>
+    <input type="checkbox" name="rooms">Dining Room<br>
+    <input type="checkbox" name="rooms">Study<br>
+    <input type="checkbox" name="rooms">Hall<br>
+  </div>	
+    </body>
 </html>

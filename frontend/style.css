@@ -1,0 +1,130 @@
+#notepad {
+    position: absolute;
+    width: 150px;
+    height: auto;
+    bottom: 5px;
+    right: 5px;
+    border: 1px solid red;
+}
+
+#hand_container {
+    position: absolute;
+    width: 99%;
+    bottom: 5px;
+}
+#hand {
+    width: 100%;
+    height: 182px;
+    text-align: center;
+}
+.card {
+    width: 90px;
+    height: 180px;
+    border: 1px solid red;
+    display:inline-block;
+}
+
+#chat_container {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+}
+#chat_text {
+    height: 150px;
+    width: 300px;
+    margin: 0px;
+    padding: 2px;
+    overflow-y: scroll;
+    word-wrap: break-word;
+    border: 1px solid black;
+}
+#chat_input {
+    width: 99%;
+}
+
+#board {
+    text-align: center;
+    table-layout: fixed;
+    border-spacing: 0px;
+    margin: auto;
+}
+.room {
+    border: 1px solid black;
+    padding: 1px;
+}
+.vert_hallway {
+    border: 1px solid black;
+    padding: 1px;
+    height: 104%;
+    width: 33%;
+    margin: auto;
+}
+.horizontal_hallway {
+    border: 1px solid black;
+    height: 33%;
+    width: 101%;
+    margin-left: -2px;
+}
+.selectable {
+    border: 1px solid blue;
+    border-width: 1px;
+    border-color: blue;
+}
+.selectable:hover {
+    border: 2px solid blue;
+    padding: 0px;
+}
+#miss_scarlett {
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: red;
+}
+#prof_plum {
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: purple;
+}
+#col_mustard {
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: yellow;
+}
+#mrs_peacock {
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: blue;
+}
+#mr_green {
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    background: green;
+}
+#mrs_white {
+    margin: auto;
+    width: 38px;
+    height: 38px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    border: solid 1px;
+}

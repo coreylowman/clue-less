@@ -85,8 +85,11 @@ function sendChat(){
   var chatEvent = {eventType: "CHAT_NOTIFICATION", body: ""};
   var chatInput = document.getElementById("chat_input");
   chatEvent.body = chatInput.value;
-  chatInput.value = '';
-  websocket.send(JSON.stringify(chatEvent));
+  chatInput.value = "";
+  //can't send empty messages
+  if (chatEvent.body !== ""){
+    websocket.send(JSON.stringify(chatEvent));
+  }
 }
 
 websocket.onmessage = function(message){

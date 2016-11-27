@@ -3,7 +3,6 @@ package edu.jhu.server;
 import java.util.List;
 
 import edu.jhu.server.data.Hallway;
-import edu.jhu.server.data.IBoardPiece;
 import edu.jhu.server.data.ILocation;
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Suspect;
@@ -63,6 +62,7 @@ public class BoardTest extends TestCase {
     Board board = new Board();
     board.initialize();
 
+    // lounge-conservatory
     Suspect suspect = Suspect.get("miss_scarlet");
     List<ILocation> moves = board.getValidMoves(suspect);
     assert (moves.contains(Room.get("hall")));
@@ -72,24 +72,62 @@ public class BoardTest extends TestCase {
     board.movePiece(suspect, Room.get("lounge"));
     assert (board.getLocationOf(suspect) == Room.get("lounge"));
 
+    // move to conservatory
     moves = board.getValidMoves(suspect);
     assert (moves.contains(Room.get("conservatory")));
     assert (moves.contains(Hallway.get("hall", "lounge")));
-    assert (moves.contains(Hallway.get("diningroom", "lounge")));
+    assertFalse(moves.contains(Hallway.get("diningroom", "lounge")));
     assert (board.isMoveValid(suspect, Room.get("conservatory")));
     assert (board.isMoveValid(suspect, Hallway.get("hall", "lounge")));
-    assert (board.isMoveValid(suspect, Hallway.get("diningroom", "lounge")));
+    assertFalse(board.isMoveValid(suspect, Hallway.get("diningroom", "lounge")));
     board.movePiece(suspect, Room.get("conservatory"));
     assert (board.getLocationOf(suspect) == Room.get("conservatory"));
+
+    // move back to lounge
+    moves = board.getValidMoves(suspect);
+    assert (moves.contains(Room.get("lounge")));
+    assert (moves.size() == 1);
+    assert (board.isMoveValid(suspect, Room.get("lounge")));
+    board.movePiece(suspect, Room.get("lounge"));
+    assert (board.getLocationOf(suspect) == Room.get("lounge"));
+
+
+    // kitchen-study
+    suspect = Suspect.get("mrs_white");
+    moves = board.getValidMoves(suspect);
+    assert (moves.contains(Room.get("ballroom")));
+    assert (moves.contains(Room.get("kitchen")));
+    assert (board.isMoveValid(suspect, Room.get("ballroom")));
+    assert (board.isMoveValid(suspect, Room.get("kitchen")));
+    board.movePiece(suspect, Room.get("kitchen"));
+    assert (board.getLocationOf(suspect) == Room.get("kitchen"));
+
+    // move to study
+    moves = board.getValidMoves(suspect);
+    assert (moves.contains(Room.get("study")));
+    assert (moves.contains(Hallway.get("kitchen", "diningroom")));
+    assert (moves.contains(Hallway.get("kitchen", "ballroom")));
+    assert (board.isMoveValid(suspect, Room.get("study")));
+    assert (board.isMoveValid(suspect, Hallway.get("kitchen", "diningroom")));
+    assert (board.isMoveValid(suspect, Hallway.get("kitchen", "ballroom")));
+    board.movePiece(suspect, Room.get("study"));
+    assert (board.getLocationOf(suspect) == Room.get("study"));
+
+    // move back to kitchen
+    moves = board.getValidMoves(suspect);
+    assert (moves.contains(Room.get("kitchen")));
+    assert (moves.contains(Hallway.get("study", "hall")));
+    assertFalse(moves.contains(Hallway.get("study", "library")));
+    assert (board.isMoveValid(suspect, Room.get("kitchen")));
+    assert (board.isMoveValid(suspect, Hallway.get("study", "hall")));
+    assertFalse(board.isMoveValid(suspect, Hallway.get("study", "library")));
+    board.movePiece(suspect, Room.get("kitchen"));
+    assert (board.getLocationOf(suspect) == Room.get("kitchen"));
+
   }
 
   private void testLocationConnections(Board board, ILocation location, ILocation... connections) {
-    IBoardPiece piece = Weapon.get("rope");
-
-    board.movePiece(piece, location);
-    assert (board.getLocationOf(piece) == location);
-
-    List<ILocation> moves = board.getValidMoves(piece);
+    List<ILocation> moves = board.getConnectedLocations(location);
     assert (moves.size() == connections.length);
     for (ILocation connection : connections) {
       assert (moves.contains(connection));

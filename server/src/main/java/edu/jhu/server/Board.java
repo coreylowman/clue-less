@@ -79,11 +79,25 @@ public class Board {
   }
 
   public List<ILocation> getValidMoves(IBoardPiece piece) {
-    return connectedLocations.get(pieces.get(piece));
+    List<ILocation> moves = new ArrayList<ILocation>(connectedLocations.get(pieces.get(piece)));
+
+    if (piece instanceof Weapon) {
+      // weapons can't be moved into hallways
+      moves.removeIf(loc -> loc instanceof Hallway);
+    } else {
+      // remove any destinations if they are hallways with more than 1 person in them
+      moves.removeIf(loc -> loc instanceof Hallway && locations.get(loc).size() != 0);
+    }
+
+    return moves;
   }
 
   public ILocation getLocationOf(IBoardPiece piece) {
     return pieces.get(piece);
+  }
+
+  public List<ILocation> getConnectedLocations(ILocation location) {
+    return connectedLocations.get(location);
   }
 
   public void movePiece(IBoardPiece piece, ILocation destination) {

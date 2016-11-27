@@ -11,34 +11,28 @@ function establishWebsocket() {
       //webpage will update status from Connecting to Connected
       document.getElementById('status').innerHTML = 'Connected';
       // connection is opened and ready to use
+
+      connection.send(JSON.stringify({eventType:'TEST'}));
+
+      // send JOIN_REQUEST
+      var tag = prompt("Please enter your name");
+      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
+      connection.send(JSON.stringify(joinRequest));
     };
 
     connection.onerror = function (error) {
         // an error occurred when sending/receiving data
     };
 
-    connection.onmessage = function (message) {
-        // try to decode json (I assume that each message from server is json)
-        try {
-            var json = JSON.parse(message.data);
-          console.log(json);
-        } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
-            return;
-        }
-        // handle incoming message
+    connection.onmessage = function(message){
+      console.log(message);
+      handleEvent(JSON.parse(message.data));
     };
 
   return connection;
 }
 
 var websocket = establishWebsocket();
-
-//example of sending JSON object to the server
-websocket.onopen = function(){
-  websocket.send(JSON.stringify({eventType:'TEST'}));
-};
-
 
 // moves character HTML element into destination HTML element
 // refer to style.css for names
@@ -88,22 +82,23 @@ function sendChat(){
   websocket.send(JSON.stringify(chatEvent));
 }
 
-websocket.onmessage = function(message){
-  console.log(message);
-  handleEvent(JSON.parse(message.data));
+function addChatText(text) {
+  document.getElementById("chat_text").value += text + "\n";
 }
 
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
-    console.log("this is only a test")
-    break;
+      console.log("this is only a test")
+      break;
     case "CHAT_NOTIFICATION":
-    document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
-    console.log(chat_text);
-    break;
+      addChatText(event.author + ': ' + event.body);
+      break;
+    case "JOIN_NOTIFICATION":
+      addChatText(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+      break;
     default:
-    console.log("Invalid eventType received");
-    break;
+      console.log("Invalid eventType received");
+      break;
   }
 }

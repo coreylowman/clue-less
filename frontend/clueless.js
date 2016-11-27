@@ -106,7 +106,7 @@ function handleEvent(event){
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;
-    case "INVALIDREQUEST":
+    case "INVALID_REQUEST_NOTIFICATION":
     alert("You cannot do that. " + event.reason);
     break;
     default:
@@ -116,7 +116,7 @@ function handleEvent(event){
 }
 
 function suggest(){
-  var suggestion = {eventType: "SUGGESTION", suspect: "", weapon: ""};
+  var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
   var suggestFormElements = document.getElementById("suggest_form").elements
   suggestion.suspect = suggestFormElements[0].value;
   suggestion.weapon = suggestFormElements[1].value;

@@ -32,11 +32,10 @@ public class Board {
     }
 
     // initialize hallways
-    String[][] hallways = {{"study", "library"}, {"study", "kitchen"}, {"study", "hall"},
-        {"hall", "billiardroom"}, {"hall", "lounge"}, {"lounge", "conservatory"},
-        {"lounge", "diningroom"}, {"diningroom", "billiardroom"}, {"diningroom", "kitchen"},
-        {"kitchen", "ballroom"}, {"ballroom", "billiardroom"}, {"ballroom", "conservatory"},
-        {"conservatory", "library"}, {"library", "billiardroom"}};
+    String[][] hallways = {{"study", "library"}, {"study", "hall"}, {"hall", "billiardroom"},
+        {"hall", "lounge"}, {"lounge", "diningroom"}, {"diningroom", "billiardroom"},
+        {"diningroom", "kitchen"}, {"kitchen", "ballroom"}, {"ballroom", "billiardroom"},
+        {"ballroom", "conservatory"}, {"conservatory", "library"}, {"library", "billiardroom"}};
     for (String[] roomNames : hallways) {
       Hallway hallway = new Hallway(roomNames[0], roomNames[1]);
       locations.put(hallway, new ArrayList<IBoardPiece>());
@@ -52,6 +51,15 @@ public class Board {
       connectedLocations.get(hallway).add(room2);
       connectedLocations.get(room1).add(hallway);
       connectedLocations.get(room2).add(hallway);
+    }
+
+    // connect the two secret passage ways
+    String[][] secretPassages = {{"lounge", "conservatory"}, {"study", "kitchen"}};
+    for (String[] passage : secretPassages) {
+      Room room1 = Room.get(passage[0]);
+      Room room2 = Room.get(passage[1]);
+      connectedLocations.get(room1).add(room2);
+      connectedLocations.get(room2).add(room1);
     }
 
     String[] suspects = {"colonel_mustard", "miss_scarlet", "professor_plum", "mr_green",
@@ -71,14 +79,64 @@ public class Board {
   }
 
   public List<ILocation> getValidMoves(IBoardPiece piece) {
-    return connectedLocations.get(pieces.get(piece));
+    List<ILocation> moves = new ArrayList<ILocation>(connectedLocations.get(pieces.get(piece)));
+
+    if (piece instanceof Weapon) {
+      // weapons can't be moved into hallways
+      moves.removeIf(loc -> loc instanceof Hallway);
+    } else {
+      // remove any destinations if they are hallways with more than 1 person in them
+      moves.removeIf(loc -> loc instanceof Hallway && locations.get(loc).size() != 0);
+    }
+
+    return moves;
+  }
+
+  public ILocation getLocationOf(IBoardPiece piece) {
+    return pieces.get(piece);
+  }
+
+  public List<ILocation> getConnectedLocations(ILocation location) {
+    return connectedLocations.get(location);
   }
 
   public void movePiece(IBoardPiece piece, ILocation destination) {
-
+    ILocation oldLocation = pieces.get(piece);
+    pieces.put(piece, destination);
+    locations.get(oldLocation).remove(piece);
+    locations.get(destination).add(piece);
   }
 
   public void initialize() {
+    initializeSuspects();
+    initializeWeapons();
+  }
 
+  // initial positions are detailed in the project description document at the end
+  private void initializeSuspects() {
+    String[][] initialPositions =
+        {{"colonel_mustard", "lounge", "diningroom"}, {"miss_scarlet", "hall", "lounge"},
+            {"professor_plum", "study", "library"}, {"mr_green", "conservatory", "ballroom"},
+            {"mrs_white", "ballroom", "kitchen"}, {"mrs_peacock", "library", "conservatory"}};
+    for (String[] location : initialPositions) {
+      Suspect suspect = Suspect.get(location[0]);
+      Hallway hallway = Hallway.get(location[1], location[2]);
+      pieces.put(suspect, hallway);
+      locations.get(hallway).add(suspect);
+    }
+  }
+
+  // weapons are just put into rooms at the start
+  private void initializeWeapons() {
+    String[] rooms = {"hall", "lounge", "diningroom", "kitchen", "ballroom", "conservatory",
+        "billiardroom", "library", "study"};
+    String[] weapons = {"rope", "lead_pipe", "knife", "wrench", "candlestick", "pistol"};
+
+    for (int i = 0; i < weapons.length; i++) {
+      Weapon weapon = Weapon.get(weapons[i]);
+      Room room = Room.get(rooms[i]);
+      pieces.put(weapon, room);
+      locations.get(room).add(weapon);
+    }
   }
 }

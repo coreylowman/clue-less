@@ -10,7 +10,7 @@ import edu.jhu.server.data.CaseFile;
 
 public class Game {
 	private enum EventType {
-		TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_NOTIFICATION, TURN_NOTIFICATION
+		TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION
 	}
   private int currentTurnIndex;
   private List<Player> players;
@@ -73,7 +73,7 @@ public class Game {
   
   private JSONObject makeInvalidRequestMessage(String player, String reason){
 	  JSONObject invalidRequest = new JSONObject();
-	  invalidRequest.put("eventType", "INVALIDREQUEST");
+	  invalidRequest.put("eventType", "INVALID_REQUEST_NOTIFICATION");
 	  invalidRequest.put("author", "Game");
 	  invalidRequest.put("reason", reason);
 	  invalidRequest.put("player", player);
@@ -90,7 +90,7 @@ public class Game {
 	  		System.out.println(event.getString("body"));
 	  		notifyPlayers(event);
 	  		break;
-	  	case SUGGESTION:
+	  	case SUGGESTION_REQUEST:
 	  		Player suggester = getPlayerByTag(event.getString("author"));
 	  		if (board.isSuggestionValid(suggester)) {
 	  			JSONObject chat = makeChatMessage(suggester.getTag() +
@@ -105,8 +105,9 @@ public class Game {
 	  			handleEvent(makeInvalidRequestMessage(event.getString("author"), "You are not in a room."));
 	  		}
 	  		break;
-	  	case INVALIDREQUEST:
+	  	case INVALID_REQUEST_NOTIFICATION:
 	  		getPlayerByTag(event.getString("player")).sendEvent(event);
+	  		break;
 	  	default:
 	  		System.out.println("invalid event type");
 	  		break;

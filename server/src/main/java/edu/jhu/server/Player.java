@@ -20,15 +20,23 @@ public class Player extends WebSocketAdapter {
   private Suspect suspect;
 
   public Player(String tag) {
-	  this.tag = tag;
+    this.tag = tag;
   }
 
   public void setGame(Game game) {
     this.game = game;
   }
 
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+
   public void setSuspect(Suspect suspect) {
     this.suspect = suspect;
+  }
+
+  public Suspect getSuspect() {
+    return this.suspect;
   }
 
   public void setCards(List<ICard> cards) {
@@ -48,7 +56,7 @@ public class Player extends WebSocketAdapter {
   }
 
   private void log(String message) {
-	  System.out.println("'" + tag + "' (" + session.getRemoteAddress().toString() + ") " + message);
+    System.out.println("'" + tag + "' (" + session.getRemoteAddress().toString() + ") " + message);
   }
 
   public void sendEvent(JSONObject event) {
@@ -67,9 +75,8 @@ public class Player extends WebSocketAdapter {
 
   @Override
   public void onWebSocketConnect(Session session) {
-	  this.session = session;
-	  log("WebSocket connected.");
-
+    this.session = session;
+    log("WebSocket connected.");
   }
 
   @Override
@@ -81,8 +88,12 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    JSONMessage.append("author", this.tag);
     JSONMessage.put("author", this.tag);
     game.handleEvent(JSONMessage);
+  }
+
+  @Override
+  public String toString() {
+    return this.tag;
   }
 }

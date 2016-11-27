@@ -87,7 +87,6 @@ public class Game {
 	  		System.out.println("test event");
 	  		break;
 	  	case CHAT_NOTIFICATION:
-	  		System.out.println(event.getString("body"));
 	  		notifyPlayers(event);
 	  		break;
 	  	case SUGGESTION_REQUEST:

@@ -7,6 +7,7 @@ import java.util.Timer;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
+import edu.jhu.server.data.ICard;
 import edu.jhu.server.data.ILocation;
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Suspect;
@@ -90,22 +91,37 @@ public class Game {
 	  return move;
   }
   
-  
-  
-  private void provideEvidence(CaseFile casefile, Player suggester) {
+  private Player findPlayerWithEvidence(CaseFile casefile, Player suggester) {
+	  List<ICard> suspect = new ArrayList<ICard>();
+	  suspect.add(casefile.getRoom());
+	  List<ICard> wrongSuspect = new ArrayList<ICard>();
+	  wrongSuspect.add(Room.get("miss_scarlet"));
 	  Player playerWithEvidence = null;
 	  for (Player player : players) {
+		  player.setCards(wrongSuspect);
+		  if(player.getTag().equals("player1")){
+			  System.out.println("tag worked");
+			  player.setCards(suspect);
+		  }
 		  if(player.getTag() != suggester.getTag() && 
 			(player.hasCard(casefile.getRoom()) || 
 			player.hasCard(casefile.getSuspect()) ||
 			player.hasCard(casefile.getWeapon()))) {
 			  playerWithEvidence = player;
 			  break;
-		  }  
+		  }
 	  }
+	  return playerWithEvidence;
+  }
+  
+  
+  private void provideEvidence(CaseFile casefile, Player suggester) {
+	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
 	  if (playerWithEvidence == null) {
 		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
 		  handleEvent(chat);
+	  } else {
+		  System.out.println("gotcha");
 	  }
   }
   

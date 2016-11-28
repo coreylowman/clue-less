@@ -63,7 +63,7 @@ public class Board {
     }
 
     String[] suspects = {"colonel_mustard", "miss_scarlet", "professor_plum", "mr_green",
-        "mrs_white", "mrs_peacock"};
+        "mrs_white", "Mrs. Peacock"};
     for (String name : suspects) {
       Suspect suspect = new Suspect(name);
     }
@@ -74,16 +74,7 @@ public class Board {
     }
   }
   
-  // Function needs to actually check if player's piece is in a room
-  public boolean isSuggestionValid(Player suggester) {
-	  return false;
-  }
   
-  // currently a dummy function, actually needs to get a room according to suspect
-  public Room getPieceLocation(Suspect suspect){
-	  return Room.get("hall");
-  }
-
   public boolean isMoveValid(IBoardPiece piece, ILocation destination) {
     return getValidMoves(piece).contains(destination);
   }
@@ -111,7 +102,7 @@ public class Board {
   }
 
   public void movePiece(IBoardPiece piece, ILocation destination) {
-    ILocation oldLocation = pieces.get(piece);
+	ILocation oldLocation = pieces.get(piece);
     pieces.put(piece, destination);
     locations.get(oldLocation).remove(piece);
     locations.get(destination).add(piece);
@@ -127,12 +118,13 @@ public class Board {
     String[][] initialPositions =
         {{"colonel_mustard", "lounge", "diningroom"}, {"miss_scarlet", "hall", "lounge"},
             {"professor_plum", "study", "library"}, {"mr_green", "conservatory", "ballroom"},
-            {"mrs_white", "ballroom", "kitchen"}, {"mrs_peacock", "library", "conservatory"}};
+            {"mrs_white", "ballroom", "kitchen"}, {"Mrs. Peacock", "library", "conservatory"}};
     for (String[] location : initialPositions) {
       Suspect suspect = Suspect.get(location[0]);
       Hallway hallway = Hallway.get(location[1], location[2]);
       pieces.put(suspect, hallway);
       locations.get(hallway).add(suspect);
+      
     }
   }
 

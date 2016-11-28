@@ -7,6 +7,10 @@ import java.util.Timer;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
+import edu.jhu.server.data.ILocation;
+import edu.jhu.server.data.Room;
+import edu.jhu.server.data.Suspect;
+import edu.jhu.server.data.Weapon;
 
 public class Game {
 	private enum EventType {
@@ -65,7 +69,7 @@ public class Game {
   
   private JSONObject makeChatMessage(String body) {
 	  JSONObject chat = new JSONObject();
-	  chat.put("eventType", "CHAT");
+	  chat.put("eventType", "CHAT_NOTIFICATION");
 	  chat.put("author", "Game");
 	  chat.put("body", body);
 	  return chat;
@@ -79,7 +83,56 @@ public class Game {
 	  invalidRequest.put("player", player);
 	  return invalidRequest;
   }
-
+  
+  private JSONObject makeMoveNotification(Suspect suspect, ILocation location){
+	  JSONObject move = new JSONObject();
+	  move.put("eventType", "MOVE_NOTIFICATION");
+	  return move;
+  }
+  
+  
+  
+  private void provideEvidence(CaseFile casefile, Player suggester) {
+	  Player playerWithEvidence = null;
+	  for (Player player : players) {
+		  if(player.getTag() != suggester.getTag() && 
+			(player.hasCard(casefile.getRoom()) || 
+			player.hasCard(casefile.getSuspect()) ||
+			player.hasCard(casefile.getWeapon()))) {
+			  playerWithEvidence = player;
+			  break;
+		  }  
+	  }
+	  if (playerWithEvidence == null) {
+		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
+		  handleEvent(chat);
+	  }
+  }
+  
+  private void handleSuggestion(JSONObject accusation, Player suggester) {
+	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
+	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
+	  Weapon theWeapon = Weapon.get("knife");
+	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
+	  if (suggestedRoom instanceof Room) {
+			JSONObject chat = makeChatMessage(suggester.getTag() +
+					" suggests that it was " + 
+					theAccused.toString() + 
+					" with the " + 
+					accusation.get("weapon") +
+					" in the " +
+					suggestedRoom.toString());
+			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
+			handleEvent(chat);
+			board.movePiece(theAccused, suggestedRoom);
+			notifyPlayers(move);
+			provideEvidence(casefile, suggester);
+			
+		} else {
+			handleEvent(makeInvalidRequestMessage(accusation.getString("author"), "You are not in a room."));
+		}
+  }
+  
   public void handleEvent(JSONObject event) {
 	  String eventType = event.getString("eventType");
 	  switch (EventType.valueOf(eventType)) {
@@ -90,19 +143,12 @@ public class Game {
 	  		notifyPlayers(event);
 	  		break;
 	  	case SUGGESTION_REQUEST:
+	  		board.initialize();
 	  		Player suggester = getPlayerByTag(event.getString("author"));
-	  		if (board.isSuggestionValid(suggester)) {
-	  			JSONObject chat = makeChatMessage(suggester.getTag() +
-	  					" suggests that it was " + 
-	  					event.get("suspect") + 
-	  					" with the " + 
-	  					event.get("weapon") +
-	  					" in the " +
-	  					board.getPieceLocation(suggester.getSuspect()).toString());
-	  			handleEvent(chat);
-	  		} else {
-	  			handleEvent(makeInvalidRequestMessage(event.getString("author"), "You are not in a room."));
-	  		}
+	  		suggester.setSuspect(Suspect.get("miss_scarlet"));
+	  		board.movePiece(suggester.getSuspect(), Room.get("study"));
+	  		handleSuggestion(event, suggester);
+	  		
 	  		break;
 	  	case INVALID_REQUEST_NOTIFICATION:
 	  		getPlayerByTag(event.getString("player")).sendEvent(event);

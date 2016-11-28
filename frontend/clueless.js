@@ -1,4 +1,4 @@
-var isMyTurn = false;
+var isMyTurn = true;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -40,6 +40,7 @@ var websocket = establishWebsocket();
 //example of sending JSON object to the server
 websocket.onopen = function(){
   websocket.send(JSON.stringify({eventType:'TEST'}));
+  suggest();
 };
 
 
@@ -79,6 +80,7 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
+
 }
 
 init();

@@ -14,7 +14,9 @@ import edu.jhu.server.data.Weapon;
 
 public class Game {
 	private enum EventType {
-		TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION
+		TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, 
+		SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION,
+		PROVIDE_EVIDENCE_REQUEST
 	}
   private int currentTurnIndex;
   private List<Player> players;
@@ -115,15 +117,15 @@ public class Game {
 	  Weapon theWeapon = Weapon.get("knife");
 	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 	  if (suggestedRoom instanceof Room) {
-			JSONObject chat = makeChatMessage(suggester.getTag() +
-					" suggests that it was " + 
-					theAccused.toString() + 
-					" with the " + 
-					accusation.get("weapon") +
-					" in the " +
-					suggestedRoom.toString());
+			JSONObject suggestion = new JSONObject();
+			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
+			suggestion.put("suggester", suggester.getTag());
+			suggestion.put("accused", theAccused.toString());
+			suggestion.put("weapon", theWeapon.toString());
+			suggestion.put("room", suggestedRoom.toString());
+			notifyPlayers(suggestion);
 			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
-			handleEvent(chat);
+			
 			board.movePiece(theAccused, suggestedRoom);
 			notifyPlayers(move);
 			provideEvidence(casefile, suggester);
@@ -153,6 +155,7 @@ public class Game {
 	  	case INVALID_REQUEST_NOTIFICATION:
 	  		getPlayerByTag(event.getString("player")).sendEvent(event);
 	  		break;
+	  	
 	  	default:
 	  		System.out.println("invalid event type");
 	  		break;

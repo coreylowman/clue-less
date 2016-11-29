@@ -29,7 +29,7 @@
                 <td><div id="l_bi" class="horizontal_hallway"></div></td>
                 <td id="billiard" class="room">Billiard Room</td>
                 <td><div id="bi_d" class="horizontal_hallway"></div></td>
-                <td id="dining" class="room">Dining Room</td>
+                <td id="diningroom" class="room">Dining Room</td>
                 </tr>
             <tr>
                 <td><div id="l_c" class="vert_hallway"><div id="mrs_peacock"></div></div></td>
@@ -64,7 +64,7 @@
       <option>Lead pipe</option>
       <option>Wrench</option>
     </select>
-    <button onclick="suggest()">Suggest</button>
+    <button id="suggest_button" onclick="suggest()">Suggest</button>
   </form>
   <form>
     <select id="accuse_suspect">
@@ -94,7 +94,8 @@
       <option>Study</option>
       <option>Hall</option>
     </select>
-    <button onclick="accuse()">Accuse</button>
+    <button id="accuse_button" onclick="accuse()">Accuse</button>
+    <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   </form>
   <div id="hand_container">
     <div id="hand">

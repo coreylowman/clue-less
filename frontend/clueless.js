@@ -1,3 +1,6 @@
+// todo store this when joining game
+var tag = "player0";
+
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -102,8 +105,63 @@ function handleEvent(event){
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
     console.log(chat_text);
     break;
+    case "TURN_NOTIFICATION":
+      handleTurnNotification(event);
+      break;
     default:
     console.log("Invalid eventType received");
     break;
   }
+}
+
+function highlightBorder(elementId, bool) {
+  var ele = document.getElementById(elementId);
+  if (bool) {
+    ele.className += " selectable";
+  } else {
+    ele.className = ele.className.replace(" selectable", "");
+  }
+}
+
+function removeOnClick(elementIds, func) {
+  for (var i = 0;i < elementIds.length;i++) {
+    var ele = document.getElementById(elementIds[i]);
+    ele.removeEventListener("click", func);
+    highlightBorder(elementIds[i], false);
+  }
+}
+
+function addOnClick(elementIds) {
+  for (var i = 0;i < elementIds.length;i++) {
+    var ele = document.getElementById(elementIds[i]);
+
+    function onClick(event) {
+      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: elementIds[i]}));
+      removeOnClick(elementIds, onClick);
+    }
+
+    ele.addEventListener("click", onClick);
+    highlightBorder(elementIds[i], true);
+  }
+}
+
+function disableTurnButtons(disabled) {
+  document.getElementById("suggest_button").disabled = disabled;
+  document.getElementById("accuse_button").disabled = disabled;
+  document.getElementById("end_turn_button").disabled = disabled;
+}
+
+function handleTurnNotification(notification) {
+  document.getElementById("chat_text").value += "It is " + notification.playerTag + "'s turn.\n";
+
+  if (notification.playerTag === tag) {
+    addOnClick(notification.validMoves);
+  }
+
+  // disableTurnButtons(false);
+}
+
+function endTurn() {
+  websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
+  // disableTurnButtons(true);
 }

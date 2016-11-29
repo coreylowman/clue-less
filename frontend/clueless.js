@@ -1,4 +1,5 @@
 var isMyTurn = true;
+var isEvidenceSelectionTime = false;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -108,13 +109,16 @@ function handleEvent(event){
     break;
     case "CHAT_NOTIFICATION":
     document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
-    console.log(chat_text);
     break;
     case "INVALID_REQUEST_NOTIFICATION":
     alert("You cannot do that. " + event.reason);
     break;
     default:
     console.log("Invalid eventType received");
+    break;
+    case "PROVIDE_EVIDENCE_NOTIFICATION":
+    alert("Please provide your evidence!");
+    isEvidenceSelectionTime = true;
     break;
   }
 }
@@ -135,3 +139,17 @@ function suggest(){
     notPlayerTurn();
   }
 };
+
+function provideEvidence(){
+
+console.log("providing evidence");
+
+}
+
+function makeSelectable(){
+  var hand = document.getElementById("hand");
+  var card = document.createElement("card");
+  card.innerHTML += "Mrs. Peacock";
+  card.className += "card";
+  hand.appendChild(card);
+}

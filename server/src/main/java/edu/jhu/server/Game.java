@@ -114,6 +114,12 @@ public class Game {
 	  return playerWithEvidence;
   }
   
+  private void provideEvidenceNotification(Player evidenceHolder){
+	  JSONObject evidenceNotification = new JSONObject();
+	  evidenceNotification.put("eventType", "PROVIDE_EVIDENCE_NOTIFICATION");
+	  evidenceNotification.put("author", "Game");
+	  evidenceHolder.sendEvent(evidenceNotification);
+  }
   
   private void provideEvidence(CaseFile casefile, Player suggester) {
 	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
@@ -121,7 +127,7 @@ public class Game {
 		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
 		  handleEvent(chat);
 	  } else {
-		  System.out.println("gotcha");
+		  provideEvidenceNotification(playerWithEvidence);
 	  }
   }
   

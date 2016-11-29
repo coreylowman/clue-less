@@ -30,6 +30,7 @@ public class ClueLessServer {
               }
 
               currentGame.addPlayer(player);
+              currentGame.start();
 
               return player;
             }

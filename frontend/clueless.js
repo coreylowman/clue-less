@@ -102,23 +102,39 @@ websocket.onmessage = function(message){
   handleEvent(JSON.parse(message.data));
 }
 
+function sendToChatBox(message){
+  document.getElementById("chat_text").value += message + '\n';
+}
+
+function suggestionChat(suggestion){
+  var suggestionChat = "Game: " +
+    suggestion.suggester + " suggests that it was " +
+    suggestion.accused + " with the " + suggestion.weapon + " in the " +
+    suggestion.room + ".";
+  sendToChatBox(suggestionChat);
+}
+
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
     console.log("this is only a test")
     break;
     case "CHAT_NOTIFICATION":
-    document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
+    sendToChatBox(event.author + ': ' + event.body);
     break;
     case "INVALID_REQUEST_NOTIFICATION":
     alert("You cannot do that. " + event.reason);
     break;
-    default:
-    console.log("Invalid eventType received");
-    break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
     alert("Please provide your evidence!");
     isEvidenceSelectionTime = true;
+    break;
+    case "SUGGESTION_NOTIFICATION":
+    suggestionChat(event);
+    console.log("suggestion");
+    break;
+    default:
+    console.log("Invalid eventType received");
     break;
   }
 }
@@ -146,10 +162,22 @@ console.log("providing evidence");
 
 }
 
-function makeSelectable(){
+function sendCardName(cardName){
+  return function(){
+    if(isEvidenceSelectionTime){
+      var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
+
+      websocket.send(JSON.stringify(evidenceRequest));
+    }
+  }
+};
+
+function addCard(cardName){
   var hand = document.getElementById("hand");
   var card = document.createElement("card");
-  card.innerHTML += "Mrs. Peacock";
+  card.innerHTML += cardName;
   card.className += "card";
+  card.id = cardName;
+  card.addEventListener("click",  sendCardName(cardName));
   hand.appendChild(card);
 }

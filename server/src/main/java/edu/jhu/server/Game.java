@@ -43,7 +43,7 @@ public class Game {
   // This breaks things if you don't give it a valid tag
   private Player getPlayerByTag(String tag) {
 	  for (Player player : players) {
-		  if (player.getTag() == tag) {
+		  if (player.getTag().equals(tag)) {
 			  return player;
 		  }
 	  }

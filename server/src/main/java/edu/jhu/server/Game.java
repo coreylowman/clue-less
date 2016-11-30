@@ -160,6 +160,21 @@ public class Game {
 		}
   }
   
+  private void handleProvideEvidence(JSONObject evidence) {
+	  Player suggester = players.get(this.currentTurnIndex %  players.size());
+	  suggester.sendEvent(makeChatMessage(evidence.getString("author") +
+			  " says " + 
+			  evidence.getString("evidence") +
+			  " was not involved."
+			  ));
+	  
+	  notifyPlayers(makeChatMessage(evidence.getString("author") + 
+			  " has disproven " +
+			  suggester.getTag() +
+			  	"'s suggestion."));
+	  
+  }
+  
   public void handleEvent(JSONObject event) {
 	  String eventType = event.getString("eventType");
 	  switch (EventType.valueOf(eventType)) {
@@ -180,7 +195,9 @@ public class Game {
 	  	case INVALID_REQUEST_NOTIFICATION:
 	  		getPlayerByTag(event.getString("player")).sendEvent(event);
 	  		break;
-	  	
+	  	case PROVIDE_EVIDENCE_REQUEST:
+	  		handleProvideEvidence(event);
+	  		break;
 	  	default:
 	  		System.out.println("invalid event type");
 	  		break;

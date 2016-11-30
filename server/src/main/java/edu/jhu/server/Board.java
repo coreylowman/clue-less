@@ -103,6 +103,7 @@ public class Board {
       Hallway hallway = Hallway.get(location[1], location[2]);
       pieces.put(suspect, hallway);
       locations.get(hallway).add(suspect);
+
     }
   }
 

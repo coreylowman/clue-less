@@ -22,7 +22,14 @@ public class Player extends WebSocketAdapter {
   public Player(String tag) {
 	  this.tag = tag;
   }
-
+  public Suspect getSuspect(){
+	  return this.suspect;
+  }
+  
+  public String getTag(){
+	  return this.tag;
+  }
+  
   public void setGame(Game game) {
     this.game = game;
   }

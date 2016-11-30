@@ -2,7 +2,7 @@
     position: absolute;
     width: 150px;
     height: auto;
-    bottom: 5px;
+    bottom: 200px;
     right: 5px;
     border: 1px solid red;
 }
@@ -25,21 +25,21 @@
 }
 
 #chat_container {
-    position: absolute;
+    position: relative;
     bottom: 5px;
     left: 5px;
 }
 #chat_text {
-    height: 150px;
+    height:350px;
     width: 300px;
-    margin: 0px;
+    margin: 10px;
     padding: 2px;
     overflow-y: scroll;
     word-wrap: break-word;
     border: 1px solid black;
 }
 #chat_input {
-    width: 99%;
+    width: 250px;
 }
 
 #board {

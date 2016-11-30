@@ -63,7 +63,7 @@ public class Board {
     }
 
     String[] suspects = {"colonel_mustard", "miss_scarlet", "professor_plum", "mr_green",
-        "mrs_white", "mrs_peacock"};
+        "mrs_white", "Mrs. Peacock"};
     for (String name : suspects) {
       Suspect suspect = new Suspect(name);
     }
@@ -73,6 +73,7 @@ public class Board {
       Weapon weapon = new Weapon(name);
     }
   }
+
 
   public boolean isMoveValid(IBoardPiece piece, ILocation destination) {
     return getValidMoves(piece).contains(destination);
@@ -117,12 +118,13 @@ public class Board {
     String[][] initialPositions =
         {{"colonel_mustard", "lounge", "diningroom"}, {"miss_scarlet", "hall", "lounge"},
             {"professor_plum", "study", "library"}, {"mr_green", "conservatory", "ballroom"},
-            {"mrs_white", "ballroom", "kitchen"}, {"mrs_peacock", "library", "conservatory"}};
+            {"mrs_white", "ballroom", "kitchen"}, {"Mrs. Peacock", "library", "conservatory"}};
     for (String[] location : initialPositions) {
       Suspect suspect = Suspect.get(location[0]);
       Hallway hallway = Hallway.get(location[1], location[2]);
       pieces.put(suspect, hallway);
       locations.get(hallway).add(suspect);
+
     }
   }
 

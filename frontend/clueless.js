@@ -116,8 +116,11 @@ function suggestionChat(suggestion){
 
 
 function highlightCard(cardName){
-  var card = document.getElementById(cardName)
-  card.style.borderColor = "yellow";
+  var card = document.getElementById(cardName);
+  if(card !== null){
+    card.style.borderColor = "yellow";
+    card.onclick =  sendCardName(cardName);
+  }
 }
 
 function provideEvidenceNotification(evidence){
@@ -126,6 +129,7 @@ function provideEvidenceNotification(evidence){
   highlightCard(evidence.suspect);
   highlightCard(evidence.room);
   highlightCard(evidence.weapon);
+
 }
 
 function handleEvent(event){
@@ -170,20 +174,24 @@ function suggest(){
   }
 };
 
-function provideEvidence(){
-
-console.log("providing evidence");
-
+// remove event listener and change border color back
+function resetCards(){
+  var cards = document.getElementsByClassName("card");
+  for(var i = 0; i < cards.length; i++){
+    cards[i].style.borderColor = "red";
+    cards[i].onclick = function() {
+      return false;
+    }
+  }
 }
 
 function sendCardName(cardName){
   return function(){
-    if(isEvidenceSelectionTime){
-      var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
-
-      websocket.send(JSON.stringify(evidenceRequest));
-    }
+    var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
+    websocket.send(JSON.stringify(evidenceRequest));
+    resetCards();
   }
+
 };
 
 function addCard(cardName){
@@ -192,6 +200,6 @@ function addCard(cardName){
   card.innerHTML += cardName;
   card.className += "card";
   card.id = cardName;
-  card.addEventListener("click",  sendCardName(cardName));
+
   hand.appendChild(card);
 }

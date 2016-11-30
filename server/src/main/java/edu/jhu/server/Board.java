@@ -23,19 +23,19 @@ public class Board {
     connectedLocations = new HashMap<ILocation, List<ILocation>>();
 
     // initialize rooms
-    String[] rooms = {"hall", "lounge", "diningroom", "kitchen", "ballroom", "conservatory",
-        "billiardroom", "library", "study"};
-    for (String roomName : rooms) {
+    for (String roomName : Room.NAMES) {
       Room room = new Room(roomName);
       locations.put(room, new ArrayList<IBoardPiece>());
       connectedLocations.put(room, new ArrayList<ILocation>());
     }
 
     // initialize hallways
-    String[][] hallways = {{"study", "library"}, {"study", "hall"}, {"hall", "billiardroom"},
-        {"hall", "lounge"}, {"lounge", "diningroom"}, {"diningroom", "billiardroom"},
-        {"diningroom", "kitchen"}, {"kitchen", "ballroom"}, {"ballroom", "billiardroom"},
-        {"ballroom", "conservatory"}, {"conservatory", "library"}, {"library", "billiardroom"}};
+    String[][] hallways = {{Room.STUDY, Room.LIBRARY}, {Room.STUDY, Room.HALL},
+        {Room.HALL, Room.BILLIARD_ROOM}, {Room.HALL, Room.LOUNGE}, {Room.LOUNGE, Room.DINING_ROOM},
+        {Room.DINING_ROOM, Room.BILLIARD_ROOM}, {Room.DINING_ROOM, Room.KITCHEN},
+        {Room.KITCHEN, Room.BALLROOM}, {Room.BALLROOM, Room.BILLIARD_ROOM},
+        {Room.BALLROOM, Room.CONSERVATORY}, {Room.CONSERVATORY, Room.LIBRARY},
+        {Room.LIBRARY, Room.BILLIARD_ROOM}};
     for (String[] roomNames : hallways) {
       Hallway hallway = new Hallway(roomNames[0], roomNames[1]);
       locations.put(hallway, new ArrayList<IBoardPiece>());
@@ -54,7 +54,7 @@ public class Board {
     }
 
     // connect the two secret passage ways
-    String[][] secretPassages = {{"lounge", "conservatory"}, {"study", "kitchen"}};
+    String[][] secretPassages = {{Room.LOUNGE, Room.CONSERVATORY}, {Room.STUDY, Room.KITCHEN}};
     for (String[] passage : secretPassages) {
       Room room1 = Room.get(passage[0]);
       Room room2 = Room.get(passage[1]);
@@ -114,10 +114,10 @@ public class Board {
 
   // initial positions are detailed in the project description document at the end
   private void initializeSuspects() {
-    String[][] initialPositions =
-        {{"colonel_mustard", "lounge", "diningroom"}, {"miss_scarlet", "hall", "lounge"},
-            {"professor_plum", "study", "library"}, {"mr_green", "conservatory", "ballroom"},
-            {"mrs_white", "ballroom", "kitchen"}, {"mrs_peacock", "library", "conservatory"}};
+    String[][] initialPositions = {{"colonel_mustard", Room.LOUNGE, Room.DINING_ROOM},
+        {"miss_scarlet", Room.HALL, Room.LOUNGE}, {"professor_plum", Room.STUDY, Room.LIBRARY},
+        {"mr_green", Room.CONSERVATORY, Room.BALLROOM}, {"mrs_white", Room.BALLROOM, Room.KITCHEN},
+        {"mrs_peacock", Room.LIBRARY, Room.CONSERVATORY}};
     for (String[] location : initialPositions) {
       Suspect suspect = Suspect.get(location[0]);
       Hallway hallway = Hallway.get(location[1], location[2]);
@@ -128,8 +128,8 @@ public class Board {
 
   // weapons are just put into rooms at the start
   private void initializeWeapons() {
-    String[] rooms = {"hall", "lounge", "diningroom", "kitchen", "ballroom", "conservatory",
-        "billiardroom", "library", "study"};
+    String[] rooms = {Room.HALL, Room.LOUNGE, Room.DINING_ROOM, Room.KITCHEN, Room.BALLROOM,
+        Room.CONSERVATORY, Room.BILLIARD_ROOM, Room.LIBRARY, Room.STUDY};
     String[] weapons = {"rope", "lead_pipe", "knife", "wrench", "candlestick", "pistol"};
 
     for (int i = 0; i < weapons.length; i++) {

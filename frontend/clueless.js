@@ -90,10 +90,6 @@ function sendChat(){
   }
 }
 
-function addChatText(text) {
-  document.getElementById("chat_text").value += text + "\n";
-}
-
 function sendToChatBox(message){
   document.getElementById("chat_text").value += message + '\n';
 }
@@ -115,7 +111,7 @@ function handleEvent(event){
       sendToChatBox(event.author + ': ' + event.body);
       break;
     case "JOIN_NOTIFICATION":
-      addChatText(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+      sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
       break;
     case "INVALID_REQUEST_NOTIFICATION":
       alert("You cannot do that. " + event.reason);

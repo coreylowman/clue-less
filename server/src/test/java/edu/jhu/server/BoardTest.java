@@ -36,7 +36,7 @@ public class BoardTest extends TestCase {
     board.initialize();
 
     String[] suspects = {"colonel_mustard", "miss_scarlet", "professor_plum", "mr_green",
-        "mrs_white", "mrs_peacock"};
+        "mrs_white", "Mrs. Peacock"};
     for (String suspectName : suspects) {
       ILocation location = board.getLocationOf(Suspect.get(suspectName));
       assert (location instanceof Hallway);
@@ -48,7 +48,7 @@ public class BoardTest extends TestCase {
     assert (board.getLocationOf(Suspect.get("mr_green")) == Hallway.get("conservatory",
         "ballroom"));
     assert (board.getLocationOf(Suspect.get("mrs_white")) == Hallway.get("ballroom", "kitchen"));
-    assert (board.getLocationOf(Suspect.get("mrs_peacock")) == Hallway.get("library",
+    assert (board.getLocationOf(Suspect.get("Mrs. Peacock")) == Hallway.get("library",
         "conservatory"));
 
     String[] weapons = {"rope", "lead_pipe", "knife", "wrench", "candlestick", "pistol"};

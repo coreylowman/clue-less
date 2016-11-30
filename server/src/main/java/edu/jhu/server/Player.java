@@ -22,7 +22,11 @@ public class Player extends WebSocketAdapter {
   public Player(String tag) {
     this.tag = tag;
   }
-
+  
+  public String getTag(){
+	  return this.tag;
+  }
+  
   public void setGame(Game game) {
     this.game = game;
   }
@@ -90,10 +94,5 @@ public class Player extends WebSocketAdapter {
     JSONObject JSONMessage = new JSONObject(message);
     JSONMessage.put("author", this.tag);
     game.handleEvent(JSONMessage);
-  }
-
-  @Override
-  public String toString() {
-    return this.tag;
   }
 }

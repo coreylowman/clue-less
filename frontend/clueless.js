@@ -117,6 +117,7 @@ function handleEvent(event){
 // adds on click event listeners to all elements passed in
 // when an element is clicked, it sends a move request to the server,
 // and then removed all the event listeners that were added
+// TODO name this better?
 function addMoveRequestOnClickTo(elementIds) {
   // removes all the on click events that are added
   // this function is specific to addMoveRequestOnClickTo(), which is why its an

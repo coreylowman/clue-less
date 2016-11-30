@@ -1,3 +1,6 @@
+var isMyTurn = true;
+var isEvidenceSelectionTime = false;
+
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -14,6 +17,7 @@ function establishWebsocket() {
     };
 
     connection.onerror = function (error) {
+      console.log('websocket messed up');
         // an error occurred when sending/receiving data
     };
 
@@ -37,6 +41,7 @@ var websocket = establishWebsocket();
 //example of sending JSON object to the server
 websocket.onopen = function(){
   websocket.send(JSON.stringify({eventType:'TEST'}));
+  suggest();
 };
 
 
@@ -76,6 +81,7 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
+
 }
 
 init();
@@ -84,13 +90,28 @@ function sendChat(){
   var chatEvent = {eventType: "CHAT_NOTIFICATION", body: ""};
   var chatInput = document.getElementById("chat_input");
   chatEvent.body = chatInput.value;
-  chatInput.value = '';
-  websocket.send(JSON.stringify(chatEvent));
+  chatInput.value = "";
+  //can't send empty messages
+  if (chatEvent.body !== ""){
+    websocket.send(JSON.stringify(chatEvent));
+  }
 }
 
 websocket.onmessage = function(message){
   console.log(message);
   handleEvent(JSON.parse(message.data));
+}
+
+function sendToChatBox(message){
+  document.getElementById("chat_text").value += message + '\n';
+}
+
+function suggestionChat(suggestion){
+  var suggestionChat = "Game: " +
+    suggestion.suggester + " suggests that it was " +
+    suggestion.accused + " with the " + suggestion.weapon + " in the " +
+    suggestion.room + ".";
+  sendToChatBox(suggestionChat);
 }
 
 function handleEvent(event){
@@ -99,11 +120,65 @@ function handleEvent(event){
     console.log("this is only a test")
     break;
     case "CHAT_NOTIFICATION":
-    document.getElementById("chat_text").value += event.author + ': ' + event.body + "\n";
-    console.log(chat_text);
+    sendToChatBox(event.author + ': ' + event.body);
+    break;
+    case "INVALID_REQUEST_NOTIFICATION":
+    alert("You cannot do that. " + event.reason);
+    break;
+    case "PROVIDE_EVIDENCE_NOTIFICATION":
+    alert("Please provide your evidence!");
+    isEvidenceSelectionTime = true;
+    break;
+    case "SUGGESTION_NOTIFICATION":
+    suggestionChat(event);
+    console.log("suggestion");
     break;
     default:
     console.log("Invalid eventType received");
     break;
+
   }
+}
+
+function notPlayerTurn(){
+  var event = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "It's not your turn."};
+  handleEvent(event);
+}
+
+function suggest(){
+  if (isMyTurn){
+    var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
+    var suggestFormElements = document.getElementById("suggest_form").elements
+    suggestion.suspect = suggestFormElements[0].value;
+    suggestion.weapon = suggestFormElements[1].value;
+    websocket.send(JSON.stringify(suggestion));
+  }else{
+    notPlayerTurn();
+  }
+};
+
+function provideEvidence(){
+
+console.log("providing evidence");
+
+}
+
+function sendCardName(cardName){
+  return function(){
+    if(isEvidenceSelectionTime){
+      var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
+
+      websocket.send(JSON.stringify(evidenceRequest));
+    }
+  }
+};
+
+function addCard(cardName){
+  var hand = document.getElementById("hand");
+  var card = document.createElement("card");
+  card.innerHTML += cardName;
+  card.className += "card";
+  card.id = cardName;
+  card.addEventListener("click",  sendCardName(cardName));
+  hand.appendChild(card);
 }

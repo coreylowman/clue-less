@@ -6,7 +6,22 @@ import java.util.List;
 import java.util.Map;
 
 public class Weapon implements ICard, IBoardPiece {
-  private static Map<String, Weapon> weapons = new HashMap<String, Weapon>();
+  public static final String ROPE = "Rope";
+  public static final String LEAD_PIPE = "Lead Pipe";
+  public static final String KNIFE = "Knife";
+  public static final String WRENCH = "Wrench";
+  public static final String CANDLESTICK = "Candlestick";
+  public static final String PISTOL = "Pistol";
+
+  private static Map<String, Weapon> weapons;
+
+  static {
+    weapons = new HashMap<String, Weapon>();
+    String[] names = {ROPE, LEAD_PIPE, KNIFE, WRENCH, CANDLESTICK, PISTOL};
+    for (String name : names) {
+      Weapon weapon = new Weapon(name);
+    }
+  }
 
   public static Weapon get(String name) {
     return weapons.get(name);

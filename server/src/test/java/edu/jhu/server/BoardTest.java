@@ -35,28 +35,31 @@ public class BoardTest extends TestCase {
     Board board = new Board();
     board.initialize();
 
-    String[] suspects = {"colonel_mustard", "miss_scarlet", "professor_plum", "mr_green",
-        "mrs_white", "mrs_peacock"};
-    for (String suspectName : suspects) {
-      ILocation location = board.getLocationOf(Suspect.get(suspectName));
+    // make sure they are in distinct hallways
+    List<Suspect> suspects = Suspect.getAll();
+    for (int i = 0; i < suspects.size(); i++) {
+      ILocation location = board.getLocationOf(suspects.get(i));
       assert (location instanceof Hallway);
+      for (int j = i + 1; j < suspects.size(); j++) {
+        ILocation otherLocation = board.getLocationOf(suspects.get(j));
+        assert (!otherLocation.equals(location));
+      }
     }
-    assert (board.getLocationOf(Suspect.get("colonel_mustard")) == Hallway.get(Room.LOUNGE,
+    assert (board.getLocationOf(Suspect.get(Suspect.COLONEL_MUSTARD)) == Hallway.get(Room.LOUNGE,
         Room.DINING_ROOM));
-    assert (board.getLocationOf(Suspect.get("miss_scarlet")) == Hallway.get(Room.LOUNGE,
+    assert (board.getLocationOf(Suspect.get(Suspect.MISS_SCARLET)) == Hallway.get(Room.LOUNGE,
         Room.HALL));
-    assert (board.getLocationOf(Suspect.get("professor_plum")) == Hallway.get(Room.STUDY,
+    assert (board.getLocationOf(Suspect.get(Suspect.PROFESSOR_PLUM)) == Hallway.get(Room.STUDY,
         Room.LIBRARY));
-    assert (board.getLocationOf(Suspect.get("mr_green")) == Hallway.get(Room.CONSERVATORY,
+    assert (board.getLocationOf(Suspect.get(Suspect.MR_GREEN)) == Hallway.get(Room.CONSERVATORY,
         Room.BALLROOM));
-    assert (board.getLocationOf(Suspect.get("mrs_white")) == Hallway.get(Room.BALLROOM,
+    assert (board.getLocationOf(Suspect.get(Suspect.MRS_WHITE)) == Hallway.get(Room.BALLROOM,
         Room.KITCHEN));
-    assert (board.getLocationOf(Suspect.get("mrs_peacock")) == Hallway.get(Room.LIBRARY,
+    assert (board.getLocationOf(Suspect.get(Suspect.MRS_PEACOCK)) == Hallway.get(Room.LIBRARY,
         Room.CONSERVATORY));
 
-    String[] weapons = {"rope", "lead_pipe", "knife", "wrench", "candlestick", "pistol"};
-    for (String weaponName : weapons) {
-      ILocation location = board.getLocationOf(Weapon.get(weaponName));
+    for (Weapon weapon : Weapon.getAll()) {
+      ILocation location = board.getLocationOf(weapon);
       assert (location instanceof Room);
     }
   }
@@ -66,7 +69,7 @@ public class BoardTest extends TestCase {
     board.initialize();
 
     // lounge-conservatory
-    Suspect suspect = Suspect.get("miss_scarlet");
+    Suspect suspect = Suspect.get(Suspect.MISS_SCARLET);
     List<ILocation> moves = board.getValidMoves(suspect);
     assert (moves.contains(Room.get(Room.HALL)));
     assert (moves.contains(Room.get(Room.LOUNGE)));
@@ -96,7 +99,7 @@ public class BoardTest extends TestCase {
 
 
     // kitchen-study
-    suspect = Suspect.get("mrs_white");
+    suspect = Suspect.get(Suspect.MRS_WHITE);
     moves = board.getValidMoves(suspect);
     assert (moves.contains(Room.get(Room.BALLROOM)));
     assert (moves.contains(Room.get(Room.KITCHEN)));
@@ -183,16 +186,9 @@ public class BoardTest extends TestCase {
     Board board = new Board();
     board.initialize();
 
-    String[][] connections = {{Room.STUDY, Room.HALL}, {Room.HALL, Room.LOUNGE},
-        {Room.STUDY, Room.LIBRARY}, {Room.HALL, Room.BILLIARD_ROOM},
-        {Room.LOUNGE, Room.DINING_ROOM}, {Room.LIBRARY, Room.BILLIARD_ROOM},
-        {Room.BILLIARD_ROOM, Room.DINING_ROOM}, {Room.LIBRARY, Room.CONSERVATORY},
-        {Room.BILLIARD_ROOM, Room.BALLROOM}, {Room.DINING_ROOM, Room.KITCHEN},
-        {Room.CONSERVATORY, Room.BALLROOM}, {Room.BALLROOM, Room.KITCHEN}};
-
-    for (String[] roomConnection : connections) {
-      testLocationConnections(board, Hallway.get(roomConnection[0], roomConnection[1]),
-          Room.get(roomConnection[0]), Room.get(roomConnection[1]));
+    for (Hallway hallway : Hallway.getAll()) {
+      testLocationConnections(board, hallway, Room.get(hallway.getEnd1()),
+          Room.get(hallway.getEnd2()));
     }
   }
 }

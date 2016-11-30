@@ -16,10 +16,16 @@ public class Room implements ILocation, ICard {
   public static final String LIBRARY = "Library";
   public static final String STUDY = "Study";
 
-  public static final String[] NAMES =
-      {HALL, LOUNGE, DINING_ROOM, KITCHEN, BALLROOM, CONSERVATORY, BILLIARD_ROOM, LIBRARY, STUDY};
+  private static Map<String, Room> rooms;
 
-  private static Map<String, Room> rooms = new HashMap<String, Room>();
+  static {
+    rooms = new HashMap<String, Room>();
+    String[] names =
+        {HALL, LOUNGE, DINING_ROOM, KITCHEN, BALLROOM, CONSERVATORY, BILLIARD_ROOM, LIBRARY, STUDY};
+    for (String name : names) {
+      Room room = new Room(name);
+    }
+  }
 
   public static Room get(String name) {
     return rooms.get(name);

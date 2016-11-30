@@ -81,7 +81,7 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
-
+  addCard("Mrs. Peacock");
 }
 
 init();
@@ -114,6 +114,20 @@ function suggestionChat(suggestion){
   sendToChatBox(suggestionChat);
 }
 
+
+function highlightCard(cardName){
+  var card = document.getElementById(cardName)
+  card.style.borderColor = "yellow";
+}
+
+function provideEvidenceNotification(evidence){
+  alert("Please provide your evidence!");
+  isEvidenceSelectionTime = true;
+  highlightCard(evidence.suspect);
+  highlightCard(evidence.room);
+  highlightCard(evidence.weapon);
+}
+
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
@@ -126,8 +140,8 @@ function handleEvent(event){
     alert("You cannot do that. " + event.reason);
     break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-    alert("Please provide your evidence!");
-    isEvidenceSelectionTime = true;
+    provideEvidenceNotification(event);
+
     break;
     case "SUGGESTION_NOTIFICATION":
     suggestionChat(event);

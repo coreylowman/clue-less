@@ -116,10 +116,13 @@ public class Game {
 	  return playerWithEvidence;
   }
   
-  private void provideEvidenceNotification(Player evidenceHolder){
+  private void provideEvidenceNotification(Player evidenceHolder, CaseFile casefile){
 	  JSONObject evidenceNotification = new JSONObject();
 	  evidenceNotification.put("eventType", "PROVIDE_EVIDENCE_NOTIFICATION");
 	  evidenceNotification.put("author", "Game");
+	  evidenceNotification.put("suspect", casefile.getSuspect().toString());
+	  evidenceNotification.put("weapon", casefile.getWeapon().toString());
+	  evidenceNotification.put("room", casefile.getRoom().toString());
 	  evidenceHolder.sendEvent(evidenceNotification);
   }
   
@@ -129,7 +132,7 @@ public class Game {
 		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
 		  handleEvent(chat);
 	  } else {
-		  provideEvidenceNotification(playerWithEvidence);
+		  provideEvidenceNotification(playerWithEvidence, casefile);
 	  }
   }
   

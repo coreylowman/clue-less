@@ -114,29 +114,37 @@ function suggestionChat(suggestion){
   sendToChatBox(suggestionChat);
 }
 
+function showHand(handEvent) {
+  var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
+  sendToChatBox(handChat);
+}
+
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
-    console.log("this is only a test")
-    break;
+      console.log("this is only a test")
+      break;
     case "CHAT_NOTIFICATION":
-    sendToChatBox(event.author + ': ' + event.body);
-    break;
+      sendToChatBox(event.author + ': ' + event.body);
+      break;
     case "INVALID_REQUEST_NOTIFICATION":
-    alert("You cannot do that. " + event.reason);
-    break;
+      alert("You cannot do that. " + event.reason);
+      break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-    alert("Please provide your evidence!");
-    isEvidenceSelectionTime = true;
-    break;
+      alert("Please provide your evidence!");
+      isEvidenceSelectionTime = true;
+      break;
     case "SUGGESTION_NOTIFICATION":
-    suggestionChat(event);
-    console.log("suggestion");
-    break;
+      suggestionChat(event);
+      console.log("suggestion");
+      break;
+    case "HAND_NOTIFICATION":
+      console.log("Hand notification");
+      showHand(event);
+      break;
     default:
-    console.log("Invalid eventType received");
-    break;
-
+      console.log("Invalid eventType received");
+      break;
   }
 }
 

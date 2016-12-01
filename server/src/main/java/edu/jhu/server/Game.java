@@ -84,7 +84,7 @@ public class Game {
   			handArray.put(card.toString());
   		}
   		
-  		handNotification.put("hand", handArray);
+  		handNotification.put("cards", handArray);
   		player.sendEvent(handNotification);
   	}
   }

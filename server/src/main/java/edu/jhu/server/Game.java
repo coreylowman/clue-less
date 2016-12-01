@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Timer;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import edu.jhu.server.data.CaseFile;
 import edu.jhu.server.data.ILocation;
@@ -56,6 +57,7 @@ public class Game {
     this.currentTurnIndex = 0;
     this.gameStarted = true;
     CardShuffler.shuffleAndDealCards(players);
+    sendHandsToPlayers();
   }
 
   public void addPlayer(Player player) {
@@ -68,7 +70,25 @@ public class Game {
       player.sendEvent(event);
     }
   }
-  
+
+  private void sendHandsToPlayers() {
+  	for (Player player : players) {
+  		// The basics
+  		JSONObject handNotification;
+  		handNotification.put("eventType", "HAND_NOTIFICATION");
+  		handNotification.put("author", "Game");
+  		
+  		// Create array of cards of this player
+  		JSONArray handArray = new JSONArray();
+  		for (ICard card : player.getCards()) {
+  			handArray.put(card.toString());
+  		}
+  		
+  		handNotification.put("hand", handArray);
+  		player.sendEvent(handNotification);
+  	}
+  }
+
   private JSONObject makeChatMessage(String body) {
 	  JSONObject chat = new JSONObject();
 	  chat.put("eventType", "CHAT_NOTIFICATION");
@@ -76,7 +96,7 @@ public class Game {
 	  chat.put("body", body);
 	  return chat;
   }
-  
+
   private JSONObject makeInvalidRequestMessage(String player, String reason){
 	  JSONObject invalidRequest = new JSONObject();
 	  invalidRequest.put("eventType", "INVALID_REQUEST_NOTIFICATION");

@@ -6,7 +6,26 @@ import java.util.List;
 import java.util.Map;
 
 public class Room implements ILocation, ICard {
-  private static Map<String, Room> rooms = new HashMap<String, Room>();
+  public static final String HALL = "Hall";
+  public static final String LOUNGE = "Lounge";
+  public static final String DINING_ROOM = "Dining Room";
+  public static final String KITCHEN = "Kitchen";
+  public static final String BALLROOM = "Ballroom";
+  public static final String CONSERVATORY = "Conservatory";
+  public static final String BILLIARD_ROOM = "Billiard Room";
+  public static final String LIBRARY = "Library";
+  public static final String STUDY = "Study";
+
+  private static Map<String, Room> rooms;
+
+  static {
+    rooms = new HashMap<String, Room>();
+    String[] names =
+        {HALL, LOUNGE, DINING_ROOM, KITCHEN, BALLROOM, CONSERVATORY, BILLIARD_ROOM, LIBRARY, STUDY};
+    for (String name : names) {
+      Room room = new Room(name);
+    }
+  }
 
   public static Room get(String name) {
     return rooms.get(name);

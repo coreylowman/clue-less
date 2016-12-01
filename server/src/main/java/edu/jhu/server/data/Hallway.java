@@ -1,13 +1,37 @@
 package edu.jhu.server.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Hallway implements ILocation {
-  private static Map<String, Hallway> hallways = new HashMap<String, Hallway>();
+  private static Map<String, Hallway> hallways;
+
+  static {
+    hallways = new HashMap<String, Hallway>();
+    String[][] hallways = {{Room.STUDY, Room.LIBRARY}, {Room.STUDY, Room.HALL},
+        {Room.HALL, Room.BILLIARD_ROOM}, {Room.HALL, Room.LOUNGE}, {Room.LOUNGE, Room.DINING_ROOM},
+        {Room.DINING_ROOM, Room.BILLIARD_ROOM}, {Room.DINING_ROOM, Room.KITCHEN},
+        {Room.KITCHEN, Room.BALLROOM}, {Room.BALLROOM, Room.BILLIARD_ROOM},
+        {Room.BALLROOM, Room.CONSERVATORY}, {Room.CONSERVATORY, Room.LIBRARY},
+        {Room.LIBRARY, Room.BILLIARD_ROOM}};
+    for (String[] roomNames : hallways) {
+      Hallway hallway = new Hallway(roomNames[0], roomNames[1]);
+    }
+  }
 
   public static Hallway get(String end1, String end2) {
-    return hallways.get(end1 + "_" + end2);
+    Hallway try1 = hallways.get(end1 + "_" + end2);
+    if (try1 != null) {
+      return try1;
+    } else {
+      return hallways.get(end2 + "_" + end1);
+    }
+  }
+
+  public static List<Hallway> getAll() {
+    return new ArrayList<Hallway>(hallways.values());
   }
 
   private String end1, end2;
@@ -16,7 +40,14 @@ public class Hallway implements ILocation {
     this.end1 = end1;
     this.end2 = end2;
     hallways.put(end1 + "_" + end2, this);
-    hallways.put(end2 + "_" + end1, this);
+  }
+
+  public String getEnd1() {
+    return end1;
+  }
+
+  public String getEnd2() {
+    return end2;
   }
 
   @Override

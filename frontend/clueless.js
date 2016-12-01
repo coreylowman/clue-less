@@ -117,6 +117,11 @@ function suggestionChat(suggestion){
 function showHand(handEvent) {
   var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
   sendToChatBox(handChat);
+  
+  document.getElementById("hand").innerHTML = "";
+  for (var card in handEvent.cards) {
+    addCard(card);
+  }
 }
 
 function handleEvent(event){

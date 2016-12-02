@@ -37,7 +37,7 @@ public class Game {
     this.timer = new Timer();
     // todo call timer.schedule() here for starting the game
 
-    this.remainingSuspects = Suspect.getAll();
+    this.remainingSuspects = new ArrayList<>(Suspect.getAll());
   }
 
   public boolean isStarted() {

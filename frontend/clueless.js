@@ -1,3 +1,4 @@
+var tag = "";
 var isMyTurn = true;
 var isEvidenceSelectionTime = false;
 
@@ -18,7 +19,7 @@ function establishWebsocket() {
       connection.send(JSON.stringify({eventType:'TEST'}));
 
       // send JOIN_REQUEST
-      var tag = prompt("Please enter your name");
+      tag = prompt("Please enter your name");
       var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
       connection.send(JSON.stringify(joinRequest));
     };
@@ -124,10 +125,66 @@ function handleEvent(event){
       suggestionChat(event);
       console.log("suggestion");
       break;
+    case "TURN_NOTIFICATION":
+      handleTurnNotification(event);
+      break;
     default:
       console.log("Invalid eventType received");
       break;
   }
+}
+
+// adds on click event listeners to all elements passed in
+// when an element is clicked, it sends a move request to the server,
+// and then removed all the event listeners that were added
+// TODO name this better?
+function addMoveRequestOnClickTo(elementIds) {
+  // removes all the on click events that are added
+  // this function is specific to addMoveRequestOnClickTo(), which is why its an
+  // inner function
+  function removeOnClickFrom(elementIds, func) {
+    for (var i = 0;i < elementIds.length;i++) {
+      var ele = document.getElementById(elementIds[i]);
+      ele.removeEventListener("click", func);
+      ele.className = ele.className.replace(" selectable", "");
+    }
+  }
+
+  for (var i = 0;i < elementIds.length;i++) {
+    var ele = document.getElementById(elementIds[i]);
+
+    // the event listener when element is clicked - send MOVE_REQUEST, and then remove on click from
+    // ALL elements passed into this function
+    function onClick(event) {
+      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: elementIds[i]}));
+      removeOnClickFrom(elementIds, onClick);
+    }
+
+    ele.addEventListener("click", onClick);
+    ele.className += " selectable";
+  }
+}
+
+// handle a turn notification from the server
+// if its our turn then display valid moves & let the player suggest/accuse/end turn
+function handleTurnNotification(notification) {
+  sendToChatBox("It is " + notification.playerTag + "'s turn.");
+
+  if (notification.playerTag === tag) {
+    // make valid locations clickable and enable all turn buttons
+    addMoveRequestOnClickTo(notification.validMoves);
+    document.getElementById("suggest_button").disabled = false;
+    document.getElementById("accuse_button").disabled = false;
+    document.getElementById("end_turn_button").disabled = false;
+  }
+}
+
+// called when End Turn button is clicked
+function endTurn() {
+  websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
+  document.getElementById("suggest_button").disabled = true;
+  document.getElementById("accuse_button").disabled = true;
+  document.getElementById("end_turn_button").disabled = true;
 }
 
 function notPlayerTurn(){

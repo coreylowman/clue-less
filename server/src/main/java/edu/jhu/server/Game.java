@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
 import edu.jhu.server.data.Suspect;
 
 import edu.jhu.server.data.ILocation;
+
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
 public class Game {
   private enum EventType {
-    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST
+    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST
   }
 
   private int currentTurnIndex;
@@ -59,7 +61,8 @@ public class Game {
   public void start() {
     this.currentTurnIndex = 0;
     this.gameStarted = true;
-    CardShuffler.shuffleAndDealCards(players);
+    this.secretCards = CardShuffler.shuffleAndDealCards(players);
+    this.board.initialize();
   }
 
   public void addPlayer(Player player) {
@@ -70,6 +73,20 @@ public class Game {
     // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
     // the WebSocket session might not be set up here, and JOIN_REQUEST allows
     // the player to set their tag.
+  }
+
+  public void sendTurnNotification() {
+    Player player = players.get(currentTurnIndex);
+
+    JSONArray validMoves = new JSONArray();
+    board.getValidMoves(player.getSuspect()).forEach(loc -> validMoves.put(loc.toString()));
+
+    JSONObject notification = new JSONObject();
+    notification.put("eventType", "TURN_NOTIFICATION");
+    notification.put("playerTag", player.getTag());
+    notification.put("validMoves", validMoves);
+
+    notifyPlayers(notification);
   }
 
   public void notifyPlayers(JSONObject event) {
@@ -150,6 +167,9 @@ public class Game {
       case CHAT_NOTIFICATION:
         notifyPlayers(event);
         break;
+      case END_TURN_REQUEST:
+        handleEndTurnRequest(event);
+        break;
       case SUGGESTION_REQUEST:
         board.initialize();
         Player suggester = getPlayerByTag(event.getString("author"));
@@ -167,6 +187,11 @@ public class Game {
         System.out.println("invalid event type");
         break;
     }
+  }
+
+  public void handleEndTurnRequest(JSONObject request) {
+    currentTurnIndex = (currentTurnIndex + 1) % players.size();
+    sendTurnNotification();
   }
 
   private void handleJoinRequest(JSONObject request) {

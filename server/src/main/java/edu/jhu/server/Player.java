@@ -18,9 +18,17 @@ public class Player extends WebSocketAdapter {
   private Game game;
   private List<ICard> cards;
   private Suspect suspect;
+  private boolean hasLost = false;
 
   public Player(String tag) {
     this.tag = tag;
+  }
+  
+  public boolean getHasLost() {
+    return hasLost;
+  }
+  public void setHasLost(boolean hasLost) {
+    this.hasLost = hasLost;
   }
 
   public String getTag() {

@@ -19,7 +19,8 @@ public class Game {
   private static enum EventType {
     TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
-    MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION
+    MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
+    ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION
   }
   
   private static class Constants {
@@ -36,6 +37,8 @@ public class Game {
     private static final String WEAPON = "weapon";
     private static final String ROOM = "room";
     private static final String PLAYER_SUSPECT = "playerSuspect";
+    private static final String ACCUSER = "accuser";
+    private static final String OUTCOME = "outcome";
   }
 
   private int currentTurnIndex;
@@ -191,14 +194,95 @@ public class Game {
       case JOIN_REQUEST:
         handleJoinRequest(event, player);
         break;
+      case ACCUSATION_REQUEST:
+        handleAccusationRequest(event, player);
+        break;
       default:
         System.out.println("invalid event type");
         break;
     }
   }
+  
+  private boolean isPlayersTurn(Player player) {
+    if (player == null)
+      throw new IllegalArgumentException("player was null");
+    
+    return player.equals(players.get(currentTurnIndex));
+  }
+  
+  public void handleAccusationRequest(JSONObject request, Player player) {
+    // a player may make an accusation at any time as long as it is their turn
+    if (!isPlayersTurn(player)) {
+      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      return;
+    }
+    
+    // get the case file components from the info in the request
+    final Room room = Room.get(request.getString(Constants.ROOM));
+    final Suspect suspect = Suspect.get(request.getString(Constants.SUSPECT));
+    final Weapon weapon = Weapon.get(request.getString(Constants.WEAPON));
+    
+    if (room == null || suspect == null || weapon == null) {
+      handleEvent(makeInvalidRequestMessage("Invalid Case File."), player);
+      return;
+    }
+    
+    // send accusation notification to all players
+    final JSONObject accusationNotification = new JSONObject();
+    accusationNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_NOTIFICATION);
+    accusationNotification.put(Constants.ACCUSER, player.getTag());
+    accusationNotification.put(Constants.ROOM, room.getName());
+    accusationNotification.put(Constants.ACCUSED, suspect.getName());
+    accusationNotification.put(Constants.WEAPON, weapon.getName());
+    notifyPlayers(accusationNotification);
+    
+    // send secret card notification to player who made the accusation
+    final JSONObject secretCardNotification = new JSONObject();
+    secretCardNotification.put(Constants.EVENT_TYPE, EventType.SECRET_CARD_NOTIFICATION);
+    secretCardNotification.put(Constants.ROOM, secretCards.getRoom().getName());
+    secretCardNotification.put(Constants.ACCUSED, secretCards.getSuspect().getName());
+    secretCardNotification.put(Constants.WEAPON, secretCards.getWeapon().getName());
+    player.sendEvent(secretCardNotification);
+    
+    // create case file and check it against the secret cards
+    final CaseFile caseFile = new CaseFile(room, suspect, weapon);
+    boolean outcome = secretCards.equals(caseFile);
+    
+    // send accusation outcome notification to all players
+    final JSONObject accusationOutcomeNotification = new JSONObject();
+    accusationOutcomeNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_OUTCOME_NOTIFICATION);
+    accusationNotification.put(Constants.ACCUSER, player.getTag());
+    accusationNotification.put(Constants.OUTCOME, String.valueOf(outcome));
+    notifyPlayers(accusationOutcomeNotification);
+    
+    if (outcome) {
+      // player wins, end the game
+      
+      // TODO: actually end the game somehow
+      
+      // for now, just prevent all other players from taking additional turns
+      for (Player p : players) {
+        if (!p.equals(player)) {
+          player.setHasLost(true);
+        }
+      }
+    } else {
+      // player loses, prevent them from taking additional turns
+      player.setHasLost(true);
+      
+      // this player's turn is now over
+      final JSONObject endTurnRequest = new JSONObject();
+      endTurnRequest.put(Constants.EVENT_TYPE, EventType.END_TURN_REQUEST);
+      handleEvent(endTurnRequest, player);
+    }
+  }
 
   public void handleEndTurnRequest(JSONObject request) {
-    currentTurnIndex = (currentTurnIndex + 1) % players.size();
+    // keep going until we get to a player that is allowed additional turns
+    do {
+      currentTurnIndex = (currentTurnIndex + 1) % players.size();
+    } while (players.get(currentTurnIndex).getHasLost());
+    
     sendTurnNotification();
   }
 

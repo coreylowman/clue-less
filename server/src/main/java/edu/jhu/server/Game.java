@@ -57,6 +57,9 @@ public class Game {
   		timer.purge();
   	}
   	
+  	// Send game start notification
+  	notifyPlayers(makeGameStartNotification());
+  	
   	// Initialize stuff
     this.currentTurnIndex = 0;
     this.gameStarted = true;
@@ -64,7 +67,7 @@ public class Game {
   }
 
   public void addPlayer(Player player) {
-    players.add(player);
+    this.players.add(player);
     player.setGame(this);
     
     // Start game if it's full now
@@ -74,7 +77,7 @@ public class Game {
   	
   	// Once we reach 3 players, we can start the game. So start a 5 minute
   	//	timer!
-  	if (players.size() == 3 && timer == null) {
+  	if (this.players.size() == 3 && timer == null) {
   		timer = new Timer();
   		
   		// In 5 minutes, start the game.
@@ -91,6 +94,12 @@ public class Game {
     for (Player player : players) {
       player.sendEvent(event);
     }
+  }
+  
+  private JSONObject makeGameStartNotification() {
+  	JSONObject gameStart = new JSONObject();
+  	gameStart.put("eventType", "GAME_START_NOTIFICATION");
+  	return gameStart;
   }
   
   private JSONObject makeChatMessage(String body) {

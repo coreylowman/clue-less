@@ -34,8 +34,8 @@ public class Board {
 
     // connect the hallways & rooms
     for (Hallway hallway : Hallway.getAll()) {
-      Room room1 = Room.get(hallway.getEnd1());
-      Room room2 = Room.get(hallway.getEnd2());
+      final Room room1 = hallway.getEnd1();
+      final Room room2 = hallway.getEnd2();
       connectedLocations.get(hallway).add(room1);
       connectedLocations.get(hallway).add(room2);
       connectedLocations.get(room1).add(hallway);
@@ -43,12 +43,10 @@ public class Board {
     }
 
     // connect the two secret passage ways
-    String[][] secretPassages = {{Room.LOUNGE, Room.CONSERVATORY}, {Room.STUDY, Room.KITCHEN}};
-    for (String[] passage : secretPassages) {
-      Room room1 = Room.get(passage[0]);
-      Room room2 = Room.get(passage[1]);
-      connectedLocations.get(room1).add(room2);
-      connectedLocations.get(room2).add(room1);
+    Room[][] secretPassages = {{Room.LOUNGE, Room.CONSERVATORY}, {Room.STUDY, Room.KITCHEN}};
+    for (Room[] rooms : secretPassages) {
+      connectedLocations.get(rooms[0]).add(rooms[1]);
+      connectedLocations.get(rooms[1]).add(rooms[0]);
     }
   }
 
@@ -92,33 +90,29 @@ public class Board {
 
   // initial positions are detailed in the project description document at the end
   private void initializeSuspects() {
-    String[][] initialPositions = {{Suspect.COLONEL_MUSTARD, Room.LOUNGE, Room.DINING_ROOM},
-        {Suspect.MISS_SCARLET, Room.HALL, Room.LOUNGE},
-        {Suspect.PROFESSOR_PLUM, Room.STUDY, Room.LIBRARY},
-        {Suspect.MR_GREEN, Room.CONSERVATORY, Room.BALLROOM},
-        {Suspect.MRS_WHITE, Room.BALLROOM, Room.KITCHEN},
-        {Suspect.MRS_PEACOCK, Room.LIBRARY, Room.CONSERVATORY}};
-    for (String[] location : initialPositions) {
-      Suspect suspect = Suspect.get(location[0]);
-      Hallway hallway = Hallway.get(location[1], location[2]);
-      pieces.put(suspect, hallway);
-      locations.get(hallway).add(suspect);
-
+    final Suspect[] suspects = {Suspect.COLONEL_MUSTARD, Suspect.MISS_SCARLET, Suspect.PROFESSOR_PLUM,
+    		Suspect.MR_GREEN, Suspect.MRS_WHITE, Suspect.MRS_PEACOCK};
+    final Hallway[] hallways = {Hallway.get(Room.LOUNGE, Room.DINING_ROOM),
+        Hallway.get(Room.HALL, Room.LOUNGE), Hallway.get(Room.STUDY, Room.LIBRARY),
+        Hallway.get(Room.CONSERVATORY, Room.BALLROOM), Hallway.get(Room.BALLROOM, Room.KITCHEN),
+        Hallway.get(Room.LIBRARY, Room.CONSERVATORY)};
+    
+    for (int i = 0; i < suspects.length; i++) {
+      pieces.put(suspects[i], hallways[i]);
+      locations.get(hallways[i]).add(suspects[i]);
     }
   }
 
   // weapons are just put into rooms at the start
   private void initializeWeapons() {
-    String[] rooms = {Room.HALL, Room.LOUNGE, Room.DINING_ROOM, Room.KITCHEN, Room.BALLROOM,
+    final Room[] rooms = {Room.HALL, Room.LOUNGE, Room.DINING_ROOM, Room.KITCHEN, Room.BALLROOM,
         Room.CONSERVATORY, Room.BILLIARD_ROOM, Room.LIBRARY, Room.STUDY};
-    String[] weapons = {Weapon.ROPE, Weapon.LEAD_PIPE, Weapon.KNIFE, Weapon.WRENCH,
+    final Weapon[] weapons = {Weapon.ROPE, Weapon.LEAD_PIPE, Weapon.KNIFE, Weapon.WRENCH,
         Weapon.CANDLESTICK, Weapon.PISTOL};
 
     for (int i = 0; i < weapons.length; i++) {
-      Weapon weapon = Weapon.get(weapons[i]);
-      Room room = Room.get(rooms[i]);
-      pieces.put(weapon, room);
-      locations.get(room).add(weapon);
+      pieces.put(weapons[i], rooms[i]);
+      locations.get(rooms[i]).add(weapons[i]);
     }
   }
 }

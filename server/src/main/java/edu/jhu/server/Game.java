@@ -99,6 +99,7 @@ public class Game {
   private JSONObject makeGameStartNotification() {
   	JSONObject gameStart = new JSONObject();
   	gameStart.put("eventType", "GAME_START_NOTIFICATION");
+  	gameStart.put("author", "Game");
   	return gameStart;
   }
   

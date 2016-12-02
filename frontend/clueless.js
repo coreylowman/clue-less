@@ -133,6 +133,9 @@ function handleEvent(event){
     suggestionChat(event);
     console.log("suggestion");
     break;
+    case "GAME_START_NOTIFICATION":
+      sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
+      break;
     default:
     console.log("Invalid eventType received");
     break;

@@ -173,7 +173,7 @@ public class Game {
 		  		// give the second player a spoof hand
 		  	if(players.size() > 1){
 		  		spoofHand(players.get(1));
-		  	}		
+		  	}
 			JSONObject suggestion = new JSONObject();
 			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
 			suggestion.put("suggester", suggester.getTag());
@@ -221,7 +221,6 @@ public class Game {
         break;
       case SUGGESTION_REQUEST:
         board.initialize();
-        System.out.println(event.getString("author"));
         Player suggester = getPlayerByTag(event.getString("author"));
        // suggester.setSuspect(Suspect.get("miss_scarlet"));
         board.movePiece(suggester.getSuspect(), Room.get("Study"));

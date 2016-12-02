@@ -1,6 +1,6 @@
 var tag = "";
 var isMyTurn = true;
-var isEvidenceSelectionTime = false;
+var canSuggest = true;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -211,13 +211,23 @@ function notPlayerTurn(){
   handleEvent(event);
 }
 
+function alreadyDidThat(){
+       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
+       handleEvent(alreadyDidThat);
+}
+
 function suggest(){
   if (isMyTurn){
-    var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
-    var suggestFormElements = document.getElementById("suggest_form").elements
-    suggestion.suspect = suggestFormElements[0].value;
-    suggestion.weapon = suggestFormElements[1].value;
-    websocket.send(JSON.stringify(suggestion));
+    if(canSuggest){
+      var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
+      var suggestFormElements = document.getElementById("suggest_form").elements;
+      suggestion.suspect = suggestFormElements[0].value;
+      suggestion.weapon = suggestFormElements[1].value;
+      websocket.send(JSON.stringify(suggestion));
+      canSuggest = false;
+     }else{
+       alreadyDidThat();
+     }
   }else{
     notPlayerTurn();
   }

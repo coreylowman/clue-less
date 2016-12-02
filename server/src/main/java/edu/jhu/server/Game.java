@@ -30,8 +30,6 @@ public class Game {
     this.players = new ArrayList<Player>();
     this.board = new Board();
     this.gameStarted = false;
-    this.timer = new Timer();
-    // todo call timer.schedule() here for starting the game
   }
 
   public boolean isStarted() {
@@ -53,6 +51,13 @@ public class Game {
   }
 
   public void start() {
+  	// If the timer is set, we need to cancel anything it had scheduled
+  	if (timer != null) {
+  		timer.cancel();
+  		timer.purge();
+  	}
+  	
+  	// Initialize stuff
     this.currentTurnIndex = 0;
     this.gameStarted = true;
     CardShuffler.shuffleAndDealCards(players);
@@ -61,6 +66,25 @@ public class Game {
   public void addPlayer(Player player) {
     players.add(player);
     player.setGame(this);
+    
+    // Start game if it's full now
+  	if (isFull()) {
+  		start();
+  	}
+  	
+  	// Once we reach 3 players, we can start the game. So start a 5 minute
+  	//	timer!
+  	if (players.size() == 3 && timer == null) {
+  		timer = new Timer();
+  		
+  		// In 5 minutes, start the game.
+  		timer.schedule(new TimerTask() {
+			    @Override
+			    public void run() {
+			        start();
+			    }
+			}, 5 * 60 * 1000);
+  	}
   }
 
   public void notifyPlayers(JSONObject event) {

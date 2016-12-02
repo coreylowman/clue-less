@@ -133,6 +133,7 @@ public class Game {
 		  handleEvent(chat);
 	  } else {
 		  provideEvidenceNotification(playerWithEvidence, casefile);
+
 	  }
   }
   

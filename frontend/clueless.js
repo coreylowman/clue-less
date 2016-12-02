@@ -116,7 +116,7 @@ function suggestionChat(suggestion){
 
 
 function highlightCard(cardName){
-  var card = document.getElementById(cardName);
+  var card = document.getElementById(cardName + "_card");
   if(card !== null){
     card.style.borderColor = "yellow";
     card.onclick =  sendCardName(cardName);
@@ -199,7 +199,7 @@ function addCard(cardName){
   var card = document.createElement("card");
   card.innerHTML += cardName;
   card.className += "card";
-  card.id = cardName;
+  card.id = cardName + "_card";
 
   hand.appendChild(card);
 }

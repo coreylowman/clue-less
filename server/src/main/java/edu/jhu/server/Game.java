@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
+import edu.jhu.server.data.Hallway;
 import edu.jhu.server.data.Suspect;
 
 import edu.jhu.server.data.ILocation;
@@ -20,7 +21,8 @@ public class Game {
     TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
-    ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION
+    ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
+    MOVE_REQUEST
   }
   
   private static class Constants {
@@ -39,6 +41,7 @@ public class Game {
     private static final String PLAYER_SUSPECT = "playerSuspect";
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
+    private static final String LOCATION = "location";
   }
 
   private int currentTurnIndex;
@@ -47,6 +50,7 @@ public class Game {
   private Board board;
   private boolean gameStarted;
   private Timer timer;
+  private boolean playerHasMoved;
 
   private List<Suspect> remainingSuspects;
 
@@ -125,6 +129,8 @@ public class Game {
   private JSONObject makeMoveNotification(Suspect suspect, ILocation location) {
     JSONObject move = new JSONObject();
     move.put(Constants.EVENT_TYPE, EventType.MOVE_NOTIFICATION);
+    move.put(Constants.SUSPECT, suspect.getName());
+    move.put(Constants.LOCATION, location.toString());
     return move;
   }
 
@@ -197,10 +203,48 @@ public class Game {
       case ACCUSATION_REQUEST:
         handleAccusationRequest(event, player);
         break;
+      case MOVE_REQUEST:
+        handleMoveRequest(event, player);
+        break;
       default:
         System.out.println("invalid event type");
         break;
     }
+  }
+  
+  private void handleMoveRequest(JSONObject request, Player player) {
+    // a player may move only if it is their turn
+    if (!isPlayersTurn(player)) {
+      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      return;
+    }
+    
+    // a player cannot move if they have already moved
+    if (playerHasMoved) {
+      handleEvent(makeInvalidRequestMessage("You have already moved."), player);
+      return;
+    }
+    
+    // get the destination room/hallway from the info in the request
+    final String string = request.getString(Constants.LOCATION);
+    ILocation dest = Room.get(string);
+    if (dest == null) {
+      dest = Hallway.get(string);
+    }
+    
+    // check the validity of the move
+    if (dest == null || !board.isMoveValid(player.getSuspect(), dest)) {
+      handleEvent(makeInvalidRequestMessage("Invalid move."), player);
+      return;
+    }
+    
+    // execute the move
+    board.movePiece(player.getSuspect(), dest);
+    playerHasMoved = true;
+    
+    // send move notification to all players
+    final JSONObject moveNotification = makeMoveNotification(player.getSuspect(), dest);
+    notifyPlayers(moveNotification);
   }
   
   private boolean isPlayersTurn(Player player) {
@@ -282,6 +326,8 @@ public class Game {
     do {
       currentTurnIndex = (currentTurnIndex + 1) % players.size();
     } while (players.get(currentTurnIndex).getHasLost());
+    
+    playerHasMoved = false;
     
     sendTurnNotification();
   }

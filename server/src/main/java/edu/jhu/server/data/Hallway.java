@@ -23,6 +23,17 @@ public class Hallway implements ILocation {
       hallways.put(hallway.toString(), hallway);
     }
   }
+  
+  public static Hallway get(String string) {
+    if (string == null || string.isEmpty())
+      throw new IllegalArgumentException("string was null or empty");
+    
+    final String[] rooms = string.split("_");
+    if (rooms.length != 2)
+      throw new IllegalArgumentException("string was malformed");
+    
+    return get(Room.get(rooms[0]), Room.get(rooms[1]));
+  }
 
   public static Hallway get(Room end1, Room end2) {
   	if (end1 == null)

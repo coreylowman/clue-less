@@ -16,8 +16,26 @@ import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
 public class Game {
-  private enum EventType {
-    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST
+  private static enum EventType {
+    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
+    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
+    MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION
+  }
+  
+  private static class Constants {
+    private static final String EVENT_TYPE = "eventType";
+    private static final String PLAYER_TAG = "playerTag";
+    private static final String VALID_MOVES = "validMoves";
+    private static final String AUTHOR = "author";
+    private static final String GAME_AUTHOR = "Game";
+    private static final String BODY = "body";
+    private static final String REASON = "reason";
+    private static final String SUSPECT = "suspect";
+    private static final String SUGGESTER = "suggester";
+    private static final String ACCUSED = "accused";
+    private static final String WEAPON = "weapon";
+    private static final String ROOM = "room";
+    private static final String PLAYER_SUSPECT = "playerSuspect";
   }
 
   private int currentTurnIndex;
@@ -72,9 +90,9 @@ public class Game {
     board.getValidMoves(player.getSuspect()).forEach(loc -> validMoves.put(loc.toString()));
 
     JSONObject notification = new JSONObject();
-    notification.put("eventType", "TURN_NOTIFICATION");
-    notification.put("playerTag", player.getTag());
-    notification.put("validMoves", validMoves);
+    notification.put(Constants.EVENT_TYPE, EventType.TURN_NOTIFICATION);
+    notification.put(Constants.PLAYER_TAG, player.getTag());
+    notification.put(Constants.VALID_MOVES, validMoves);
 
     notifyPlayers(notification);
   }
@@ -87,23 +105,23 @@ public class Game {
 
   private JSONObject makeChatMessage(String body) {
     JSONObject chat = new JSONObject();
-    chat.put("eventType", "CHAT_NOTIFICATION");
-    chat.put("author", "Game");
-    chat.put("body", body);
+    chat.put(Constants.EVENT_TYPE, EventType.CHAT_NOTIFICATION);
+    chat.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+    chat.put(Constants.BODY, body);
     return chat;
   }
 
   private JSONObject makeInvalidRequestMessage(String reason) {
     JSONObject invalidRequest = new JSONObject();
-    invalidRequest.put("eventType", "INVALID_REQUEST_NOTIFICATION");
-    invalidRequest.put("author", "Game");
-    invalidRequest.put("reason", reason);
+    invalidRequest.put(Constants.EVENT_TYPE, EventType.INVALID_REQUEST_NOTIFICATION);
+    invalidRequest.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+    invalidRequest.put(Constants.REASON, reason);
     return invalidRequest;
   }
 
   private JSONObject makeMoveNotification(Suspect suspect, ILocation location) {
     JSONObject move = new JSONObject();
-    move.put("eventType", "MOVE_NOTIFICATION");
+    move.put(Constants.EVENT_TYPE, EventType.MOVE_NOTIFICATION);
     return move;
   }
 
@@ -125,16 +143,16 @@ public class Game {
 
   private void handleSuggestion(JSONObject accusation, Player suggester) {
     ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
-    Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
+    Suspect theAccused = Suspect.get(accusation.get(Constants.SUSPECT).toString());
     Weapon theWeapon = Weapon.KNIFE;
     CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
     if (suggestedRoom instanceof Room) {
       JSONObject suggestion = new JSONObject();
-      suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
-      suggestion.put("suggester", suggester.getTag());
-      suggestion.put("accused", theAccused.toString());
-      suggestion.put("weapon", theWeapon.toString());
-      suggestion.put("room", suggestedRoom.toString());
+      suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
+      suggestion.put(Constants.SUGGESTER, suggester.getTag());
+      suggestion.put(Constants.ACCUSED, theAccused.toString());
+      suggestion.put(Constants.WEAPON, theWeapon.toString());
+      suggestion.put(Constants.ROOM, suggestedRoom.toString());
       notifyPlayers(suggestion);
       JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
 
@@ -148,7 +166,7 @@ public class Game {
   }
 
   public void handleEvent(JSONObject event, Player player) {
-    String eventType = event.getString("eventType");
+    String eventType = event.getString(Constants.EVENT_TYPE);
     switch (EventType.valueOf(eventType)) {
       case TEST:
         System.out.println("test event");
@@ -185,13 +203,13 @@ public class Game {
   }
 
   private void handleJoinRequest(JSONObject request, Player author) {
-    author.setTag(request.getString("playerTag"));
+    author.setTag(request.getString(Constants.PLAYER_TAG));
 
     JSONObject joinNotification = new JSONObject();
 
-    joinNotification.put("eventType", "JOIN_NOTIFICATION");
-    joinNotification.put("playerTag", author.getTag());
-    joinNotification.put("playerSuspect", author.getSuspect().toString());
+    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
 
     notifyPlayers(joinNotification);
   }

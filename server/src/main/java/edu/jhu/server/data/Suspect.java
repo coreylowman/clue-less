@@ -6,7 +6,23 @@ import java.util.List;
 import java.util.Map;
 
 public class Suspect implements IBoardPiece, ICard {
-  private static Map<String, Suspect> suspects = new HashMap<String, Suspect>();
+  public static final String COLONEL_MUSTARD = "Colonel Mustard";
+  public static final String MISS_SCARLET = "Miss Scarlet";
+  public static final String PROFESSOR_PLUM = "Professor Plum";
+  public static final String MR_GREEN = "Mr. Green";
+  public static final String MRS_WHITE = "Mrs. White";
+  public static final String MRS_PEACOCK = "Mrs. Peacock";
+
+  private static Map<String, Suspect> suspects;
+
+  static {
+    suspects = new HashMap<String, Suspect>();
+    String[] names =
+        {COLONEL_MUSTARD, MISS_SCARLET, PROFESSOR_PLUM, MR_GREEN, MRS_WHITE, MRS_PEACOCK};
+    for (String suspectName : names) {
+      Suspect suspect = new Suspect(suspectName);
+    }
+  }
 
   public static Suspect get(String name) {
     return suspects.get(name);

@@ -1,3 +1,4 @@
+var tag = "";
 var isMyTurn = true;
 var isEvidenceSelectionTime = false;
 
@@ -14,6 +15,13 @@ function establishWebsocket() {
       //webpage will update status from Connecting to Connected
       document.getElementById('status').innerHTML = 'Connected';
       // connection is opened and ready to use
+
+      connection.send(JSON.stringify({eventType:'TEST'}));
+
+      // send JOIN_REQUEST
+      tag = prompt("Please enter your name");
+      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
+      connection.send(JSON.stringify(joinRequest));
     };
 
     connection.onerror = function (error) {
@@ -21,29 +29,15 @@ function establishWebsocket() {
         // an error occurred when sending/receiving data
     };
 
-    connection.onmessage = function (message) {
-        // try to decode json (I assume that each message from server is json)
-        try {
-            var json = JSON.parse(message.data);
-          console.log(json);
-        } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
-            return;
-        }
-        // handle incoming message
+    connection.onmessage = function(message){
+      console.log(message);
+      handleEvent(JSON.parse(message.data));
     };
 
   return connection;
 }
 
 var websocket = establishWebsocket();
-
-//example of sending JSON object to the server
-websocket.onopen = function(){
-  websocket.send(JSON.stringify({eventType:'TEST'}));
-  suggest();
-};
-
 
 // moves character HTML element into destination HTML element
 // refer to style.css for names
@@ -97,11 +91,6 @@ function sendChat(){
   }
 }
 
-websocket.onmessage = function(message){
-  console.log(message);
-  handleEvent(JSON.parse(message.data));
-}
-
 function sendToChatBox(message){
   document.getElementById("chat_text").value += message + '\n';
 }
@@ -135,26 +124,86 @@ function provideEvidenceNotification(evidence){
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
-    console.log("this is only a test")
-    break;
+      console.log("this is only a test")
+      break;
     case "CHAT_NOTIFICATION":
-    sendToChatBox(event.author + ': ' + event.body);
+      sendToChatBox(event.author + ': ' + event.body);
+      break;
+    case "JOIN_NOTIFICATION":
+    sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
     break;
     case "INVALID_REQUEST_NOTIFICATION":
     alert("You cannot do that. " + event.reason);
     break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
     provideEvidenceNotification(event);
-
+    alert("Please provide your evidence!");
+    isEvidenceSelectionTime = true;
     break;
     case "SUGGESTION_NOTIFICATION":
     suggestionChat(event);
     console.log("suggestion");
     break;
+    case "TURN_NOTIFICATION":
+    handleTurnNotification(event);
+    break;
     default:
     console.log("Invalid eventType received");
     break;
   }
+}
+
+// adds on click event listeners to all elements passed in
+// when an element is clicked, it sends a move request to the server,
+// and then removed all the event listeners that were added
+// TODO name this better?
+function addMoveRequestOnClickTo(elementIds) {
+  // removes all the on click events that are added
+  // this function is specific to addMoveRequestOnClickTo(), which is why its an
+  // inner function
+  function removeOnClickFrom(elementIds, func) {
+    for (var i = 0;i < elementIds.length;i++) {
+      var ele = document.getElementById(elementIds[i]);
+      ele.removeEventListener("click", func);
+      ele.className = ele.className.replace(" selectable", "");
+    }
+  }
+
+  for (var i = 0;i < elementIds.length;i++) {
+    var ele = document.getElementById(elementIds[i]);
+
+    // the event listener when element is clicked - send MOVE_REQUEST, and then remove on click from
+    // ALL elements passed into this function
+    function onClick(event) {
+      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: elementIds[i]}));
+      removeOnClickFrom(elementIds, onClick);
+    }
+
+    ele.addEventListener("click", onClick);
+    ele.className += " selectable";
+  }
+}
+
+// handle a turn notification from the server
+// if its our turn then display valid moves & let the player suggest/accuse/end turn
+function handleTurnNotification(notification) {
+  sendToChatBox("It is " + notification.playerTag + "'s turn.");
+
+  if (notification.playerTag === tag) {
+    // make valid locations clickable and enable all turn buttons
+    addMoveRequestOnClickTo(notification.validMoves);
+    document.getElementById("suggest_button").disabled = false;
+    document.getElementById("accuse_button").disabled = false;
+    document.getElementById("end_turn_button").disabled = false;
+  }
+}
+
+// called when End Turn button is clicked
+function endTurn() {
+  websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
+  document.getElementById("suggest_button").disabled = true;
+  document.getElementById("accuse_button").disabled = true;
+  document.getElementById("end_turn_button").disabled = true;
 }
 
 function notPlayerTurn(){
@@ -173,6 +222,7 @@ function suggest(){
     notPlayerTurn();
   }
 };
+
 
 // remove event listener and change border color back
 function resetCards(){

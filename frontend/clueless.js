@@ -113,9 +113,13 @@ function highlightCard(cardName){
   }
 }
 
+function handleEvidenceProvided(evidence){
+  canEndTurn = true;
+  alert(evidence.author + " says that the crime did not involve " + evidence.evidence + ".");
+}
+
 function provideEvidenceNotification(evidence){
   alert("Please provide your evidence!");
-  isEvidenceSelectionTime = true;
   highlightCard(evidence.suspect);
   highlightCard(evidence.room);
   highlightCard(evidence.weapon);
@@ -146,6 +150,9 @@ function handleEvent(event){
     break;
     case "TURN_NOTIFICATION":
     handleTurnNotification(event);
+    break;
+    case "EVIDENCE_PROVIDED_NOTIFICATION":
+    handleEvidenceProvided(event);
     break;
     default:
     console.log("Invalid eventType received");

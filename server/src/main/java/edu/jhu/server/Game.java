@@ -203,14 +203,11 @@ public class Game {
 		}
   }
   
+  
   private void handleProvideEvidence(JSONObject evidence) {
 	  Player suggester = players.get(this.currentTurnIndex %  players.size());
-	  suggester.sendEvent(makeChatMessage(evidence.getString("author") +
-			  " says " + 
-			  evidence.getString("evidence") +
-			  " was not involved."
-			  ));
-	  
+	  evidence.put("eventType", "EVIDENCE_PROVIDED_NOTIFICATION");
+	  suggester.sendEvent(evidence);
 	  notifyPlayers(makeChatMessage(evidence.getString("author") + 
 			  " has disproven " +
 			  suggester.getTag() +

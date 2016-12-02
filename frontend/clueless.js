@@ -43,7 +43,6 @@ var websocket = establishWebsocket();
 //example of sending JSON object to the server
 websocket.onopen = function(){
   websocket.send(JSON.stringify({eventType:'TEST'}));
-  suggest();
 };
 
 
@@ -179,8 +178,7 @@ function addMoveRequestOnClickTo(elementIds) {
 // handle a turn notification from the server
 // if its our turn then display valid moves & let the player suggest/accuse/end turn
 function handleTurnNotification(notification) {
-  // TODO replace with addChatMessage function when PR gets merged
-  document.getElementById("chat_text").value += "It is " + notification.playerTag + "'s turn.\n";
+  sendToChatBox("It is " + notification.playerTag + "'s turn.");
 
   if (notification.playerTag === tag) {
     // make valid locations clickable and enable all turn buttons

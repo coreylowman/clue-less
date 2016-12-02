@@ -123,23 +123,26 @@ public class Game {
 	  List<ICard> suspect = new ArrayList<ICard>();
 	  suspect.add(casefile.getRoom());
 	  Player playerWithEvidence = null;
-	  for (Player player : players) {
-		  if(player.getTag() != suggester.getTag() && 
-			(player.hasCard(casefile.getRoom()) || 
-			player.hasCard(casefile.getSuspect()) ||
-			player.hasCard(casefile.getWeapon()))) {
-			  playerWithEvidence = player;
-			  break;
+	  // next Player
+	  int nextPlayerIndex = this.currentTurnIndex + 1;
+	  for (int i = 0; i < players.size(); i++){
+		  Player currentPlayer = players.get((i + nextPlayerIndex) % players.size());
+		  if(currentPlayer.getTag() != suggester.getTag() && 
+					(currentPlayer.hasCard(casefile.getRoom()) || 
+					currentPlayer.hasCard(casefile.getSuspect()) ||
+					currentPlayer.hasCard(casefile.getWeapon()))) {
+					  playerWithEvidence = currentPlayer;
+					  break;
 		  }
-	  }
+	  }	  
 	  return playerWithEvidence;
   }
   
   //This should ultimately be deleted, but I need it for
   //testing
-  private void spoofHand(Player player){
+  private void spoofHand(Player player, ICard card){
 	  List<ICard> spoofHand = new ArrayList<ICard>();
-	  spoofHand.add(Suspect.get("Mrs. Peacock"));
+	  spoofHand.add(card);
 	  player.setCards(spoofHand);
   }
   
@@ -171,8 +174,11 @@ public class Game {
 	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 	  if (suggestedRoom instanceof Room) {
 		  		// give the second player a spoof hand
-		  	if(players.size() > 1){
-		  		spoofHand(players.get(1));
+		  	if(players.size() > 2){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  		spoofHand(players.get(2), Suspect.get("Mrs. White"));
 		  	}
 			JSONObject suggestion = new JSONObject();
 			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");

@@ -180,6 +180,11 @@ public class Game {
 		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
 		  		spoofHand(players.get(2), Suspect.get("Mrs. White"));
 		  	}
+		  	if(players.size() > 1){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  	}
 			JSONObject suggestion = new JSONObject();
 			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
 			suggestion.put("suggester", suggester.getTag());

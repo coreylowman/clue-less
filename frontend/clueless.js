@@ -1,6 +1,7 @@
 var tag = "";
 var isMyTurn = true;
 var canSuggest = true;
+var canEndTurn = true;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -136,9 +137,8 @@ function handleEvent(event){
     alert("You cannot do that. " + event.reason);
     break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
+    console.log("provide evidence");
     provideEvidenceNotification(event);
-    alert("Please provide your evidence!");
-    isEvidenceSelectionTime = true;
     break;
     case "SUGGESTION_NOTIFICATION":
     suggestionChat(event);
@@ -225,6 +225,7 @@ function suggest(){
       suggestion.weapon = suggestFormElements[1].value;
       websocket.send(JSON.stringify(suggestion));
       canSuggest = false;
+      canEndTurn = false;
      }else{
        alreadyDidThat();
      }

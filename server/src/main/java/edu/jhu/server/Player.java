@@ -92,7 +92,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    JSONMessage.put("author", this.tag);
-    game.handleEvent(JSONMessage);
+    game.handleEvent(JSONMessage, this);
   }
 }

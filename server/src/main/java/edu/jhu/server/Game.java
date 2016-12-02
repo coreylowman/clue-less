@@ -48,16 +48,6 @@ public class Game {
     return this.players.size() == 6;
   }
 
-  // This breaks things if you don't give it a valid tag
-  private Player getPlayerByTag(String tag) {
-    for (Player player : players) {
-      if (player.getTag().equals(tag)) {
-        return player;
-      }
-    }
-    return null;
-  }
-
   public void start() {
     this.currentTurnIndex = 0;
     this.gameStarted = true;
@@ -103,12 +93,11 @@ public class Game {
     return chat;
   }
 
-  private JSONObject makeInvalidRequestMessage(String player, String reason) {
+  private JSONObject makeInvalidRequestMessage(String reason) {
     JSONObject invalidRequest = new JSONObject();
     invalidRequest.put("eventType", "INVALID_REQUEST_NOTIFICATION");
     invalidRequest.put("author", "Game");
     invalidRequest.put("reason", reason);
-    invalidRequest.put("player", player);
     return invalidRequest;
   }
 
@@ -128,8 +117,9 @@ public class Game {
       }
     }
     if (playerWithEvidence == null) {
+      // FIXME: shouldn't this be a provide evidence outcome notification message?
       JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
-      handleEvent(chat);
+      handleEvent(chat, null);
     }
   }
 
@@ -153,12 +143,11 @@ public class Game {
       provideEvidence(casefile, suggester);
 
     } else {
-      handleEvent(
-          makeInvalidRequestMessage(accusation.getString("author"), "You are not in a room."));
+      handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
     }
   }
 
-  public void handleEvent(JSONObject event) {
+  public void handleEvent(JSONObject event, Player player) {
     String eventType = event.getString("eventType");
     switch (EventType.valueOf(eventType)) {
       case TEST:
@@ -171,17 +160,18 @@ public class Game {
         handleEndTurnRequest(event);
         break;
       case SUGGESTION_REQUEST:
+        // FIXME: what is this?
         board.initialize();
-        Player suggester = getPlayerByTag(event.getString("author"));
+        Player suggester = player;
         suggester.setSuspect(Suspect.MISS_SCARLET);
         board.movePiece(suggester.getSuspect(), Room.STUDY);
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:
-        getPlayerByTag(event.getString("player")).sendEvent(event);
+        player.sendEvent(event);
         break;
       case JOIN_REQUEST:
-        handleJoinRequest(event);
+        handleJoinRequest(event, player);
         break;
       default:
         System.out.println("invalid event type");
@@ -194,8 +184,7 @@ public class Game {
     sendTurnNotification();
   }
 
-  private void handleJoinRequest(JSONObject request) {
-    Player author = this.getPlayerByTag(request.getString("author"));
+  private void handleJoinRequest(JSONObject request, Player author) {
     author.setTag(request.getString("playerTag"));
 
     JSONObject joinNotification = new JSONObject();

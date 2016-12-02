@@ -18,9 +18,17 @@ public class Player extends WebSocketAdapter {
   private Game game;
   private List<ICard> cards;
   private Suspect suspect;
+  private boolean hasLost = false;
 
   public Player(String tag) {
     this.tag = tag;
+  }
+  
+  public boolean getHasLost() {
+    return hasLost;
+  }
+  public void setHasLost(boolean hasLost) {
+    this.hasLost = hasLost;
   }
 
   public String getTag() {
@@ -92,7 +100,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    JSONMessage.put("author", this.tag);
-    game.handleEvent(JSONMessage);
+    game.handleEvent(JSONMessage, this);
   }
 }

@@ -37,7 +37,7 @@ public class Game {
     this.timer = new Timer();
     // todo call timer.schedule() here for starting the game
 
-    this.remainingSuspects = Suspect.getAll();
+    this.remainingSuspects = new ArrayList<>(Suspect.getAll());
   }
 
   public boolean isStarted() {
@@ -136,7 +136,7 @@ public class Game {
   private void handleSuggestion(JSONObject accusation, Player suggester) {
     ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
     Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
-    Weapon theWeapon = Weapon.get("knife");
+    Weapon theWeapon = Weapon.KNIFE;
     CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
     if (suggestedRoom instanceof Room) {
       JSONObject suggestion = new JSONObject();
@@ -173,8 +173,8 @@ public class Game {
       case SUGGESTION_REQUEST:
         board.initialize();
         Player suggester = getPlayerByTag(event.getString("author"));
-        suggester.setSuspect(Suspect.get("miss_scarlet"));
-        board.movePiece(suggester.getSuspect(), Room.get("study"));
+        suggester.setSuspect(Suspect.MISS_SCARLET);
+        board.movePiece(suggester.getSuspect(), Room.STUDY);
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:

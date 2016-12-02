@@ -1,45 +1,52 @@
 package edu.jhu.server.data;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Room implements ILocation, ICard {
-  public static final String HALL = "Hall";
-  public static final String LOUNGE = "Lounge";
-  public static final String DINING_ROOM = "Dining Room";
-  public static final String KITCHEN = "Kitchen";
-  public static final String BALLROOM = "Ballroom";
-  public static final String CONSERVATORY = "Conservatory";
-  public static final String BILLIARD_ROOM = "Billiard Room";
-  public static final String LIBRARY = "Library";
-  public static final String STUDY = "Study";
+	
+  public static final Room HALL = new Room("Hall");
+  public static final Room LOUNGE = new Room("Lounge");
+  public static final Room DINING_ROOM = new Room("Dining Room");
+  public static final Room KITCHEN = new Room("Kitchen");
+  public static final Room BALLROOM = new Room("Ballroom");
+  public static final Room CONSERVATORY = new Room("Conservatory");
+  public static final Room BILLIARD_ROOM = new Room("Billiard Room");
+  public static final Room LIBRARY = new Room("Library");
+  public static final Room STUDY = new Room("Study");
 
-  private static Map<String, Room> rooms;
+  private static final Map<String, Room> rooms = new HashMap<>();
 
   static {
-    rooms = new HashMap<String, Room>();
-    String[] names =
+    final Room[] roomList =
         {HALL, LOUNGE, DINING_ROOM, KITCHEN, BALLROOM, CONSERVATORY, BILLIARD_ROOM, LIBRARY, STUDY};
-    for (String name : names) {
-      Room room = new Room(name);
+    
+    for (Room room : roomList) {
+      rooms.put(room.getName(), room);
     }
   }
 
   public static Room get(String name) {
-    return rooms.get(name);
+  	if (name == null || name.isEmpty())
+  		throw new IllegalArgumentException("name was null or empty");
+  	
+  	return rooms.get(name);
   }
 
-  public static List<Room> getAll() {
-    return new ArrayList<Room>(rooms.values());
+  public static Collection<Room> getAll() {
+    return Collections.unmodifiableCollection(rooms.values());
   }
 
   private String name;
-
-  public Room(String name) {
-    rooms.put(name, this);
-    this.name = name;
+  
+  private Room(String name) {
+  	this.name = name;
+  }
+  
+  public String getName() {
+	  return name;
   }
 
   @Override

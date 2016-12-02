@@ -45,6 +45,7 @@ public class BoardTest extends TestCase {
         assert (!otherLocation.equals(location));
       }
     }
+
     assert (board.getLocationOf(Suspect.get(Suspect.COLONEL_MUSTARD)) == Hallway.get(Room.LOUNGE,
         Room.DINING_ROOM));
     assert (board.getLocationOf(Suspect.get(Suspect.MISS_SCARLET)) == Hallway.get(Room.LOUNGE,

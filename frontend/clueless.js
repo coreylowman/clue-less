@@ -1,5 +1,4 @@
-// TODO store this when joining game
-var tag = "player0";
+var tag = "";
 var isMyTurn = true;
 var isEvidenceSelectionTime = false;
 
@@ -16,6 +15,13 @@ function establishWebsocket() {
       //webpage will update status from Connecting to Connected
       document.getElementById('status').innerHTML = 'Connected';
       // connection is opened and ready to use
+
+      connection.send(JSON.stringify({eventType:'TEST'}));
+
+      // send JOIN_REQUEST
+      tag = prompt("Please enter your name");
+      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
+      connection.send(JSON.stringify(joinRequest));
     };
 
     connection.onerror = function (error) {
@@ -23,28 +29,15 @@ function establishWebsocket() {
         // an error occurred when sending/receiving data
     };
 
-    connection.onmessage = function (message) {
-        // try to decode json (I assume that each message from server is json)
-        try {
-            var json = JSON.parse(message.data);
-          console.log(json);
-        } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
-            return;
-        }
-        // handle incoming message
+    connection.onmessage = function(message){
+      console.log(message);
+      handleEvent(JSON.parse(message.data));
     };
 
   return connection;
 }
 
 var websocket = establishWebsocket();
-
-//example of sending JSON object to the server
-websocket.onopen = function(){
-  websocket.send(JSON.stringify({eventType:'TEST'}));
-};
-
 
 // moves character HTML element into destination HTML element
 // refer to style.css for names
@@ -98,11 +91,6 @@ function sendChat(){
   }
 }
 
-websocket.onmessage = function(message){
-  console.log(message);
-  handleEvent(JSON.parse(message.data));
-}
-
 function sendToChatBox(message){
   document.getElementById("chat_text").value += message + '\n';
 }
@@ -118,29 +106,31 @@ function suggestionChat(suggestion){
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
-    console.log("this is only a test")
-    break;
+      console.log("this is only a test")
+      break;
     case "CHAT_NOTIFICATION":
-    sendToChatBox(event.author + ': ' + event.body);
-    break;
+      sendToChatBox(event.author + ': ' + event.body);
+      break;
+    case "JOIN_NOTIFICATION":
+      sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+      break;
     case "INVALID_REQUEST_NOTIFICATION":
-    alert("You cannot do that. " + event.reason);
-    break;
+      alert("You cannot do that. " + event.reason);
+      break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-    alert("Please provide your evidence!");
-    isEvidenceSelectionTime = true;
-    break;
+      alert("Please provide your evidence!");
+      isEvidenceSelectionTime = true;
+      break;
     case "SUGGESTION_NOTIFICATION":
-    suggestionChat(event);
-    console.log("suggestion");
-    break;
+      suggestionChat(event);
+      console.log("suggestion");
+      break;
     case "TURN_NOTIFICATION":
       handleTurnNotification(event);
       break;
     default:
-    console.log("Invalid eventType received");
-    break;
-
+      console.log("Invalid eventType received");
+      break;
   }
 }
 

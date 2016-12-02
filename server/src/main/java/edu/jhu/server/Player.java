@@ -31,6 +31,10 @@ public class Player extends WebSocketAdapter {
     this.game = game;
   }
 
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+
   public void setSuspect(Suspect suspect) {
     this.suspect = suspect;
   }
@@ -77,7 +81,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketConnect(Session session) {
     this.session = session;
     log("WebSocket connected.");
-
   }
 
   @Override
@@ -89,7 +92,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    JSONMessage.append("author", this.tag);
     JSONMessage.put("author", this.tag);
     game.handleEvent(JSONMessage);
   }

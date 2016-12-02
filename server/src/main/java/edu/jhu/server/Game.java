@@ -8,15 +8,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
-import edu.jhu.server.data.ILocation;
 import edu.jhu.server.data.Suspect;
+
+import edu.jhu.server.data.ILocation;
 
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
 public class Game {
   private enum EventType {
-    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, END_TURN_REQUEST
+    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST
   }
 
   private int currentTurnIndex;
@@ -26,6 +27,8 @@ public class Game {
   private boolean gameStarted;
   private Timer timer;
 
+  private List<Suspect> remainingSuspects;
+
   public Game() {
     this.currentTurnIndex = 0;
     this.players = new ArrayList<Player>();
@@ -33,6 +36,8 @@ public class Game {
     this.gameStarted = false;
     this.timer = new Timer();
     // todo call timer.schedule() here for starting the game
+
+    this.remainingSuspects = Suspect.getAll();
   }
 
   public boolean isStarted() {
@@ -63,6 +68,11 @@ public class Game {
   public void addPlayer(Player player) {
     players.add(player);
     player.setGame(this);
+    player.setSuspect(this.remainingSuspects.remove(0));
+
+    // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
+    // the WebSocket session might not be set up here, and JOIN_REQUEST allows
+    // the player to set their tag.
   }
 
   public void sendTurnNotification() {
@@ -170,6 +180,9 @@ public class Game {
       case INVALID_REQUEST_NOTIFICATION:
         getPlayerByTag(event.getString("player")).sendEvent(event);
         break;
+      case JOIN_REQUEST:
+        handleJoinRequest(event);
+        break;
       default:
         System.out.println("invalid event type");
         break;
@@ -179,5 +192,18 @@ public class Game {
   public void handleEndTurnRequest(JSONObject request) {
     currentTurnIndex = (currentTurnIndex + 1) % players.size();
     sendTurnNotification();
+  }
+
+  private void handleJoinRequest(JSONObject request) {
+    Player author = this.getPlayerByTag(request.getString("author"));
+    author.setTag(request.getString("playerTag"));
+
+    JSONObject joinNotification = new JSONObject();
+
+    joinNotification.put("eventType", "JOIN_NOTIFICATION");
+    joinNotification.put("playerTag", author.getTag());
+    joinNotification.put("playerSuspect", author.getSuspect().toString());
+
+    notifyPlayers(joinNotification);
   }
 }

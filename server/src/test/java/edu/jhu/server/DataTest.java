@@ -74,16 +74,16 @@ public class DataTest extends TestCase {
   }
 
   public void testHallway() {
-    Hallway hallway1 = new Hallway("billiards", "kitchen");
+    Hallway hallway1 = new Hallway("billiards", Room.KITCHEN);
     Hallway hallway2 = new Hallway("asd;f_", " ;joiasdjf;");
 
     assertFalse(hallway1.equals(hallway2));
     assertFalse(hallway1.equals(null));
 
-    Hallway hallway3 = new Hallway("kitchen", "billiards");
+    Hallway hallway3 = new Hallway(Room.KITCHEN, "billiards");
     assertTrue(hallway3.equals(hallway1));
-    assertTrue(hallway3.equals(Hallway.get("billiards", "kitchen")));
-    assertTrue(hallway1.equals(Hallway.get("billiards", "kitchen")));
+    assertTrue(hallway3.equals(Hallway.get("billiards", Room.KITCHEN)));
+    assertTrue(hallway1.equals(Hallway.get("billiards", Room.KITCHEN)));
 
     assertTrue(Hallway.get("laksjd;f", "a;lsdjfoiq") == null);
   }

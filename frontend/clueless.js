@@ -12,9 +12,7 @@ function establishWebsocket() {
 
   //takes care of any initial action upon opening of websocket
     connection.onopen = function () {
-      console.log('opened');
-      //webpage will update status from Connecting to Connected
-      document.getElementById('status').innerHTML = 'Connected';
+      console.log('connected');
       // connection is opened and ready to use
 
       connection.send(JSON.stringify({eventType:'TEST'}));
@@ -40,18 +38,25 @@ function establishWebsocket() {
 
 var websocket = establishWebsocket();
 
+// if a room is passed in, nothing changes
+// if a hallway is passed in and the names are reversed (e.g. Hallway_Study instead
+// of Study_Hallway, then it reverses them)
+function getLocationName(location) {
+  if (location.includes("_")) {
+    if (document.getElementById(location) == null) {
+      var pair = location.split("_");
+      location = pair[1] + "_" + pair[0];
+    }
+  }
+  return location;
+}
+
 // moves character HTML element into destination HTML element
 // refer to style.css for names
 // eg
 // moveTo('col_mustard', 'study');
 function moveTo(character, destination){
-  if (destination.includes("_")) {
-    if (document.getElementById(destination) == null) {
-      var pair = destination.split("_");
-      destination = pair[1] + "_" + pair[0];
-    }
-  }
-
+  destination = getLocationName(destination);
   document.getElementById(destination).appendChild(document.getElementById(character));
 }
 
@@ -232,8 +237,14 @@ function addMoveRequestOnClickTo(elementIds) {
 function handleTurnNotification(notification) {
   sendToChatBox("It is " + notification.playerTag + "'s turn.");
 
+  // make sure all the valid moves have the correct ids
+  notification.validMoves.forEach(function(val, ind, arr) {
+    arr[ind] = getLocationName(val);
+  });
+
   if (notification.playerTag === tag) {
     // make valid locations clickable and enable all turn buttons
+    console.log(notification.validMoves);
     addMoveRequestOnClickTo(notification.validMoves);
     document.getElementById("suggest_button").disabled = false;
     document.getElementById("accuse_button").disabled = false;
@@ -300,7 +311,7 @@ function sendCardName(cardName){
 
 function addCard(cardName){
   var hand = document.getElementById("hand");
-  var card = document.createElement("card");
+  var card = document.createElement("div");
   card.innerHTML += cardName;
   card.className += "card";
   card.id = cardName + "_card";

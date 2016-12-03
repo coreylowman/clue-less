@@ -16,9 +16,9 @@ public class CardShuffler {
   public static Random random = new Random();
 
   public static CaseFile shuffleAndDealCards(List<Player> players) {
-    List<Suspect> suspects = Suspect.getAll();
-    List<Weapon> weapons = Weapon.getAll();
-    List<Room> rooms = Room.getAll();
+    List<Suspect> suspects = new ArrayList<>(Suspect.getAll());
+    List<Weapon> weapons = new ArrayList<>(Weapon.getAll());
+    List<Room> rooms = new ArrayList<>(Room.getAll());
 
     // get secret cards
     Suspect secretSuspect = suspects.remove(random.nextInt(suspects.size()));

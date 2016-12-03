@@ -29,74 +29,72 @@ public class DataTest extends TestCase {
   }
 
   public void testRoom() {
-    Room room1 = new Room("billiards");
-    Room room2 = new Room("asd;f_");
+    Room room1 = Room.get("Billiard Room");
+    Room room2 = Room.get("Library");
 
     assertFalse(room1.equals(room2));
     assertFalse(room1.equals(null));
+    assertFalse(room2.equals(null));
 
-    Room room3 = new Room("billiards");
+    Room room3 = Room.get("Billiard Room");
     assertTrue(room3.equals(room1));
-    assertTrue(room3.equals(Room.get("billiards")));
-    assertTrue(room1.equals(Room.get("billiards")));
 
     assertTrue(Room.get("laskdjf;aosi") == null);
   }
 
   public void testSuspect() {
-    Suspect suspsect1 = new Suspect("billiards");
-    Suspect suspect2 = new Suspect("asd;f_");
+    Suspect suspect1 = Suspect.get("Colonel Mustard");
+    Suspect suspect2 = Suspect.get("Miss Scarlet");
 
-    assertFalse(suspsect1.equals(suspect2));
-    assertFalse(suspsect1.equals(null));
+    assertFalse(suspect1.equals(suspect2));
+    assertFalse(suspect1.equals(null));
+    assertFalse(suspect2.equals(null));
 
-    Suspect suspect3 = new Suspect("billiards");
-    assertTrue(suspect3.equals(suspsect1));
-    assertTrue(suspect3.equals(Suspect.get("billiards")));
-    assertTrue(suspsect1.equals(Suspect.get("billiards")));
+    Suspect suspect3 = Suspect.get("Colonel Mustard");
+    assertTrue(suspect3.equals(suspect1));
 
     assertTrue(Suspect.get("laksjd;f") == null);
   }
 
   public void testWeapon() {
-    Weapon weapon1 = new Weapon("billiards");
-    Weapon weapon2 = new Weapon("asd;f_");
+    Weapon weapon1 = Weapon.get("Rope");
+    Weapon weapon2 = Weapon.get("Knife");
 
     assertFalse(weapon1.equals(weapon2));
     assertFalse(weapon1.equals(null));
+    assertFalse(weapon2.equals(null));
 
-    Weapon weapon3 = new Weapon("billiards");
+    Weapon weapon3 = Weapon.get("Rope");
     assertTrue(weapon3.equals(weapon1));
-    assertTrue(weapon3.equals(Weapon.get("billiards")));
-    assertTrue(weapon1.equals(Weapon.get("billiards")));
 
     assertTrue(Weapon.get("laksjd;f") == null);
   }
 
   public void testHallway() {
-    Hallway hallway1 = new Hallway("billiards", Room.KITCHEN);
-    Hallway hallway2 = new Hallway("asd;f_", " ;joiasdjf;");
+    Hallway hallway1 = Hallway.get(Room.BALLROOM, Room.KITCHEN);
+    Hallway hallway2 = Hallway.get(Room.BILLIARD_ROOM, Room.DINING_ROOM);
 
     assertFalse(hallway1.equals(hallway2));
     assertFalse(hallway1.equals(null));
+    assertFalse(hallway2.equals(null));
 
-    Hallway hallway3 = new Hallway(Room.KITCHEN, "billiards");
+    Hallway hallway3 = Hallway.get(Room.BALLROOM, Room.KITCHEN);
     assertTrue(hallway3.equals(hallway1));
-    assertTrue(hallway3.equals(Hallway.get("billiards", Room.KITCHEN)));
-    assertTrue(hallway1.equals(Hallway.get("billiards", Room.KITCHEN)));
 
-    assertTrue(Hallway.get("laksjd;f", "a;lsdjfoiq") == null);
+    assertTrue(Hallway.get(Room.BILLIARD_ROOM, Room.KITCHEN) == null);
   }
 
   public void testCaseFile() {
-    Suspect suspect1 = new Suspect("suspect1");
-    Room room1 = new Room("room1");
-    Weapon weapon1 = new Weapon("weapon1");
+    Suspect suspect1 = Suspect.get("Colonel Mustard");
+    Room room1 = Room.get("Billiard Room");
+    Weapon weapon1 = Weapon.get("Rope");
     CaseFile casefile1 = new CaseFile(room1, suspect1, weapon1);
     CaseFile casefile2 = new CaseFile(room1, suspect1, weapon1);
+    assertFalse(casefile1.equals(null));
     assertTrue(casefile1.equals(casefile2));
 
-    CaseFile casefile3 = new CaseFile(room1, new Suspect("suspect2"), weapon1);
+    CaseFile casefile3 = new CaseFile(room1, Suspect.get("Miss Scarlet"), weapon1);
+    assertFalse(casefile3.equals(null));
     assertFalse(casefile1.equals(casefile3));
   }
 }

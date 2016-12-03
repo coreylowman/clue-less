@@ -1,41 +1,48 @@
 package edu.jhu.server.data;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Weapon implements ICard, IBoardPiece {
-  public static final String ROPE = "Rope";
-  public static final String LEAD_PIPE = "Lead Pipe";
-  public static final String KNIFE = "Knife";
-  public static final String WRENCH = "Wrench";
-  public static final String CANDLESTICK = "Candlestick";
-  public static final String PISTOL = "Pistol";
+	
+  public static final Weapon ROPE = new Weapon("Rope");
+  public static final Weapon LEAD_PIPE = new Weapon("Lead Pipe");
+  public static final Weapon KNIFE = new Weapon("Knife");
+  public static final Weapon WRENCH = new Weapon("Wrench");
+  public static final Weapon CANDLESTICK = new Weapon("Candlestick");
+  public static final Weapon PISTOL = new Weapon("Pistol");
 
-  private static Map<String, Weapon> weapons;
+  private static final Map<String, Weapon> weapons = new HashMap<>();
 
   static {
-    weapons = new HashMap<String, Weapon>();
-    String[] names = {ROPE, LEAD_PIPE, KNIFE, WRENCH, CANDLESTICK, PISTOL};
-    for (String name : names) {
-      Weapon weapon = new Weapon(name);
+    final Weapon[] weaponList = {ROPE, LEAD_PIPE, KNIFE, WRENCH, CANDLESTICK, PISTOL};
+    
+    for (Weapon weapon : weaponList) {
+      weapons.put(weapon.getName(), weapon);
     }
   }
 
   public static Weapon get(String name) {
+  	if (name == null || name.isEmpty())
+  		throw new IllegalArgumentException("name was null or empty");
+  	
     return weapons.get(name);
   }
 
-  public static List<Weapon> getAll() {
-    return new ArrayList<Weapon>(weapons.values());
+  public static Collection<Weapon> getAll() {
+    return Collections.unmodifiableCollection(weapons.values());
   }
 
   private String name;
 
-  public Weapon(String name) {
-    weapons.put(name, this);
+  private Weapon(String name) {
     this.name = name;
+  }
+  
+  public String getName() {
+  	return name;
   }
 
   @Override

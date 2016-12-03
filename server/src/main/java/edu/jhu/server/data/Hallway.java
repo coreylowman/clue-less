@@ -1,58 +1,82 @@
 package edu.jhu.server.data;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Hallway implements ILocation {
-  private static Map<String, Hallway> hallways;
+	
+  private static final Map<String, Hallway> hallways = new HashMap<>();
 
   static {
-    hallways = new HashMap<String, Hallway>();
-    String[][] hallways = {{Room.STUDY, Room.LIBRARY}, {Room.STUDY, Room.HALL},
+    final Room[][] hallwayList = {{Room.STUDY, Room.LIBRARY}, {Room.STUDY, Room.HALL},
         {Room.HALL, Room.BILLIARD_ROOM}, {Room.HALL, Room.LOUNGE}, {Room.LOUNGE, Room.DINING_ROOM},
         {Room.DINING_ROOM, Room.BILLIARD_ROOM}, {Room.DINING_ROOM, Room.KITCHEN},
         {Room.KITCHEN, Room.BALLROOM}, {Room.BALLROOM, Room.BILLIARD_ROOM},
         {Room.BALLROOM, Room.CONSERVATORY}, {Room.CONSERVATORY, Room.LIBRARY},
         {Room.LIBRARY, Room.BILLIARD_ROOM}};
-    for (String[] roomNames : hallways) {
-      Hallway hallway = new Hallway(roomNames[0], roomNames[1]);
+    
+    for (Room[] rooms : hallwayList) {
+      final Hallway hallway = new Hallway(rooms[0], rooms[1]);
+      
+      hallways.put(hallway.toString(), hallway);
     }
   }
+  
+  public static Hallway get(String string) {
+    if (string == null || string.isEmpty())
+      throw new IllegalArgumentException("string was null or empty");
+    
+    final String[] rooms = string.split("_");
+    if (rooms.length != 2)
+      throw new IllegalArgumentException("string was malformed");
+    
+    return get(Room.get(rooms[0]), Room.get(rooms[1]));
+  }
 
-  public static Hallway get(String end1, String end2) {
-    Hallway try1 = hallways.get(end1 + "_" + end2);
+  public static Hallway get(Room end1, Room end2) {
+  	if (end1 == null)
+  		throw new IllegalArgumentException("end1 was null");
+  	if (end2 == null)
+  		throw new IllegalArgumentException("end2 was null");
+  	
+    final Hallway try1 = hallways.get(hallwayToString(end1, end2));
+    
     if (try1 != null) {
       return try1;
     } else {
-      return hallways.get(end2 + "_" + end1);
+      return hallways.get(hallwayToString(end2, end1));
     }
   }
 
-  public static List<Hallway> getAll() {
-    return new ArrayList<Hallway>(hallways.values());
+  public static Collection<Hallway> getAll() {
+    return Collections.unmodifiableCollection(hallways.values());
+  }
+  
+  private static String hallwayToString(Room end1, Room end2) {
+  	return end1 + "_" + end2;
   }
 
-  private String end1, end2;
+  private Room end1;
+  private Room end2;
 
-  public Hallway(String end1, String end2) {
-    this.end1 = end1;
+  private Hallway(Room end1, Room end2) {
+  	this.end1 = end1;
     this.end2 = end2;
-    hallways.put(end1 + "_" + end2, this);
   }
 
-  public String getEnd1() {
+  public Room getEnd1() {
     return end1;
   }
 
-  public String getEnd2() {
+  public Room getEnd2() {
     return end2;
   }
 
   @Override
   public String toString() {
-    return end1 + "_" + end2;
+    return hallwayToString(end1, end2);
   }
 
   @Override

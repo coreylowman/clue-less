@@ -74,55 +74,10 @@
     border: 2px solid blue;
     padding: 0px;
 }
-#miss_scarlett {
+.suspect {
     margin: auto;
-    width: 40px;
-    height: 40px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px;
-    background: red;
-}
-#prof_plum {
-    margin: auto;
-    width: 40px;
-    height: 40px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px;
-    background: purple;
-}
-#col_mustard {
-    margin: auto;
-    width: 40px;
-    height: 40px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px;
-    background: yellow;
-}
-#mrs_peacock {
-    margin: auto;
-    width: 40px;
-    height: 40px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px;
-    background: blue;
-}
-#mr_green {
-    margin: auto;
-    width: 40px;
-    height: 40px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px;
-    background: green;
-}
-#mrs_white {
-    margin: auto;
-    width: 38px;
-    height: 38px;
+    width: 39px;
+    height: 39px;
     -webkit-border-radius: 25px;
     -moz-border-radius: 25px;
     border-radius: 25px;

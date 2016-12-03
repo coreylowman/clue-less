@@ -72,9 +72,9 @@ public class Game {
     return this.gameStarted;
   }
 
-  
+  //REMEMBER TO CHANGE THIS BACK TO 6
   public boolean isFull() {
-    return this.players.size() == 6;
+    return this.players.size() == 3;
   }
 
   public void start() {
@@ -313,9 +313,12 @@ public class Game {
       case MOVE_REQUEST:
         handleMoveRequest(event, player);
         break;
-	  	case PROVIDE_EVIDENCE_REQUEST:
+	  case PROVIDE_EVIDENCE_REQUEST:
 	  	handleProvideEvidence(event, player);
 	  	break;
+      case END_TURN_REQUEST:
+    	handleEndTurnRequest(player);
+    	break;
       default:
         System.out.println("invalid event type");
         break;
@@ -427,21 +430,25 @@ public class Game {
       // this player's turn is now over
       final JSONObject endTurnRequest = new JSONObject();
       endTurnRequest.put(Constants.EVENT_TYPE, EventType.END_TURN_REQUEST);
-      handleEndTurnRequest();
+      handleEndTurnRequest(player);
     }
   }
 
-  public void handleEndTurnRequest() {
-    // keep going until we get to a player that is allowed additional turns
-    do {
-      currentTurnIndex = (currentTurnIndex + 1) % players.size();
-    } while (players.get(currentTurnIndex).getHasLost());
+  public void handleEndTurnRequest(Player player) {
+	  if (!isPlayersTurn(player)){
+		  player.sendEvent(makeInvalidRequestMessage("It's not your turn."));
+	  }
+	  else{
+	// keep going until we get to a player that is allowed additional turns
+		  do {
+			  currentTurnIndex = (currentTurnIndex + 1) % players.size();
+		  } while (players.get(currentTurnIndex).getHasLost());
     
-    playerHasMoved = false;
+		  playerHasMoved = false;
     
-    sendTurnNotification();
+		  sendTurnNotification();
+	  }
   }
-
   private void handleJoinRequest(JSONObject request, Player author) {
 	  
 	  author.setTag(request.getString(Constants.PLAYER_TAG));

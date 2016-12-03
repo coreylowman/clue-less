@@ -7,8 +7,6 @@
 	<script src="clueless.js" defer></script>
     </head>
     <body>
-      <div id="status">Connecting...</div>
-	<!-- page content -->
   <table id="board" width="800" height="600">
             <tr>
                 <td id="Study" class="room">Study</td>
@@ -45,8 +43,7 @@
                 <td><div id="Ballroom_Kitchen" class="horizontal_hallway"><div id="Mrs. White" class="suspect"></div></div></td>
                 <td id="Kitchen" class="room">Kitchen</td>
             </tr>
-        </table> 
-  <button onclick="addCard('Mrs. Peacock')">test move</button>
+        </table>
   <form id="suggest_form">
     <select id="suggest_suspect">
       <option>Mrs. Peacock</option>
@@ -64,8 +61,8 @@
       <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
+    <button id="suggest_button" onclick="suggest()">Suggest</button>
   </form>
-  <button id="suggest_button" onclick="suggest()">Suggest</button>
   <form>
     <select id="accuse_suspect">
       <option>Mrs. Peacock</option>
@@ -95,16 +92,10 @@
       <option>Hall</option>
     </select>
     <button id="accuse_button" onclick="accuse()">Accuse</button>
-    <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   </form>
+  <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">
     <div id="hand">
-      <div class="card" onclick="provideEvidence()"><h2>Mrs. Peacock<h2>Card1</div>
-      <div class="card">Card2</div>
-      <div class="card">Card3</div>
-      <div class="card">Card4</div>
-      <div class="card">Card5</div>
-      <div class="card">Card6</div>
     </div>
   </div>
   <div id="chat_container">

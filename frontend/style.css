@@ -2,37 +2,38 @@
     position: absolute;
     width: 150px;
     height: auto;
-    bottom: 200px;
+    bottom: 5px;
     right: 5px;
     border: 1px solid red;
 }
 
 #hand_container {
-    position: absolute;
-    width: 99%;
+    position:absolute;
+    left: 40%;
     bottom: 5px;
-}
-#hand {
-    width: 100%;
     height: 182px;
-    text-align: center;
 }
+
+#hand {
+    text-align: center;
+    overflow: auto;
+}
+
 .card {
     width: 90px;
     height: 180px;
     border: 1px solid red;
-    display:inline-block;
+    float: left;
 }
 
 #chat_container {
-    position: relative;
+    position: absolute;
     bottom: 5px;
     left: 5px;
 }
 #chat_text {
-    height:350px;
+    height:150px;
     width: 300px;
-    margin: 10px;
     padding: 2px;
     overflow-y: scroll;
     word-wrap: break-word;
@@ -42,29 +43,39 @@
     width: 250px;
 }
 
+
 #board {
     text-align: center;
     table-layout: fixed;
     border-spacing: 0px;
     margin: auto;
 }
+
+td {
+    height: 20%;
+    width: 20%;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+}
+
 .room {
     border: 1px solid black;
-    padding: 1px;
 }
+
 .vert_hallway {
     border: 1px solid black;
-    padding: 1px;
-    height: 104%;
+    height: 100%;
     width: 33%;
     margin: auto;
 }
+
 .horizontal_hallway {
     border: 1px solid black;
-    height: 33%;
-    width: 101%;
-    margin-left: -2px;
+    height: 44%;
+    width: 99%;
 }
+
 .selectable {
     border: 1px solid blue;
     border-width: 1px;

@@ -114,8 +114,8 @@ function showHand(handEvent) {
   sendToChatBox(handChat);
   
   document.getElementById("hand").innerHTML = "";
-  for (var card in handEvent.cards) {
-    addCard(card);
+  for (var i = 0; i < handEvent.cards.length; i++) {
+    addCard(handEvent.cards[i]);
   }
 }
 

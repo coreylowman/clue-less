@@ -3,6 +3,7 @@ package edu.jhu.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +44,8 @@ public class Game {
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
+    
+    private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
 
   private int currentTurnIndex;
@@ -60,9 +63,6 @@ public class Game {
     this.players = new ArrayList<Player>();
     this.board = new Board();
     this.gameStarted = false;
-    this.timer = new Timer();
-    // todo call timer.schedule() here for starting the game
-
     this.remainingSuspects = new ArrayList<>(Suspect.getAll());
   }
 
@@ -75,15 +75,34 @@ public class Game {
   }
 
   public void start() {
+  	// If the timer is set, we need to cancel anything it had scheduled
+  	if (timer != null) {
+  		timer.cancel();
+  		timer.purge();
+  	}
+  	
+  	// Someone left while timer was going, we can't start yet
+  	if (this.players.size() < 3) {
+  	  return;
+  	}
+  	
+  	// Send game start notification
+  	notifyPlayers(makeGameStartNotification());
+  	
+  	// Initialize stuff
     this.currentTurnIndex = 0;
     this.gameStarted = true;
     this.secretCards = CardShuffler.shuffleAndDealCards(players);
     this.board.initialize();
+    
+    // Send first turn notification
+    sendTurnNotification();
   }
 
   public void addPlayer(Player player) {
-    players.add(player);
+    this.players.add(player);
     player.setGame(this);
+
     player.setSuspect(this.remainingSuspects.remove(0));
 
     // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
@@ -109,6 +128,13 @@ public class Game {
     for (Player player : players) {
       player.sendEvent(event);
     }
+  }
+  
+  private JSONObject makeGameStartNotification() {
+  	JSONObject gameStart = new JSONObject();
+  	gameStart.put(Constants.EVENT_TYPE, EventType.GAME_START_NOTIFICATION);
+  	gameStart.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+  	return gameStart;
   }
 
   private JSONObject makeChatMessage(String body) {
@@ -392,7 +418,8 @@ public class Game {
   }
 
   private void handleJoinRequest(JSONObject request, Player author) {
-    author.setTag(request.getString(Constants.PLAYER_TAG));
+	  
+	  author.setTag(request.getString(Constants.PLAYER_TAG));
 
     JSONObject joinNotification = new JSONObject();
 
@@ -401,5 +428,24 @@ public class Game {
     joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
 
     notifyPlayers(joinNotification);
+    
+    // Start game if it's full now
+  	if (isFull()) {
+  		start();
+  	}
+  	
+  	// Once we reach 3 players, we can start the game. So start a 5 minute
+  	//	timer!
+  	if (this.players.size() == 3 && timer == null) {
+  		timer = new Timer();
+  		
+  		// In 5 minutes, start the game.
+  		timer.schedule(new TimerTask() {
+			    @Override
+			    public void run() {
+			        start();
+			    }
+			}, Constants.START_GAME_AFTER_MS);
+  	}
   }
 }

@@ -24,7 +24,7 @@ public class Game {
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
-    MOVE_REQUEST
+    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION
   }
   
   private static class Constants {
@@ -191,11 +191,11 @@ public class Game {
   
   private void provideEvidenceNotification(Player evidenceHolder, CaseFile casefile){
 	  JSONObject evidenceNotification = new JSONObject();
-	  evidenceNotification.put("eventType", "PROVIDE_EVIDENCE_NOTIFICATION");
-	  evidenceNotification.put("author", "Game");
-	  evidenceNotification.put("suspect", casefile.getSuspect().toString());
-	  evidenceNotification.put("weapon", casefile.getWeapon().toString());
-	  evidenceNotification.put("room", casefile.getRoom().toString());
+	  evidenceNotification.put(Constants.EVENT_TYPE, EventType.PROVIDE_EVIDENCE_NOTIFICATION);
+	  evidenceNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+	  evidenceNotification.put(Constants.SUSPECT, casefile.getSuspect().toString());
+	  evidenceNotification.put(Constants.WEAPON, casefile.getWeapon().toString());
+	  evidenceNotification.put(Constants.ROOM, casefile.getRoom().toString());
 	  evidenceHolder.sendEvent(evidenceNotification);
   }
   
@@ -204,9 +204,13 @@ public class Game {
 	  if (playerWithEvidence == null) {
 		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
 		  notifyPlayers(chat);
+		  JSONObject allowTurnEnd = new JSONObject();
+		  allowTurnEnd.put(Constants.EVENT_TYPE, EventType.ALLOW_TURN_END);
+		  suggester.sendEvent(allowTurnEnd);
+		  
 	  } else {
 		  provideEvidenceNotification(playerWithEvidence, casefile);
-
+		  
 	  }
   }
   
@@ -231,11 +235,11 @@ public class Game {
 		  	}
 		  	*/
 			JSONObject suggestion = new JSONObject();
-			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
-			suggestion.put("suggester", suggester.getTag());
-			suggestion.put("accused", theAccused.toString());
-			suggestion.put("weapon", theWeapon.toString());
-			suggestion.put("room", suggestedRoom.toString());
+			suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
+			suggestion.put(Constants.SUGGESTER, suggester.getTag());
+			suggestion.put(Constants.ACCUSED, theAccused.toString());
+			suggestion.put(Constants.WEAPON, theWeapon.toString());
+			suggestion.put(Constants.ROOM, suggestedRoom.toString());
 			notifyPlayers(suggestion);
 			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
 			
@@ -251,8 +255,8 @@ public class Game {
   
   private void handleProvideEvidence(JSONObject evidence, Player player) {
 	  Player suggester = players.get(this.currentTurnIndex %  players.size());
-	  evidence.put("eventType", "EVIDENCE_PROVIDED_NOTIFICATION");
-	  evidence.put("author", player.getTag());
+	  evidence.put(Constants.EVENT_TYPE, EventType.EVIDENCE_PROVIDED_NOTIFICATION);
+	  evidence.put(Constants.AUTHOR, player.getTag());
 	  suggester.sendEvent(evidence);
 	  notifyPlayers(makeChatMessage(player.getTag() + 
 			  " has disproven " +

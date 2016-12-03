@@ -170,11 +170,12 @@ function addMoveRequestOnClickTo(elementIds) {
 
   for (var i = 0;i < elementIds.length;i++) {
     var ele = document.getElementById(elementIds[i]);
+    var name = String(elementIds[i]);
 
     // the event listener when element is clicked - send MOVE_REQUEST, and then remove on click from
     // ALL elements passed into this function
     function onClick(event) {
-      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: elementIds[i]}));
+      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: name}));
       removeOnClickFrom(elementIds, onClick);
     }
 

@@ -240,7 +240,7 @@ public class Game {
 	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
 	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
 	  Weapon theWeapon = Weapon.get(accusation.getString("weapon"));
-	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
+	 
 	  if (suggestedRoom instanceof Room) {
 		  		// give the second player a spoof hand
 		 /*
@@ -267,6 +267,7 @@ public class Game {
 			
 			board.movePiece(theAccused, suggestedRoom);
 			notifyPlayers(move);
+			CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 			provideEvidence(casefile, suggester);
 			
 		} else {

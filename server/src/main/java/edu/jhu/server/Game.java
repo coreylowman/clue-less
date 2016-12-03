@@ -7,7 +7,6 @@ import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 import edu.jhu.server.data.CaseFile;
 import edu.jhu.server.data.ICard;
@@ -25,7 +24,8 @@ public class Game {
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
-    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION
+    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
+    HAND_NOTIFICATION
   }
   
   private static class Constants {
@@ -45,6 +45,7 @@ public class Game {
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
+    private static final String CARDS = "cards";
     
     private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
@@ -136,9 +137,9 @@ public class Game {
   private void sendHandsToPlayers() {
   	for (Player player : players) {
   		// The basics
-  		JSONObject handNotification;
-  		handNotification.put("eventType", "HAND_NOTIFICATION");
-  		handNotification.put("author", "Game");
+  		JSONObject handNotification = new JSONObject();
+  		handNotification.put(Constants.EVENT_TYPE, EventType.HAND_NOTIFICATION);
+  		handNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
   		
   		// Create array of cards of this player
   		JSONArray handArray = new JSONArray();
@@ -146,9 +147,10 @@ public class Game {
   			handArray.put(card.toString());
   		}
   		
-  		handNotification.put("cards", handArray);
+  		handNotification.put(Constants.CARDS, handArray);
   		player.sendEvent(handNotification);
   	}
+  }
 
   private JSONObject makeGameStartNotification() {
   	JSONObject gameStart = new JSONObject();

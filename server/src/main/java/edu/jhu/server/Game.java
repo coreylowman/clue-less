@@ -43,6 +43,8 @@ public class Game {
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
+    
+    private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
 
   private int currentTurnIndex;
@@ -86,6 +88,9 @@ public class Game {
     this.gameStarted = true;
     this.secretCards = CardShuffler.shuffleAndDealCards(players);
     this.board.initialize();
+    
+    // Send first turn notification
+    sendTurnNotification();
   }
 
   public void addPlayer(Player player) {
@@ -121,8 +126,8 @@ public class Game {
   
   private JSONObject makeGameStartNotification() {
   	JSONObject gameStart = new JSONObject();
-  	gameStart.put("eventType", "GAME_START_NOTIFICATION");
-  	gameStart.put("author", "Game");
+  	gameStart.put(Constants.EVENT_TYPE, EventType.GAME_START_NOTIFICATION);
+  	gameStart.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
   	return gameStart;
   }
 
@@ -349,7 +354,17 @@ public class Game {
   }
 
   private void handleJoinRequest(JSONObject request, Player author) {
-	    
+	  
+	  author.setTag(request.getString(Constants.PLAYER_TAG));
+
+    JSONObject joinNotification = new JSONObject();
+
+    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
+
+    notifyPlayers(joinNotification);
+    
     // Start game if it's full now
   	if (isFull()) {
   		start();
@@ -366,17 +381,7 @@ public class Game {
 			    public void run() {
 			        start();
 			    }
-			}, 5 * 60 * 1000);
+			}, Constants.START_GAME_AFTER_MS);
   	}
-	  
-	  author.setTag(request.getString(Constants.PLAYER_TAG));
-
-    JSONObject joinNotification = new JSONObject();
-
-    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
-    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
-    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
-
-    notifyPlayers(joinNotification);
   }
 }

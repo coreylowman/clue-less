@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
@@ -13,20 +14,27 @@ import edu.jhu.server.data.ICard;
 import edu.jhu.server.data.Suspect;
 
 public class Player extends WebSocketAdapter {
+  private static enum LobbyEventType {
+    GAMES_REQUEST, JOIN_GAME_REQUEST, CREATE_GAME_REQUEST
+  }
+
   private Session session;
   private String tag;
   private Game game;
   private List<ICard> cards;
   private Suspect suspect;
   private boolean hasLost = false;
+  private boolean inLobby;
 
   public Player(String tag) {
     this.tag = tag;
+    this.inLobby = true;
   }
-  
+
   public boolean getHasLost() {
     return hasLost;
   }
+
   public void setHasLost(boolean hasLost) {
     this.hasLost = hasLost;
   }
@@ -80,6 +88,36 @@ public class Player extends WebSocketAdapter {
     }
   }
 
+  private void handleLobbyEvent(JSONObject event) {
+    switch (LobbyEventType.valueOf(event.getString("eventType"))) {
+      case GAMES_REQUEST: {
+        JSONArray games = new JSONArray();
+        for (String name : ClueLessServer.getGameNames()) {
+          games.put(name);
+        }
+        JSONObject notification = new JSONObject();
+        notification.put("eventType", "GAMES_NOTIFICATION");
+        notification.put("games", games);
+        sendEvent(notification);
+        break;
+      }
+      case JOIN_GAME_REQUEST:
+        ClueLessServer.joinGame(event.getString("name"), this);
+        this.inLobby = false;
+        break;
+      case CREATE_GAME_REQUEST: {
+        ClueLessServer.createGame(event.getString("name"));
+        JSONObject notification = new JSONObject();
+        notification.put("eventType", "GAME_NOTIFICATION");
+        notification.put("name", event.getString("name"));
+        ClueLessServer.notifyWaitingPlayers(notification);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   @Override
   public void onWebSocketClose(int statusCode, String reason) {
     log("WebSocket closed.");
@@ -100,6 +138,11 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    game.handleEvent(JSONMessage, this);
+
+    if (inLobby) {
+      handleLobbyEvent(JSONMessage);
+    } else {
+      game.handleEvent(JSONMessage, this);
+    }
   }
 }

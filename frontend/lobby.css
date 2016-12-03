@@ -1,0 +1,12 @@
+#gameList {
+    position: absolute;
+    left: 50%;
+    top:25%;
+    background: #ffffff;
+    list-style-type: none;
+    padding: 5px 5px;
+}
+
+li {
+    margin: 5px 0;
+}

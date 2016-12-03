@@ -1,43 +1,17 @@
 var tag = "";
 var isMyTurn = true;
 var isEvidenceSelectionTime = false;
+var webSocket = sessionStorage.webSocket;
 
-function establishWebsocket() {
-    // if user is running mozilla then use it's built-in WebSocket
-    window.WebSocket = window.WebSocket || window.MozWebSocket;
+webSocket.onmessage = function(message){
+  console.log(message);
+  handleEvent(JSON.parse(message.data));
+};
 
-  //establish connection at localhost:3000
-    var connection = new WebSocket('ws://127.0.0.1:3000');
-
-  //takes care of any initial action upon opening of websocket
-    connection.onopen = function () {
-      console.log('opened');
-      //webpage will update status from Connecting to Connected
-      document.getElementById('status').innerHTML = 'Connected';
-      // connection is opened and ready to use
-
-      connection.send(JSON.stringify({eventType:'TEST'}));
-
-      // send JOIN_REQUEST
-      tag = prompt("Please enter your name");
-      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
-      connection.send(JSON.stringify(joinRequest));
-    };
-
-    connection.onerror = function (error) {
-      console.log('websocket messed up');
-        // an error occurred when sending/receiving data
-    };
-
-    connection.onmessage = function(message){
-      console.log(message);
-      handleEvent(JSON.parse(message.data));
-    };
-
-  return connection;
-}
-
-var websocket = establishWebsocket();
+// send JOIN_REQUEST
+tag = prompt("Please enter your name");
+var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
+connection.send(JSON.stringify(joinRequest));
 
 // moves character HTML element into destination HTML element
 // refer to style.css for names

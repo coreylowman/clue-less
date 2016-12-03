@@ -44,8 +44,14 @@ var websocket = establishWebsocket();
 // refer to style.css for names
 // eg
 // moveTo('col_mustard', 'study');
-
 function moveTo(character, destination){
+  if (destination.includes("_")) {
+    if (document.getElementById(destination) == null) {
+      var pair = destination.split("_");
+      destination = pair[1] + "_" + pair[0];
+    }
+  }
+
   document.getElementById(destination).appendChild(document.getElementById(character));
 }
 
@@ -154,10 +160,22 @@ function handleEvent(event){
     case "EVIDENCE_PROVIDED_NOTIFICATION":
     handleEvidenceProvided(event);
     break;
+      handleTurnNotification(event);
+      break;
+    case "MOVE_NOTIFICATION":
+      handleMoveNotification(event);
+      break;
+
     default:
     console.log("Invalid eventType received");
     break;
   }
+}
+
+function handleMoveNotification(notification) {
+  sendToChatBox(notification.suspect + " moved to " + notification.location);
+
+  moveTo(notification.suspect, notification.location);
 }
 
 // adds on click event listeners to all elements passed in

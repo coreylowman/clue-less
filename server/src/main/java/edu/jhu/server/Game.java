@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
 import edu.jhu.server.data.ICard;
+import edu.jhu.server.data.Hallway;
 import edu.jhu.server.data.Suspect;
 
 import edu.jhu.server.data.ILocation;
@@ -17,8 +18,31 @@ import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
 public class Game {
-  private enum EventType {
-    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION, INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST
+  private static enum EventType {
+    TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
+    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
+    MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
+    ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
+    MOVE_REQUEST
+  }
+  
+  private static class Constants {
+    private static final String EVENT_TYPE = "eventType";
+    private static final String PLAYER_TAG = "playerTag";
+    private static final String VALID_MOVES = "validMoves";
+    private static final String AUTHOR = "author";
+    private static final String GAME_AUTHOR = "Game";
+    private static final String BODY = "body";
+    private static final String REASON = "reason";
+    private static final String SUSPECT = "suspect";
+    private static final String SUGGESTER = "suggester";
+    private static final String ACCUSED = "accused";
+    private static final String WEAPON = "weapon";
+    private static final String ROOM = "room";
+    private static final String PLAYER_SUSPECT = "playerSuspect";
+    private static final String ACCUSER = "accuser";
+    private static final String OUTCOME = "outcome";
+    private static final String LOCATION = "location";
   }
 
   private int currentTurnIndex;
@@ -27,6 +51,7 @@ public class Game {
   private Board board;
   private boolean gameStarted;
   private Timer timer;
+  private boolean playerHasMoved;
 
   private List<Suspect> remainingSuspects;
 
@@ -38,7 +63,7 @@ public class Game {
     this.timer = new Timer();
     // todo call timer.schedule() here for starting the game
 
-    this.remainingSuspects = Suspect.getAll();
+    this.remainingSuspects = new ArrayList<>(Suspect.getAll());
   }
 
   public boolean isStarted() {
@@ -47,16 +72,6 @@ public class Game {
 
   public boolean isFull() {
     return this.players.size() == 6;
-  }
-
-  // This breaks things if you don't give it a valid tag
-  private Player getPlayerByTag(String tag) {
-    for (Player player : players) {
-      if (player.getTag().equals(tag)) {
-        return player;
-      }
-    }
-    return null;
   }
 
   public void start() {
@@ -83,9 +98,9 @@ public class Game {
     board.getValidMoves(player.getSuspect()).forEach(loc -> validMoves.put(loc.toString()));
 
     JSONObject notification = new JSONObject();
-    notification.put("eventType", "TURN_NOTIFICATION");
-    notification.put("playerTag", player.getTag());
-    notification.put("validMoves", validMoves);
+    notification.put(Constants.EVENT_TYPE, EventType.TURN_NOTIFICATION);
+    notification.put(Constants.PLAYER_TAG, player.getTag());
+    notification.put(Constants.VALID_MOVES, validMoves);
 
     notifyPlayers(notification);
   }
@@ -97,26 +112,27 @@ public class Game {
   }
 
   private JSONObject makeChatMessage(String body) {
-	  JSONObject chat = new JSONObject();
-	  chat.put("eventType", "CHAT_NOTIFICATION");
-	  chat.put("author", "Game");
-	  chat.put("body", body);
-	  return chat;
+    JSONObject chat = new JSONObject();
+    chat.put(Constants.EVENT_TYPE, EventType.CHAT_NOTIFICATION);
+    chat.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+    chat.put(Constants.BODY, body);
+    return chat;
   }
-  
-  private JSONObject makeInvalidRequestMessage(String player, String reason){
-	  JSONObject invalidRequest = new JSONObject();
-	  invalidRequest.put("eventType", "INVALID_REQUEST_NOTIFICATION");
-	  invalidRequest.put("author", "Game");
-	  invalidRequest.put("reason", reason);
-	  invalidRequest.put("player", player);
-	  return invalidRequest;
+
+  private JSONObject makeInvalidRequestMessage(String reason) {
+    JSONObject invalidRequest = new JSONObject();
+    invalidRequest.put(Constants.EVENT_TYPE, EventType.INVALID_REQUEST_NOTIFICATION);
+    invalidRequest.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+    invalidRequest.put(Constants.REASON, reason);
+    return invalidRequest;
   }
-  
-  private JSONObject makeMoveNotification(Suspect suspect, ILocation location){
-	  JSONObject move = new JSONObject();
-	  move.put("eventType", "MOVE_NOTIFICATION");
-	  return move;
+
+  private JSONObject makeMoveNotification(Suspect suspect, ILocation location) {
+    JSONObject move = new JSONObject();
+    move.put(Constants.EVENT_TYPE, EventType.MOVE_NOTIFICATION);
+    move.put(Constants.SUSPECT, suspect.toString());
+    move.put(Constants.LOCATION, location.toString());
+    return move;
   }
   
   private Player findPlayerWithEvidence(CaseFile casefile, Player suggester) {
@@ -199,7 +215,7 @@ public class Game {
 			provideEvidence(casefile, suggester);
 			
 		} else {
-			handleEvent(makeInvalidRequestMessage(accusation.getString("author"), "You are not in a room."));
+			handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
 		}
   }
   
@@ -212,11 +228,10 @@ public class Game {
 			  " has disproven " +
 			  suggester.getTag() +
 			  	"'s suggestion."));
-	  
   }
 
-  public void handleEvent(JSONObject event) {
-    String eventType = event.getString("eventType");
+  public void handleEvent(JSONObject event, Player player) {
+    String eventType = event.getString(Constants.EVENT_TYPE);
     switch (EventType.valueOf(eventType)) {
       case TEST:
         System.out.println("test event");
@@ -228,18 +243,23 @@ public class Game {
         handleEndTurnRequest(event);
         break;
       case SUGGESTION_REQUEST:
+        // FIXME: what is this?
         board.initialize();
-        Player suggester = getPlayerByTag(event.getString("author"));
-       // suggester.setSuspect(Suspect.get("miss_scarlet"));
+        Player suggester = player;
         board.movePiece(suggester.getSuspect(), Room.get("Study"));
-        
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:
-        getPlayerByTag(event.getString("player")).sendEvent(event);
+        player.sendEvent(event);
         break;
       case JOIN_REQUEST:
-        handleJoinRequest(event);
+        handleJoinRequest(event, player);
+        break;
+      case ACCUSATION_REQUEST:
+        handleAccusationRequest(event, player);
+        break;
+      case MOVE_REQUEST:
+        handleMoveRequest(event, player);
         break;
 	  	case PROVIDE_EVIDENCE_REQUEST:
 	  	handleProvideEvidence(event);
@@ -249,21 +269,135 @@ public class Game {
         break;
     }
   }
+  
+  private void handleMoveRequest(JSONObject request, Player player) {
+    // a player may move only if it is their turn
+    if (!isPlayersTurn(player)) {
+      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      return;
+    }
+    
+    // a player cannot move if they have already moved
+    if (playerHasMoved) {
+      handleEvent(makeInvalidRequestMessage("You have already moved."), player);
+      return;
+    }
+    
+    // get the destination room/hallway from the info in the request
+    final String string = request.getString(Constants.LOCATION);
+    ILocation dest = Room.get(string);
+    if (dest == null) {
+      dest = Hallway.get(string);
+    }
+    
+    // check the validity of the move
+    if (dest == null || !board.isMoveValid(player.getSuspect(), dest)) {
+      handleEvent(makeInvalidRequestMessage("Invalid move."), player);
+      return;
+    }
+    
+    // execute the move
+    board.movePiece(player.getSuspect(), dest);
+    playerHasMoved = true;
+    
+    // send move notification to all players
+    final JSONObject moveNotification = makeMoveNotification(player.getSuspect(), dest);
+    notifyPlayers(moveNotification);
+  }
+  
+  private boolean isPlayersTurn(Player player) {
+    if (player == null)
+      throw new IllegalArgumentException("player was null");
+    
+    return player.equals(players.get(currentTurnIndex));
+  }
+  
+  public void handleAccusationRequest(JSONObject request, Player player) {
+    // a player may make an accusation at any time as long as it is their turn
+    if (!isPlayersTurn(player)) {
+      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      return;
+    }
+    
+    // get the case file components from the info in the request
+    final Room room = Room.get(request.getString(Constants.ROOM));
+    final Suspect suspect = Suspect.get(request.getString(Constants.SUSPECT));
+    final Weapon weapon = Weapon.get(request.getString(Constants.WEAPON));
+    
+    if (room == null || suspect == null || weapon == null) {
+      handleEvent(makeInvalidRequestMessage("Invalid Case File."), player);
+      return;
+    }
+    
+    // send accusation notification to all players
+    final JSONObject accusationNotification = new JSONObject();
+    accusationNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_NOTIFICATION);
+    accusationNotification.put(Constants.ACCUSER, player.getTag());
+    accusationNotification.put(Constants.ROOM, room.getName());
+    accusationNotification.put(Constants.ACCUSED, suspect.getName());
+    accusationNotification.put(Constants.WEAPON, weapon.getName());
+    notifyPlayers(accusationNotification);
+    
+    // send secret card notification to player who made the accusation
+    final JSONObject secretCardNotification = new JSONObject();
+    secretCardNotification.put(Constants.EVENT_TYPE, EventType.SECRET_CARD_NOTIFICATION);
+    secretCardNotification.put(Constants.ROOM, secretCards.getRoom().getName());
+    secretCardNotification.put(Constants.ACCUSED, secretCards.getSuspect().getName());
+    secretCardNotification.put(Constants.WEAPON, secretCards.getWeapon().getName());
+    player.sendEvent(secretCardNotification);
+    
+    // create case file and check it against the secret cards
+    final CaseFile caseFile = new CaseFile(room, suspect, weapon);
+    boolean outcome = secretCards.equals(caseFile);
+    
+    // send accusation outcome notification to all players
+    final JSONObject accusationOutcomeNotification = new JSONObject();
+    accusationOutcomeNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_OUTCOME_NOTIFICATION);
+    accusationNotification.put(Constants.ACCUSER, player.getTag());
+    accusationNotification.put(Constants.OUTCOME, String.valueOf(outcome));
+    notifyPlayers(accusationOutcomeNotification);
+    
+    if (outcome) {
+      // player wins, end the game
+      
+      // TODO: actually end the game somehow
+      
+      // for now, just prevent all other players from taking additional turns
+      for (Player p : players) {
+        if (!p.equals(player)) {
+          player.setHasLost(true);
+        }
+      }
+    } else {
+      // player loses, prevent them from taking additional turns
+      player.setHasLost(true);
+      
+      // this player's turn is now over
+      final JSONObject endTurnRequest = new JSONObject();
+      endTurnRequest.put(Constants.EVENT_TYPE, EventType.END_TURN_REQUEST);
+      handleEvent(endTurnRequest, player);
+    }
+  }
 
   public void handleEndTurnRequest(JSONObject request) {
-    currentTurnIndex = (currentTurnIndex + 1) % players.size();
+    // keep going until we get to a player that is allowed additional turns
+    do {
+      currentTurnIndex = (currentTurnIndex + 1) % players.size();
+    } while (players.get(currentTurnIndex).getHasLost());
+    
+    playerHasMoved = false;
+    
     sendTurnNotification();
   }
 
-  private void handleJoinRequest(JSONObject request) {
-    Player author = this.getPlayerByTag(request.getString("author"));
-    author.setTag(request.getString("playerTag"));
+  private void handleJoinRequest(JSONObject request, Player author) {
+    author.setTag(request.getString(Constants.PLAYER_TAG));
 
     JSONObject joinNotification = new JSONObject();
 
-    joinNotification.put("eventType", "JOIN_NOTIFICATION");
-    joinNotification.put("playerTag", author.getTag());
-    joinNotification.put("playerSuspect", author.getSuspect().toString());
+    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
 
     notifyPlayers(joinNotification);
   }

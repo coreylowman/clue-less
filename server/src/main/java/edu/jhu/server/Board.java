@@ -108,7 +108,7 @@ public class Board {
     final Room[] rooms = {Room.HALL, Room.LOUNGE, Room.DINING_ROOM, Room.KITCHEN, Room.BALLROOM,
         Room.CONSERVATORY, Room.BILLIARD_ROOM, Room.LIBRARY, Room.STUDY};
     final Weapon[] weapons = {Weapon.ROPE, Weapon.LEAD_PIPE, Weapon.KNIFE, Weapon.WRENCH,
-        Weapon.CANDLESTICK, Weapon.PISTOL};
+        Weapon.CANDLESTICK, Weapon.REVOLVER};
 
     for (int i = 0; i < weapons.length; i++) {
       pieces.put(weapons[i], rooms[i]);

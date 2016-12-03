@@ -24,7 +24,8 @@ public class Game {
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
-    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION
+    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
+    HAND_NOTIFICATION
   }
   
   private static class Constants {
@@ -44,6 +45,7 @@ public class Game {
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
+    private static final String CARDS = "cards";
     
     private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
@@ -92,10 +94,12 @@ public class Game {
   	// Initialize stuff
     this.currentTurnIndex = 0;
     this.gameStarted = true;
+
     this.secretCards = CardShuffler.shuffleAndDealCards(players);
     this.board.initialize();
     
-    // Send first turn notification
+    // Send hands to players and then first turn notification
+    sendHandsToPlayers();
     sendTurnNotification();
   }
 
@@ -129,7 +133,25 @@ public class Game {
       player.sendEvent(event);
     }
   }
-  
+
+  private void sendHandsToPlayers() {
+  	for (Player player : players) {
+  		// The basics
+  		JSONObject handNotification = new JSONObject();
+  		handNotification.put(Constants.EVENT_TYPE, EventType.HAND_NOTIFICATION);
+  		handNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+  		
+  		// Create array of cards of this player
+  		JSONArray handArray = new JSONArray();
+  		for (ICard card : player.getCards()) {
+  			handArray.put(card.toString());
+  		}
+  		
+  		handNotification.put(Constants.CARDS, handArray);
+  		player.sendEvent(handNotification);
+  	}
+  }
+
   private JSONObject makeGameStartNotification() {
   	JSONObject gameStart = new JSONObject();
   	gameStart.put(Constants.EVENT_TYPE, EventType.GAME_START_NOTIFICATION);

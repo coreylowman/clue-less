@@ -109,6 +109,15 @@ function suggestionChat(suggestion){
   sendToChatBox(suggestionChat);
 }
 
+function showHand(handEvent) {
+  var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
+  sendToChatBox(handChat);
+  
+  document.getElementById("hand").innerHTML = "";
+  for (var i = 0; i < handEvent.cards.length; i++) {
+    addCard(handEvent.cards[i]);
+  }
+}
 
 function highlightCard(cardName){
   var card = document.getElementById(cardName + "_card");
@@ -132,7 +141,6 @@ function provideEvidenceNotification(evidence){
   highlightCard(evidence.suspect);
   highlightCard(evidence.room);
   highlightCard(evidence.weapon);
-
 }
 
 function handleEvent(event){
@@ -144,15 +152,15 @@ function handleEvent(event){
       sendToChatBox(event.author + ': ' + event.body);
       break;
     case "JOIN_NOTIFICATION":
-    sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
-    break;
+      sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+      break;
     case "INVALID_REQUEST_NOTIFICATION":
-    alert("You cannot do that. " + event.reason);
-    break;
+      alert("You cannot do that. " + event.reason);
+      break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-    console.log("provide evidence");
-    provideEvidenceNotification(event);
-    break;
+      console.log("provide evidence");
+      provideEvidenceNotification(event);
+      break;
     case "SUGGESTION_NOTIFICATION":
     	suggestionChat(event);
     	console.log("suggestion");
@@ -160,21 +168,24 @@ function handleEvent(event){
     case "GAME_START_NOTIFICATION":
       sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
       break;
+    case "HAND_NOTIFICATION":
+      showHand(event);
+      break;
     case "TURN_NOTIFICATION":
-    handleTurnNotification(event);
-    break;
+      handleTurnNotification(event);
+      break;
     case "EVIDENCE_PROVIDED_NOTIFICATION":
-    handleEvidenceProvided(event);
-    break;
+      handleEvidenceProvided(event);
+      break;
     case "MOVE_NOTIFICATION":
       handleMoveNotification(event);
       break;
     case "ALLOW_TURN_END":
-    handleAllowTurnEnd();
-    break;
+      handleAllowTurnEnd();
+      break;
     default:
-    console.log("Invalid eventType received");
-    break;
+      console.log("Invalid eventType received");
+      break;
   }
 }
 

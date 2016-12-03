@@ -12,12 +12,12 @@ public class Weapon implements ICard, IBoardPiece {
   public static final Weapon KNIFE = new Weapon("Knife");
   public static final Weapon WRENCH = new Weapon("Wrench");
   public static final Weapon CANDLESTICK = new Weapon("Candlestick");
-  public static final Weapon PISTOL = new Weapon("Pistol");
+  public static final Weapon REVOLVER = new Weapon("Revolver");
 
   private static final Map<String, Weapon> weapons = new HashMap<>();
 
   static {
-    final Weapon[] weaponList = {ROPE, LEAD_PIPE, KNIFE, WRENCH, CANDLESTICK, PISTOL};
+    final Weapon[] weaponList = {ROPE, LEAD_PIPE, KNIFE, WRENCH, CANDLESTICK, REVOLVER};
     
     for (Weapon weapon : weaponList) {
       weapons.put(weapon.getName(), weapon);

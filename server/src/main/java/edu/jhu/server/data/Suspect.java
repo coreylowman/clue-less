@@ -1,42 +1,49 @@
 package edu.jhu.server.data;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Suspect implements IBoardPiece, ICard {
-  public static final String COLONEL_MUSTARD = "Colonel Mustard";
-  public static final String MISS_SCARLET = "Miss Scarlet";
-  public static final String PROFESSOR_PLUM = "Professor Plum";
-  public static final String MR_GREEN = "Mr. Green";
-  public static final String MRS_WHITE = "Mrs. White";
-  public static final String MRS_PEACOCK = "Mrs. Peacock";
+	
+  public static final Suspect COLONEL_MUSTARD = new Suspect("Colonel Mustard");
+  public static final Suspect MISS_SCARLET = new Suspect("Miss Scarlet");
+  public static final Suspect PROFESSOR_PLUM = new Suspect("Professor Plum");
+  public static final Suspect MR_GREEN = new Suspect("Mr. Green");
+  public static final Suspect MRS_WHITE = new Suspect("Mrs. White");
+  public static final Suspect MRS_PEACOCK = new Suspect("Mrs. Peacock");
 
-  private static Map<String, Suspect> suspects;
+  private static final Map<String, Suspect> suspects = new HashMap<>();
 
   static {
-    suspects = new HashMap<String, Suspect>();
-    String[] names =
+    final Suspect[] suspectList =
         {COLONEL_MUSTARD, MISS_SCARLET, PROFESSOR_PLUM, MR_GREEN, MRS_WHITE, MRS_PEACOCK};
-    for (String suspectName : names) {
-      Suspect suspect = new Suspect(suspectName);
+    
+    for (Suspect suspect : suspectList) {
+      suspects.put(suspect.getName(), suspect);
     }
   }
 
   public static Suspect get(String name) {
+  	if (name == null || name.isEmpty())
+  		throw new IllegalArgumentException("name was null or empty");
+  	
     return suspects.get(name);
   }
 
-  public static List<Suspect> getAll() {
-    return new ArrayList<Suspect>(suspects.values());
+  public static Collection<Suspect> getAll() {
+    return Collections.unmodifiableCollection(suspects.values());
   }
 
   private String name;
 
-  public Suspect(String name) {
-    suspects.put(name, this);
+  private Suspect(String name) {
     this.name = name;
+  }
+  
+  public String getName() {
+  	return name;
   }
 
   @Override

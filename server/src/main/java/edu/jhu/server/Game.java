@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
+import edu.jhu.server.data.ICard;
 import edu.jhu.server.data.Hallway;
 import edu.jhu.server.data.Suspect;
 
@@ -23,7 +24,7 @@ public class Game {
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
-    MOVE_REQUEST
+    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION
   }
   
   private static class Constants {
@@ -155,49 +156,112 @@ public class Game {
   private JSONObject makeMoveNotification(Suspect suspect, ILocation location) {
     JSONObject move = new JSONObject();
     move.put(Constants.EVENT_TYPE, EventType.MOVE_NOTIFICATION);
-    move.put(Constants.SUSPECT, suspect.getName());
+    move.put(Constants.SUSPECT, suspect.toString());
     move.put(Constants.LOCATION, location.toString());
     return move;
   }
-
-  private void provideEvidence(CaseFile casefile, Player suggester) {
-    Player playerWithEvidence = null;
-    for (Player player : players) {
-      if (player.getTag() != suggester.getTag() && (player.hasCard(casefile.getRoom())
-          || player.hasCard(casefile.getSuspect()) || player.hasCard(casefile.getWeapon()))) {
-        playerWithEvidence = player;
-        break;
-      }
-    }
-    if (playerWithEvidence == null) {
-      // FIXME: shouldn't this be a provide evidence outcome notification message?
-      JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
-      handleEvent(chat, null);
-    }
+  
+  private Player findPlayerWithEvidence(CaseFile casefile, Player suggester) {
+	  List<ICard> suspect = new ArrayList<ICard>();
+	  suspect.add(casefile.getRoom());
+	  Player playerWithEvidence = null;
+	  // next Player
+	  int nextPlayerIndex = this.currentTurnIndex + 1;
+	  for (int i = 0; i < players.size() - 1; i++){
+		  Player currentPlayer = players.get((i + nextPlayerIndex) % players.size());
+		  if(currentPlayer.hasCard(casefile.getRoom()) || 
+			currentPlayer.hasCard(casefile.getSuspect()) ||
+			currentPlayer.hasCard(casefile.getWeapon())) {
+				playerWithEvidence = currentPlayer;
+				break;
+		  }
+	  }	  
+	  return playerWithEvidence;
   }
-
+  
+  //This should ultimately be deleted, but I need it for
+  //testing
+  /*
+  private void spoofHand(Player player, ICard card){
+	  List<ICard> spoofHand = new ArrayList<ICard>();
+	  spoofHand.add(card);
+	  player.setCards(spoofHand);
+  }
+  */
+  
+  private void provideEvidenceNotification(Player evidenceHolder, CaseFile casefile){
+	  JSONObject evidenceNotification = new JSONObject();
+	  evidenceNotification.put(Constants.EVENT_TYPE, EventType.PROVIDE_EVIDENCE_NOTIFICATION);
+	  evidenceNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+	  evidenceNotification.put(Constants.SUSPECT, casefile.getSuspect().toString());
+	  evidenceNotification.put(Constants.WEAPON, casefile.getWeapon().toString());
+	  evidenceNotification.put(Constants.ROOM, casefile.getRoom().toString());
+	  evidenceHolder.sendEvent(evidenceNotification);
+  }
+  
+  private void provideEvidence(CaseFile casefile, Player suggester) {
+	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
+	  if (playerWithEvidence == null) {
+		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
+		  notifyPlayers(chat);
+		  JSONObject allowTurnEnd = new JSONObject();
+		  allowTurnEnd.put(Constants.EVENT_TYPE, EventType.ALLOW_TURN_END);
+		  suggester.sendEvent(allowTurnEnd);
+		  
+	  } else {
+		  provideEvidenceNotification(playerWithEvidence, casefile);
+		  
+	  }
+  }
+  
   private void handleSuggestion(JSONObject accusation, Player suggester) {
-    ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
-    Suspect theAccused = Suspect.get(accusation.get(Constants.SUSPECT).toString());
-    Weapon theWeapon = Weapon.KNIFE;
-    CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
-    if (suggestedRoom instanceof Room) {
-      JSONObject suggestion = new JSONObject();
-      suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
-      suggestion.put(Constants.SUGGESTER, suggester.getTag());
-      suggestion.put(Constants.ACCUSED, theAccused.toString());
-      suggestion.put(Constants.WEAPON, theWeapon.toString());
-      suggestion.put(Constants.ROOM, suggestedRoom.toString());
-      notifyPlayers(suggestion);
-      JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
-
-      board.movePiece(theAccused, suggestedRoom);
-      notifyPlayers(move);
-      provideEvidence(casefile, suggester);
-
-    } else {
-      handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
-    }
+	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
+	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
+	  Weapon theWeapon = Weapon.get(accusation.getString("weapon"));
+	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
+	  if (suggestedRoom instanceof Room) {
+		  		// give the second player a spoof hand
+		 /*
+		  if(players.size() > 2){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  		spoofHand(players.get(2), Suspect.get("Mrs. White"));
+		  	}
+		  	if(players.size() > 1){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  	}
+		  	*/
+			JSONObject suggestion = new JSONObject();
+			suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
+			suggestion.put(Constants.SUGGESTER, suggester.getTag());
+			suggestion.put(Constants.ACCUSED, theAccused.toString());
+			suggestion.put(Constants.WEAPON, theWeapon.toString());
+			suggestion.put(Constants.ROOM, suggestedRoom.toString());
+			notifyPlayers(suggestion);
+			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
+			
+			board.movePiece(theAccused, suggestedRoom);
+			notifyPlayers(move);
+			provideEvidence(casefile, suggester);
+			
+		} else {
+			handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
+		}
+  }
+  
+  
+  private void handleProvideEvidence(JSONObject evidence, Player player) {
+	  Player suggester = players.get(this.currentTurnIndex %  players.size());
+	  evidence.put(Constants.EVENT_TYPE, EventType.EVIDENCE_PROVIDED_NOTIFICATION);
+	  evidence.put(Constants.AUTHOR, player.getTag());
+	  suggester.sendEvent(evidence);
+	  notifyPlayers(makeChatMessage(player.getTag() + 
+			  " has disproven " +
+			  suggester.getTag() +
+			  	"'s suggestion."));
   }
 
   public void handleEvent(JSONObject event, Player player) {
@@ -207,17 +271,14 @@ public class Game {
         System.out.println("test event");
         break;
       case CHAT_NOTIFICATION:
+    	event.put("author", player.getTag());
         notifyPlayers(event);
         break;
       case END_TURN_REQUEST:
         handleEndTurnRequest(event);
         break;
       case SUGGESTION_REQUEST:
-        // FIXME: what is this?
-        board.initialize();
         Player suggester = player;
-        suggester.setSuspect(Suspect.MISS_SCARLET);
-        board.movePiece(suggester.getSuspect(), Room.STUDY);
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:
@@ -232,6 +293,9 @@ public class Game {
       case MOVE_REQUEST:
         handleMoveRequest(event, player);
         break;
+	  	case PROVIDE_EVIDENCE_REQUEST:
+	  	handleProvideEvidence(event, player);
+	  	break;
       default:
         System.out.println("invalid event type");
         break;

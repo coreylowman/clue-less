@@ -1,6 +1,7 @@
 var tag = "";
 var isMyTurn = true;
-var isEvidenceSelectionTime = false;
+var canSuggest = true;
+var canEndTurn = true;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -81,7 +82,6 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
-
 }
 
 init();
@@ -109,6 +109,32 @@ function suggestionChat(suggestion){
   sendToChatBox(suggestionChat);
 }
 
+
+function highlightCard(cardName){
+  var card = document.getElementById(cardName + "_card");
+  if(card !== null){
+    card.style.borderColor = "yellow";
+    card.onclick =  sendCardName(cardName);
+  }
+}
+
+function handleEvidenceProvided(evidence){
+  canEndTurn = true;
+  alert(evidence.author + " says that the crime did not involve " + evidence.evidence + ".");
+};
+
+function handleAllowTurnEnd(){
+  canEndTurn = true;
+};
+
+function provideEvidenceNotification(evidence){
+  alert("Please provide your evidence!");
+  highlightCard(evidence.suspect);
+  highlightCard(evidence.room);
+  highlightCard(evidence.weapon);
+
+}
+
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
@@ -118,15 +144,15 @@ function handleEvent(event){
       sendToChatBox(event.author + ': ' + event.body);
       break;
     case "JOIN_NOTIFICATION":
-      sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
-      break;
+    sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+    break;
     case "INVALID_REQUEST_NOTIFICATION":
-      alert("You cannot do that. " + event.reason);
-      break;
+    alert("You cannot do that. " + event.reason);
+    break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-      alert("Please provide your evidence!");
-      isEvidenceSelectionTime = true;
-      break;
+    console.log("provide evidence");
+    provideEvidenceNotification(event);
+    break;
     case "SUGGESTION_NOTIFICATION":
     	suggestionChat(event);
     	console.log("suggestion");
@@ -135,14 +161,20 @@ function handleEvent(event){
       sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
       break;
     case "TURN_NOTIFICATION":
-      handleTurnNotification(event);
-      break;
+    handleTurnNotification(event);
+    break;
+    case "EVIDENCE_PROVIDED_NOTIFICATION":
+    handleEvidenceProvided(event);
+    break;
     case "MOVE_NOTIFICATION":
       handleMoveNotification(event);
       break;
+    case "ALLOW_TURN_END":
+    handleAllowTurnEnd();
+    break;
     default:
-      console.log("Invalid eventType received");
-      break;
+    console.log("Invalid eventType received");
+    break;
   }
 }
 
@@ -210,30 +242,48 @@ function notPlayerTurn(){
   handleEvent(event);
 }
 
+function alreadyDidThat(){
+       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
+       handleEvent(alreadyDidThat);
+}
+
 function suggest(){
   if (isMyTurn){
-    var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
-    var suggestFormElements = document.getElementById("suggest_form").elements
-    suggestion.suspect = suggestFormElements[0].value;
-    suggestion.weapon = suggestFormElements[1].value;
-    websocket.send(JSON.stringify(suggestion));
+    if(canSuggest){
+      var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
+      var suggestFormElements = document.getElementById("suggest_form").elements;
+      suggestion.suspect = suggestFormElements[0].value;
+      suggestion.weapon = suggestFormElements[1].value;
+      websocket.send(JSON.stringify(suggestion));
+      canSuggest = false;
+      canEndTurn = false;
+     }else{
+       alreadyDidThat();
+     }
   }else{
     notPlayerTurn();
   }
 };
 
-function provideEvidence(){
-  console.log("providing evidence");
+
+// remove event listener and change border color back
+function resetCards(){
+  var cards = document.getElementsByClassName("card");
+  for(var i = 0; i < cards.length; i++){
+    cards[i].style.borderColor = "red";
+    cards[i].onclick = function() {
+      return false;
+    }
+  }
 }
 
 function sendCardName(cardName){
   return function(){
-    if(isEvidenceSelectionTime){
-      var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
-
-      websocket.send(JSON.stringify(evidenceRequest));
-    }
+    var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
+    websocket.send(JSON.stringify(evidenceRequest));
+    resetCards();
   }
+
 };
 
 function addCard(cardName){
@@ -241,7 +291,7 @@ function addCard(cardName){
   var card = document.createElement("card");
   card.innerHTML += cardName;
   card.className += "card";
-  card.id = cardName;
-  card.addEventListener("click",  sendCardName(cardName));
+  card.id = cardName + "_card";
+
   hand.appendChild(card);
 }

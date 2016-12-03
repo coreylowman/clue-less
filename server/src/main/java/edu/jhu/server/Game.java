@@ -182,11 +182,13 @@ public class Game {
   
   //This should ultimately be deleted, but I need it for
   //testing
+  /*
   private void spoofHand(Player player, ICard card){
 	  List<ICard> spoofHand = new ArrayList<ICard>();
 	  spoofHand.add(card);
 	  player.setCards(spoofHand);
   }
+  */
   
   private void provideEvidenceNotification(Player evidenceHolder, CaseFile casefile){
 	  JSONObject evidenceNotification = new JSONObject();
@@ -216,7 +218,8 @@ public class Game {
 	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 	  if (suggestedRoom instanceof Room) {
 		  		// give the second player a spoof hand
-		  	if(players.size() > 2){
+		 /*
+		  if(players.size() > 2){
 		  		currentTurnIndex = 1;
 		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
 		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
@@ -227,6 +230,7 @@ public class Game {
 		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
 		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
 		  	}
+		  	*/
 			JSONObject suggestion = new JSONObject();
 			suggestion.put("eventType", "SUGGESTION_NOTIFICATION");
 			suggestion.put("suggester", suggester.getTag());
@@ -270,10 +274,7 @@ public class Game {
         handleEndTurnRequest(event);
         break;
       case SUGGESTION_REQUEST:
-        // FIXME: what is this?
-        board.initialize();
         Player suggester = player;
-        board.movePiece(suggester.getSuspect(), Room.get("Study"));
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:

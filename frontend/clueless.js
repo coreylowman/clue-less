@@ -82,7 +82,6 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
-  addCard("Mrs. Peacock");
 }
 
 init();

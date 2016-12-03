@@ -72,8 +72,9 @@ public class Game {
     return this.gameStarted;
   }
 
+  //REMEMBER TO CHANGE THIS BACK TO 6
   public boolean isFull() {
-    return this.players.size() == 6;
+    return this.players.size() == 3;
   }
 
   public void start() {
@@ -270,7 +271,7 @@ public class Game {
 			provideEvidence(casefile, suggester);
 			
 		} else {
-			handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
+			suggester.sendEvent(makeInvalidRequestMessage("You are not in a room."));
 		}
   }
   
@@ -296,9 +297,6 @@ public class Game {
     	event.put("author", player.getTag());
         notifyPlayers(event);
         break;
-      case END_TURN_REQUEST:
-        handleEndTurnRequest(event);
-        break;
       case SUGGESTION_REQUEST:
         Player suggester = player;
         handleSuggestion(event, suggester);
@@ -315,9 +313,12 @@ public class Game {
       case MOVE_REQUEST:
         handleMoveRequest(event, player);
         break;
-	  	case PROVIDE_EVIDENCE_REQUEST:
+	  case PROVIDE_EVIDENCE_REQUEST:
 	  	handleProvideEvidence(event, player);
 	  	break;
+      case END_TURN_REQUEST:
+    	handleEndTurnRequest(player);
+    	break;
       default:
         System.out.println("invalid event type");
         break;
@@ -327,13 +328,13 @@ public class Game {
   private void handleMoveRequest(JSONObject request, Player player) {
     // a player may move only if it is their turn
     if (!isPlayersTurn(player)) {
-      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      player.sendEvent(makeInvalidRequestMessage("It is not your turn."));
       return;
     }
     
     // a player cannot move if they have already moved
     if (playerHasMoved) {
-      handleEvent(makeInvalidRequestMessage("You have already moved."), player);
+      player.sendEvent(makeInvalidRequestMessage("You have already moved."));
       return;
     }
     
@@ -346,7 +347,7 @@ public class Game {
     
     // check the validity of the move
     if (dest == null || !board.isMoveValid(player.getSuspect(), dest)) {
-      handleEvent(makeInvalidRequestMessage("Invalid move."), player);
+      player.sendEvent(makeInvalidRequestMessage("Invalid move."));
       return;
     }
     
@@ -369,7 +370,7 @@ public class Game {
   public void handleAccusationRequest(JSONObject request, Player player) {
     // a player may make an accusation at any time as long as it is their turn
     if (!isPlayersTurn(player)) {
-      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      player.sendEvent(makeInvalidRequestMessage("It is not your turn."));
       return;
     }
     
@@ -379,7 +380,7 @@ public class Game {
     final Weapon weapon = Weapon.get(request.getString(Constants.WEAPON));
     
     if (room == null || suspect == null || weapon == null) {
-      handleEvent(makeInvalidRequestMessage("Invalid Case File."), player);
+      player.sendEvent(makeInvalidRequestMessage("Invalid Case File."));
       return;
     }
     
@@ -429,21 +430,25 @@ public class Game {
       // this player's turn is now over
       final JSONObject endTurnRequest = new JSONObject();
       endTurnRequest.put(Constants.EVENT_TYPE, EventType.END_TURN_REQUEST);
-      handleEvent(endTurnRequest, player);
+      handleEndTurnRequest(player);
     }
   }
 
-  public void handleEndTurnRequest(JSONObject request) {
-    // keep going until we get to a player that is allowed additional turns
-    do {
-      currentTurnIndex = (currentTurnIndex + 1) % players.size();
-    } while (players.get(currentTurnIndex).getHasLost());
+  public void handleEndTurnRequest(Player player) {
+	  if (!isPlayersTurn(player)){
+		  player.sendEvent(makeInvalidRequestMessage("It's not your turn."));
+	  }
+	  else{
+	// keep going until we get to a player that is allowed additional turns
+		  do {
+			  currentTurnIndex = (currentTurnIndex + 1) % players.size();
+		  } while (players.get(currentTurnIndex).getHasLost());
     
-    playerHasMoved = false;
+		  playerHasMoved = false;
     
-    sendTurnNotification();
+		  sendTurnNotification();
+	  }
   }
-
   private void handleJoinRequest(JSONObject request, Player author) {
 	  
 	  author.setTag(request.getString(Constants.PLAYER_TAG));

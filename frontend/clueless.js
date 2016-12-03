@@ -128,8 +128,11 @@ function handleEvent(event){
       isEvidenceSelectionTime = true;
       break;
     case "SUGGESTION_NOTIFICATION":
-      suggestionChat(event);
-      console.log("suggestion");
+    	suggestionChat(event);
+    	console.log("suggestion");
+    break;
+    case "GAME_START_NOTIFICATION":
+      sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
       break;
     case "TURN_NOTIFICATION":
       handleTurnNotification(event);

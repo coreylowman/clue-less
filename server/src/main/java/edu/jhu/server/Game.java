@@ -268,6 +268,7 @@ public class Game {
         System.out.println("test event");
         break;
       case CHAT_NOTIFICATION:
+    	event.put("author", player.getTag());
         notifyPlayers(event);
         break;
       case END_TURN_REQUEST:

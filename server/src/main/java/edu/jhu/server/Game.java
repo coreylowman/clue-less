@@ -80,6 +80,11 @@ public class Game {
   		timer.purge();
   	}
   	
+  	// Someone left while timer was going, we can't start yet
+  	if (this.players.size() < 3) {
+  	  return;
+  	}
+  	
   	// Send game start notification
   	notifyPlayers(makeGameStartNotification());
   	

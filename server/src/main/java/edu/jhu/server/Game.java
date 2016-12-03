@@ -167,14 +167,13 @@ public class Game {
 	  Player playerWithEvidence = null;
 	  // next Player
 	  int nextPlayerIndex = this.currentTurnIndex + 1;
-	  for (int i = 0; i < players.size(); i++){
+	  for (int i = 0; i < players.size() - 1; i++){
 		  Player currentPlayer = players.get((i + nextPlayerIndex) % players.size());
-		  if(currentPlayer.getTag() != suggester.getTag() && 
-					(currentPlayer.hasCard(casefile.getRoom()) || 
-					currentPlayer.hasCard(casefile.getSuspect()) ||
-					currentPlayer.hasCard(casefile.getWeapon()))) {
-					  playerWithEvidence = currentPlayer;
-					  break;
+		  if(currentPlayer.hasCard(casefile.getRoom()) || 
+			currentPlayer.hasCard(casefile.getSuspect()) ||
+			currentPlayer.hasCard(casefile.getWeapon())) {
+				playerWithEvidence = currentPlayer;
+				break;
 		  }
 	  }	  
 	  return playerWithEvidence;

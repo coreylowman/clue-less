@@ -80,9 +80,8 @@ public class Game {
     return this.gameStarted;
   }
 
-  //REMEMBER TO CHANGE THIS BACK TO 6
   public boolean isFull() {
-    return this.players.size() == 3;
+    return this.players.size() == 6;
   }
 
   public void start() {

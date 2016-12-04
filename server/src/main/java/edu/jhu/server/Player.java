@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
@@ -103,7 +102,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-
     playerHolder.handleEvent(JSONMessage, this);
   }
 }

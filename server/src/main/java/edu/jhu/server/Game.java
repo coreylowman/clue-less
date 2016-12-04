@@ -21,7 +21,7 @@ import edu.jhu.server.data.Weapon;
 public class Game {
   private static enum EventType {
     TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
-    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
+    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
     MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
@@ -109,9 +109,31 @@ public class Game {
 
     player.setSuspect(this.remainingSuspects.remove(0));
 
-    // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
-    // the WebSocket session might not be set up here, and JOIN_REQUEST allows
-    // the player to set their tag.
+    JSONObject joinNotification = new JSONObject();
+
+    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+    joinNotification.put(Constants.PLAYER_TAG, player.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
+
+    notifyPlayers(joinNotification);
+   
+    // Once we reach 3 players, we can start the game. So start a 5 minute
+    //  timer!
+    if (this.players.size() == 3 && timer == null) {
+        timer = new Timer();
+        
+        // In 5 minutes, start the game.
+        timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    start();
+                }
+            }, Constants.START_GAME_AFTER_MS);
+    }
+    // Start game if it's full now
+    if (isFull()) {
+        start();
+    }
   }
 
   public void sendTurnNotification() {
@@ -304,9 +326,6 @@ public class Game {
       case INVALID_REQUEST_NOTIFICATION:
         player.sendEvent(event);
         break;
-      case JOIN_REQUEST:
-        handleJoinRequest(event, player);
-        break;
       case ACCUSATION_REQUEST:
         handleAccusationRequest(event, player);
         break;
@@ -448,36 +467,5 @@ public class Game {
     
 		  sendTurnNotification();
 	  }
-  }
-  private void handleJoinRequest(JSONObject request, Player author) {
-	  
-	  author.setTag(request.getString(Constants.PLAYER_TAG));
-
-    JSONObject joinNotification = new JSONObject();
-
-    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
-    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
-    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
-
-    notifyPlayers(joinNotification);
-   
-  	
-  	// Once we reach 3 players, we can start the game. So start a 5 minute
-  	//	timer!
-  	if (this.players.size() == 3 && timer == null) {
-  		timer = new Timer();
-  		
-  		// In 5 minutes, start the game.
-  		timer.schedule(new TimerTask() {
-			    @Override
-			    public void run() {
-			        start();
-			    }
-			}, Constants.START_GAME_AFTER_MS);
-  	}
-    // Start game if it's full now
-  	if (isFull()) {
-  		start();
-  	}
   }
 }

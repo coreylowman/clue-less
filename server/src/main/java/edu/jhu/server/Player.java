@@ -15,7 +15,7 @@ import edu.jhu.server.data.Suspect;
 
 public class Player extends WebSocketAdapter {
   private static enum LobbyEventType {
-    GAMES_REQUEST, JOIN_GAME_REQUEST, CREATE_GAME_REQUEST
+    GAMES_REQUEST, JOIN_REQUEST, CREATE_GAME_REQUEST
   }
 
   private Session session;
@@ -101,8 +101,9 @@ public class Player extends WebSocketAdapter {
         sendEvent(notification);
         break;
       }
-      case JOIN_GAME_REQUEST:
-        ClueLessServer.joinGame(event.getString("name"), this);
+      case JOIN_REQUEST:
+        setTag(event.getString("playerTag"));
+        ClueLessServer.joinGame(event.getString("game"), this);
         this.inLobby = false;
         break;
       case CREATE_GAME_REQUEST: {

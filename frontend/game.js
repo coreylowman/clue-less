@@ -1,40 +1,15 @@
-var tag = "";
+var tag = parent.tag;
 var isMyTurn = true;
 var canSuggest = true;
 var canEndTurn = true;
-var websocket = sessionStorage.websocket;
-var gameName = sessionStorage.gameName;
 
-function establishWebsocket() {
-    // if user is running mozilla then use it's built-in WebSocket
-    window.WebSocket = window.WebSocket || window.MozWebSocket;
+// this script is loaded within an iframe, so grab the websocket from the parent
+var websocket = parent.websocket;
 
-  //establish connection at localhost:3000
-    var connection = new WebSocket('ws://127.0.0.1:3000');
-
-    //takes care of any initial action upon opening of websocket
-    connection.onopen = function () {
-      console.log('opened');
-
-      // send JOIN_REQUEST
-      tag = prompt("Please enter your name");
-      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag, game: gameName };
-      connection.send(JSON.stringify(joinRequest));
-    };
-
-    connection.onerror = function (error) {
-      console.log('websocket messed up');
-    };
-
-    connection.onmessage = function(message){
-      console.log(message);
-      handleEvent(JSON.parse(message.data));
-    };
-
-  return connection;
-}
-
-var websocket = establishWebsocket();
+websocket.onmessage = function(message){
+  console.log('game onmessage: ' + message.data);
+  handleEvent(JSON.parse(message.data));
+};
 
 // if a room is passed in, nothing changes
 // if a hallway is passed in and the names are reversed (e.g. Hallway_Study instead

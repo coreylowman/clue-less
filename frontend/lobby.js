@@ -1,31 +1,14 @@
-function establishWebsocket() {
-    // if user is running mozilla then use it's built-in WebSocket
-    window.WebSocket = window.WebSocket || window.MozWebSocket;
+// this script is loaded within an iframe, so grab the websocket from the parent
+var websocket = parent.websocket;
 
-  //establish connection at localhost:3000
-    var connection = new WebSocket('ws://127.0.0.1:3000');
+websocket.onmessage = function(message){
+  console.log("lobby onmessage: " + message.data);
+  handleEvent(JSON.parse(message.data));
+};
 
-    //takes care of any initial action upon opening of websocket
-    connection.onopen = function () {
-      console.log('opened');
-
-      var gameRequest = {eventType: "GAMES_REQUEST"};
-      connection.send(JSON.stringify(gameRequest));
-    };
-
-    connection.onerror = function (error) {
-      console.log('websocket messed up');
-    };
-
-    connection.onmessage = function(message){
-      console.log(message);
-      handleEvent(JSON.parse(message.data));
-    };
-
-  return connection;
-}
-
-var websocket = establishWebsocket();
+// websocket has alreayd been opened at this point
+var gameRequest = {eventType: "GAMES_REQUEST"};
+websocket.send(JSON.stringify(gameRequest));
 
 function createGame() {
   var name = document.getElementById("createName").value;
@@ -35,8 +18,10 @@ function createGame() {
 }
 
 function joinGame(name) {
-  sessionStorage.gameName = name;
-  window.location.href = "clueless.html"
+  parent.tag = prompt("Please enter your name");
+  parent.goto("game.html");
+  var joinRequest = {eventType: "JOIN_REQUEST", playerTag: parent.tag, game: name };
+  websocket.send(JSON.stringify(joinRequest));
 }
 
 function createGameElement(name) {

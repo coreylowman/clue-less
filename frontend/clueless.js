@@ -102,22 +102,29 @@ function sendChat(){
   }
 }
 
+function tag(message) {
+  return "[" + message + "] ";
+}
+
+function bold(message) {
+  return "<b>" + message + "</b>";
+}
+
 function sendToChatBox(message){
-  document.getElementById("chat_text").value += message + '\n';
+  var text = document.getElementById("chat_text");
+  text.innerHTML += message + "</br>";
+  text.scrollTop = text.scrollHeight;
 }
 
 function suggestionChat(suggestion){
-  var suggestionChat = "Game: " +
-    suggestion.suggester + " suggests that it was " +
-    suggestion.accused + " with the " + suggestion.weapon + " in the " +
-    suggestion.room + ".";
+  var suggestionChat = bold(tag("Game")) +
+    bold(suggestion.suggester) + " suggests that it was " +
+    bold(suggestion.accused) + " with the " + bold(suggestion.weapon) + " in the " +
+    bold(suggestion.room) + ".";
   sendToChatBox(suggestionChat);
 }
 
 function showHand(handEvent) {
-  var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
-  sendToChatBox(handChat);
-  
   document.getElementById("hand").innerHTML = "";
   for (var i = 0; i < handEvent.cards.length; i++) {
     addCard(handEvent.cards[i]);
@@ -127,14 +134,14 @@ function showHand(handEvent) {
 function highlightCard(cardName){
   var card = document.getElementById(cardName + "_card");
   if(card !== null){
-    card.style.borderColor = "yellow";
+    card.className += " selectable";
     card.onclick =  sendCardName(cardName);
   }
 }
 
 function handleEvidenceProvided(evidence){
   canEndTurn = true;
-  alert(evidence.author + " says that the crime did not involve " + evidence.evidence + ".");
+  sendToChatBox(bold(tag("Game")) + bold(evidence.author) + " says that the crime did not involve " + bold(evidence.evidence) + ".");
 };
 
 function handleAllowTurnEnd(){
@@ -154,10 +161,10 @@ function handleEvent(event){
       console.log("this is only a test")
       break;
     case "CHAT_NOTIFICATION":
-      sendToChatBox(event.author + ': ' + event.body);
+      sendToChatBox(bold(tag(event.author)) + event.body);
       break;
     case "JOIN_NOTIFICATION":
-      sendToChatBox(event.playerTag + " (" + event.playerSuspect + ") has joined!");
+      sendToChatBox(bold(event.playerTag + " (" + event.playerSuspect + ") has joined!"));
       break;
     case "INVALID_REQUEST_NOTIFICATION":
       alert("You cannot do that. " + event.reason);
@@ -171,7 +178,7 @@ function handleEvent(event){
     	console.log("suggestion");
     break;
     case "GAME_START_NOTIFICATION":
-      sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
+      sendToChatBox(bold(tag("Game")) + 'Get a Clue!! The game is starting...NOW!');
       break;
     case "HAND_NOTIFICATION":
       showHand(event);
@@ -293,7 +300,7 @@ function suggest(){
 function resetCards(){
   var cards = document.getElementsByClassName("card");
   for(var i = 0; i < cards.length; i++){
-    cards[i].style.borderColor = "red";
+    cards[i].className = cards[i].className.replace(" selectable", "");
     cards[i].onclick = function() {
       return false;
     }
@@ -306,7 +313,6 @@ function sendCardName(cardName){
     websocket.send(JSON.stringify(evidenceRequest));
     resetCards();
   }
-
 };
 
 function addCard(cardName){

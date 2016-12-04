@@ -243,7 +243,7 @@ function handleSecretCard(secretCard){
         secretCard.accused +
         " in the " +
         secretCard.room +
-        "with the " +
+        " with the " +
         secretCard.weapon + ".");
 }
 

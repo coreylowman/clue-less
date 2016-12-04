@@ -63,7 +63,7 @@
     </select>
   </form>
   <button id="suggest_button" onclick="suggest()">Suggest</button>
-  <form>
+  <form id="accuse_form">
     <select id="accuse_suspect">
       <option>Mrs. Peacock</option>
       <option>Professor Plum</option>
@@ -91,7 +91,7 @@
       <option>Study</option>
       <option>Hall</option>
     </select>
-    <button id="accuse_button" onclick="accuse()">Accuse</button>
+    <button id="accuse_button" onclick="accuse(); return false">Accuse</button>
   </form>
   <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">

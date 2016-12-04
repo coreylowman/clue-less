@@ -81,7 +81,7 @@ public class Game {
   }
 
   public boolean isFull() {
-    return this.players.size() == 6;
+    return this.players.size() == 3;
   }
 
   public void start() {
@@ -440,12 +440,13 @@ public class Game {
     // send accusation outcome notification to all players
     final JSONObject accusationOutcomeNotification = new JSONObject();
     accusationOutcomeNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_OUTCOME_NOTIFICATION);
-    accusationNotification.put(Constants.ACCUSER, player.getTag());
-    accusationNotification.put(Constants.OUTCOME, String.valueOf(outcome));
+    accusationOutcomeNotification.put(Constants.ACCUSER, player.getTag());
+    accusationOutcomeNotification.put(Constants.OUTCOME, String.valueOf(outcome));
     notifyPlayers(accusationOutcomeNotification);
     
     if (outcome) {
-      // player wins, end the game
+      notifyPlayers(secretCardNotification);
+    	// player wins, end the game
       
       // TODO: actually end the game somehow
       

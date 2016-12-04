@@ -382,5 +382,10 @@ function addCard(cardName){
   card.className += "card";
   card.id = cardName + "_card";
 
+  var img = document.createElement("img");
+  img.setAttribute("src", "images/" + cardName.replace(" ", "").replace(".", "") + ".png");
+  img.setAttribute("width", "100%");
+  card.appendChild(img);
+
   hand.appendChild(card);
 }

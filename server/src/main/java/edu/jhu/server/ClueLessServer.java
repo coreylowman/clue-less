@@ -22,6 +22,7 @@ public class ClueLessServer {
       WebSocketHandler wsHandler = new WebSocketHandler() {
         @Override
         public void configure(WebSocketServletFactory factory) {
+          factory.getPolicy().setIdleTimeout(20 * 60 * 1000); // 20 min. timeout on web sockets
           factory.setCreator(new WebSocketCreator() {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
               Player player = new Player("player" + String.valueOf(id++));

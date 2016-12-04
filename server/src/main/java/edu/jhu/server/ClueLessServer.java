@@ -1,58 +1,26 @@
 package edu.jhu.server;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.json.JSONObject;
 
 public class ClueLessServer {
 
   static int id;
-  static Map<String, Game> availableGames;
-  static Set<Player> noGamePlayers;
-
-  public static void createGame(String name) {
-    availableGames.put(name, new Game());
-  }
-
-  public static void joinGame(String name, Player player) {
-    Game game = availableGames.get(name);
-    game.addPlayer(player);
-    noGamePlayers.remove(player);
-
-    if (game.isStarted() || game.isFull()) {
-      availableGames.remove(name);
-
-      JSONObject notification = new JSONObject();
-      notification.put("eventType", "GAME_REMOVED_NOTIFICATION");
-      notification.put("name", name);
-      notifyWaitingPlayers(notification);
-    }
-  }
-
-  public static Set<String> getGameNames() {
-    return availableGames.keySet();
-  }
-
-  public static void notifyWaitingPlayers(JSONObject event) {
-    for (Player player : noGamePlayers) {
-      player.sendEvent(event);
-    }
-  }
+  static Lobby lobby;
 
   public static void main(String[] args) throws Exception {
     id = 0;
-    availableGames = new HashMap<>();
-    noGamePlayers = new HashSet<>();
+    lobby = new Lobby();
 
     try {
       WebSocketHandler wsHandler = new WebSocketHandler() {
@@ -62,15 +30,21 @@ public class ClueLessServer {
           factory.setCreator(new WebSocketCreator() {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
               Player player = new Player("player" + String.valueOf(id++));
-              noGamePlayers.add(player);
+              lobby.addPlayer(player);
               return player;
             }
           });
         }
       };
 
+      ResourceHandler resHandler = new ResourceHandler();
+      resHandler.setResourceBase("../frontend");
+
+      HandlerList handlers = new HandlerList();
+      handlers.setHandlers(new Handler[] {wsHandler, resHandler});
+
       Server server = new Server(new InetSocketAddress(3000));
-      server.setHandler(wsHandler);
+      server.setHandler(handlers);
       server.start();
       server.join();
     } catch (Throwable t) {

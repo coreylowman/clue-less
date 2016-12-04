@@ -18,7 +18,7 @@ import edu.jhu.server.data.ILocation;
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
-public class Game {
+public class Game implements PlayerHolder {
   private static enum EventType {
     TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, END_TURN_REQUEST,
@@ -102,10 +102,14 @@ public class Game {
     sendHandsToPlayers();
     sendTurnNotification();
   }
+  
+  public void removePlayer(Player player) {
+    // todo
+  }
 
   public void addPlayer(Player player) {
     this.players.add(player);
-    player.setGame(this);
+    player.setPlayerHolder(this);
 
     player.setSuspect(this.remainingSuspects.remove(0));
 

@@ -1,4 +1,4 @@
-var tag = "";
+var playerTag = "";
 var isMyTurn = true;
 var canSuggest = true;
 var canEndTurn = true;
@@ -18,8 +18,8 @@ function establishWebsocket() {
       connection.send(JSON.stringify({eventType:'TEST'}));
 
       // send JOIN_REQUEST
-      tag = prompt("Please enter your name");
-      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
+      playerTag = prompt("Please enter your name");
+      var joinRequest = {eventType: "JOIN_REQUEST", playerTag: playerTag };
       connection.send(JSON.stringify(joinRequest));
     };
 
@@ -106,8 +106,8 @@ function tag(message) {
   return "[" + message + "] ";
 }
 
-function bold(message) {
-  return "<b>" + message + "</b>";
+function bold(message, attrs = "") {
+  return "<b style=\"" + attrs + "\">" + message + "</b>";
 }
 
 function sendToChatBox(message){
@@ -117,7 +117,7 @@ function sendToChatBox(message){
 }
 
 function suggestionChat(suggestion){
-  var suggestionChat = bold(tag("Game")) +
+  var suggestionChat = tag("Game") +
     bold(suggestion.suggester) + " suggests that it was " +
     bold(suggestion.accused) + " with the " + bold(suggestion.weapon) + " in the " +
     bold(suggestion.room) + ".";
@@ -141,7 +141,7 @@ function highlightCard(cardName){
 
 function handleEvidenceProvided(evidence){
   canEndTurn = true;
-  sendToChatBox(bold(tag("Game")) + bold(evidence.author) + " says that the crime did not involve " + bold(evidence.evidence) + ".");
+  sendToChatBox(tag("Game") + bold(evidence.author) + " says that the crime did not involve " + bold(evidence.evidence) + ".");
 };
 
 function handleAllowTurnEnd(){
@@ -156,29 +156,28 @@ function provideEvidenceNotification(evidence){
 }
 
 function handleEvent(event){
+  console.log(event);
   switch(event.eventType){
     case "TEST":
       console.log("this is only a test")
       break;
     case "CHAT_NOTIFICATION":
-      sendToChatBox(bold(tag(event.author)) + event.body);
+      sendToChatBox(tag(event.author) + event.body);
       break;
     case "JOIN_NOTIFICATION":
-      sendToChatBox(bold(event.playerTag + " (" + event.playerSuspect + ") has joined!"));
+      sendToChatBox(tag("Game") + bold(event.playerTag + " (" + event.playerSuspect + ")") + " has joined!");
       break;
     case "INVALID_REQUEST_NOTIFICATION":
       alert("You cannot do that. " + event.reason);
       break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-      console.log("provide evidence");
       provideEvidenceNotification(event);
       break;
     case "SUGGESTION_NOTIFICATION":
-    	suggestionChat(event);
-    	console.log("suggestion");
-    break;
+      suggestionChat(event);
+      break;
     case "GAME_START_NOTIFICATION":
-      sendToChatBox(bold(tag("Game")) + 'Get a Clue!! The game is starting...NOW!');
+      sendToChatBox(tag("Game") + 'Get a Clue!! The game is starting...NOW!');
       break;
     case "HAND_NOTIFICATION":
       showHand(event);
@@ -202,7 +201,7 @@ function handleEvent(event){
 }
 
 function handleMoveNotification(notification) {
-  sendToChatBox(notification.suspect + " moved to " + notification.location);
+  sendToChatBox(tag("Game")  + bold(notification.suspect) + " moved to " + bold(notification.location));
 
   moveTo(notification.suspect, notification.location);
 }
@@ -242,14 +241,14 @@ function addMoveRequestOnClickTo(elementIds) {
 // handle a turn notification from the server
 // if its our turn then display valid moves & let the player suggest/accuse/end turn
 function handleTurnNotification(notification) {
-  sendToChatBox("It is " + notification.playerTag + "'s turn.");
+  sendToChatBox(tag("Game") + "It's " + bold(notification.playerTag) + "'s turn.");
 
   // make sure all the valid moves have the correct ids
   notification.validMoves.forEach(function(val, ind, arr) {
     arr[ind] = getLocationName(val);
   });
 
-  if (notification.playerTag === tag) {
+  if (notification.playerTag === playerTag) {
     // make valid locations clickable and enable all turn buttons
     console.log(notification.validMoves);
     addMoveRequestOnClickTo(notification.validMoves);
@@ -273,8 +272,8 @@ function notPlayerTurn(){
 }
 
 function alreadyDidThat(){
-       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
-       handleEvent(alreadyDidThat);
+  var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
+  handleEvent(alreadyDidThat);
 }
 
 function suggest(){

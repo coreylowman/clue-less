@@ -7,22 +7,20 @@
 	<script src="clueless.js" defer></script>
     </head>
     <body>
-      <div id="status">Connecting...</div>
-	<!-- page content -->
   <table id="board" width="800" height="600">
             <tr>
                 <td id="Study" class="room">Study</td>
                 <td><div id="Study_Hall" class="horizontal_hallway"></div></td>
                 <td id="Hall" class="room">Hall</td>
-                <td><div id="Hall_Lounge" class="horizontal_hallway"><div id="Miss Scarlet"></div></div></td>
+                <td><div id="Hall_Lounge" class="horizontal_hallway"><div id="Miss Scarlet" style="background-color: red;" class="suspect"></div></div></td>
                 <td id="Lounge" class="room">Lounge</td>
             </tr>
             <tr>
-                <td><div id="Study_Library" class="vert_hallway"><div id="Professor Plum"></div></div></td>
+                <td><div id="Study_Library" class="vert_hallway"><div id="Professor Plum" style="background-color: purple;" class="suspect"></div></div></td>
                 <td></td>
                 <td><div id="Hall_Billiard Room" class="vert_hallway"></div></td>
                 <td></td>
-                <td><div id="Lounge_Dining Room" class="vert_hallway"><div id="Colonel Mustard"></div></div></td>
+                <td><div id="Lounge_Dining Room" class="vert_hallway"><div id="Colonel Mustard" style="background-color: yellow;" class="suspect"></div></div></td>
             </tr>
             <tr>
                 <td id="Library" class="room">Library</td>
@@ -32,7 +30,7 @@
                 <td id="Dining Room" class="room">Dining Room</td>
                 </tr>
             <tr>
-                <td><div id="Library_Conservatory" class="vert_hallway"><div id="Mrs. Peacock"></div></div></td>
+                <td><div id="Library_Conservatory" class="vert_hallway"><div id="Mrs. Peacock" style="background-color: blue;" class="suspect"></div></div></td>
                 <td></td>
                 <td><div id="Billiard Room_Ballroom" class="vert_hallway"></div></td>
                 <td></td>
@@ -40,13 +38,12 @@
             </tr>
             <tr>
                 <td id="Conservatory" class="room">Conservatory</td>
-                <td><div id="Conservatory_Ballroom" class="horizontal_hallway"><div id="Mr. Green"></div></div></td>
+                <td><div id="Conservatory_Ballroom" class="horizontal_hallway"><div id="Mr. Green" style="background-color: green;" class="suspect"></div></div></td>
                 <td id="Ballroom" class="room">Ballroom</td>
-                <td><div id="Ballroom_Kitchen" class="horizontal_hallway"><div id="Mrs. White"></div></div></td>
+                <td><div id="Ballroom_Kitchen" class="horizontal_hallway"><div id="Mrs. White" class="suspect"></div></div></td>
                 <td id="Kitchen" class="room">Kitchen</td>
             </tr>
-        </table> 
-  <button onclick="addCard('Mrs. Peacock')">test move</button>
+        </table>
   <form id="suggest_form">
     <select id="suggest_suspect">
       <option>Mrs. Peacock</option>
@@ -61,11 +58,11 @@
       <option>Rope</option>
       <option>Revolver</option>
       <option>Candlestick</option>
-      <option>Lead pipe</option>
+      <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
+    <button id="suggest_button" onclick="suggest()">Suggest</button>
   </form>
-  <button onclick="suggest()">Suggest</button>
   <form>
     <select id="accuse_suspect">
       <option>Mrs. Peacock</option>
@@ -80,7 +77,7 @@
       <option>Rope</option>
       <option>Revolver</option>
       <option>Candlestick</option>
-      <option>Lead pipe</option>
+      <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
     <select id="accuse_room">
@@ -95,16 +92,10 @@
       <option>Hall</option>
     </select>
     <button id="accuse_button" onclick="accuse()">Accuse</button>
-    <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   </form>
+  <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">
     <div id="hand">
-      <div class="card">Card1</div>
-      <div class="card">Card2</div>
-      <div class="card">Card3</div>
-      <div class="card">Card4</div>
-      <div class="card">Card5</div>
-      <div class="card">Card6</div>
     </div>
   </div>
   <div id="chat_container">
@@ -128,7 +119,7 @@
     <input type="checkbox" name="weapons">Rope<br>
     <input type="checkbox" name="weapons">Revolver<br>
     <input type="checkbox" name="weapons">Candlestick<br>
-    <input type="checkbox" name="weapons">Lead pipe<br>
+    <input type="checkbox" name="weapons">Lead Pipe<br>
     <input type="checkbox" name="weapons">Wrench<br>
     <br>
     <input type="checkbox" name="rooms">Billiard Room<br>

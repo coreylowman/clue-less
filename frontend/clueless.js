@@ -1,7 +1,8 @@
 var tag = "";
 var isMyTurn = true;
-var isEvidenceSelectionTime = false;
 var webSocket = sessionStorage.webSocket;
+var canSuggest = true;
+var canEndTurn = true;
 
 webSocket.onmessage = function(message){
   console.log(message);
@@ -13,18 +14,25 @@ tag = prompt("Please enter your name");
 var joinRequest = {eventType: "JOIN_REQUEST", playerTag: tag };
 connection.send(JSON.stringify(joinRequest));
 
+// if a room is passed in, nothing changes
+// if a hallway is passed in and the names are reversed (e.g. Hallway_Study instead
+// of Study_Hallway, then it reverses them)
+function getLocationName(location) {
+  if (location.includes("_")) {
+    if (document.getElementById(location) == null) {
+      var pair = location.split("_");
+      location = pair[1] + "_" + pair[0];
+    }
+  }
+  return location;
+}
+
 // moves character HTML element into destination HTML element
 // refer to style.css for names
 // eg
 // moveTo('col_mustard', 'study');
 function moveTo(character, destination){
-  if (destination.includes("_")) {
-    if (document.getElementById(destination) == null) {
-      var pair = destination.split("_");
-      destination = pair[1] + "_" + pair[0];
-    }
-  }
-
+  destination = getLocationName(destination);
   document.getElementById(destination).appendChild(document.getElementById(character));
 }
 
@@ -55,7 +63,6 @@ function init(){
   addIdSpecificOnclickByClass("room");
   addIdSpecificOnclickByClass("horizontal_hallway");
   addIdSpecificOnclickByClass("vert_hallway");
-
 }
 
 init();
@@ -83,6 +90,40 @@ function suggestionChat(suggestion){
   sendToChatBox(suggestionChat);
 }
 
+function showHand(handEvent) {
+  var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
+  sendToChatBox(handChat);
+  
+  document.getElementById("hand").innerHTML = "";
+  for (var i = 0; i < handEvent.cards.length; i++) {
+    addCard(handEvent.cards[i]);
+  }
+}
+
+function highlightCard(cardName){
+  var card = document.getElementById(cardName + "_card");
+  if(card !== null){
+    card.style.borderColor = "yellow";
+    card.onclick =  sendCardName(cardName);
+  }
+}
+
+function handleEvidenceProvided(evidence){
+  canEndTurn = true;
+  alert(evidence.author + " says that the crime did not involve " + evidence.evidence + ".");
+};
+
+function handleAllowTurnEnd(){
+  canEndTurn = true;
+};
+
+function provideEvidenceNotification(evidence){
+  alert("Please provide your evidence!");
+  highlightCard(evidence.suspect);
+  highlightCard(evidence.room);
+  highlightCard(evidence.weapon);
+}
+
 function handleEvent(event){
   switch(event.eventType){
     case "TEST":
@@ -98,18 +139,30 @@ function handleEvent(event){
       alert("You cannot do that. " + event.reason);
       break;
     case "PROVIDE_EVIDENCE_NOTIFICATION":
-      alert("Please provide your evidence!");
-      isEvidenceSelectionTime = true;
+      console.log("provide evidence");
+      provideEvidenceNotification(event);
       break;
     case "SUGGESTION_NOTIFICATION":
-      suggestionChat(event);
-      console.log("suggestion");
+    	suggestionChat(event);
+    	console.log("suggestion");
+    break;
+    case "GAME_START_NOTIFICATION":
+      sendToChatBox(event.author + ': Get a Clue!! The game is starting...NOW!')
+      break;
+    case "HAND_NOTIFICATION":
+      showHand(event);
       break;
     case "TURN_NOTIFICATION":
       handleTurnNotification(event);
       break;
+    case "EVIDENCE_PROVIDED_NOTIFICATION":
+      handleEvidenceProvided(event);
+      break;
     case "MOVE_NOTIFICATION":
       handleMoveNotification(event);
+      break;
+    case "ALLOW_TURN_END":
+      handleAllowTurnEnd();
       break;
     default:
       console.log("Invalid eventType received");
@@ -141,11 +194,12 @@ function addMoveRequestOnClickTo(elementIds) {
 
   for (var i = 0;i < elementIds.length;i++) {
     var ele = document.getElementById(elementIds[i]);
+    let name = String(elementIds[i]);
 
     // the event listener when element is clicked - send MOVE_REQUEST, and then remove on click from
     // ALL elements passed into this function
     function onClick(event) {
-      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: elementIds[i]}));
+      websocket.send(JSON.stringify({eventType: "MOVE_REQUEST", location: name}));
       removeOnClickFrom(elementIds, onClick);
     }
 
@@ -159,8 +213,14 @@ function addMoveRequestOnClickTo(elementIds) {
 function handleTurnNotification(notification) {
   sendToChatBox("It is " + notification.playerTag + "'s turn.");
 
+  // make sure all the valid moves have the correct ids
+  notification.validMoves.forEach(function(val, ind, arr) {
+    arr[ind] = getLocationName(val);
+  });
+
   if (notification.playerTag === tag) {
     // make valid locations clickable and enable all turn buttons
+    console.log(notification.validMoves);
     addMoveRequestOnClickTo(notification.validMoves);
     document.getElementById("suggest_button").disabled = false;
     document.getElementById("accuse_button").disabled = false;
@@ -181,38 +241,61 @@ function notPlayerTurn(){
   handleEvent(event);
 }
 
+function alreadyDidThat(){
+       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
+       handleEvent(alreadyDidThat);
+}
+
 function suggest(){
   if (isMyTurn){
-    var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
-    var suggestFormElements = document.getElementById("suggest_form").elements
-    suggestion.suspect = suggestFormElements[0].value;
-    suggestion.weapon = suggestFormElements[1].value;
-    websocket.send(JSON.stringify(suggestion));
+    if(canSuggest){
+      var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
+      var suggestFormElements = document.getElementById("suggest_form").elements;
+      suggestion.suspect = suggestFormElements[0].value;
+      suggestion.weapon = suggestFormElements[1].value;
+      websocket.send(JSON.stringify(suggestion));
+      canSuggest = false;
+      canEndTurn = false;
+     }else{
+       alreadyDidThat();
+     }
   }else{
     notPlayerTurn();
   }
 };
 
-function provideEvidence(){
-  console.log("providing evidence");
+
+// remove event listener and change border color back
+function resetCards(){
+  var cards = document.getElementsByClassName("card");
+  for(var i = 0; i < cards.length; i++){
+    cards[i].style.borderColor = "red";
+    cards[i].onclick = function() {
+      return false;
+    }
+  }
 }
 
 function sendCardName(cardName){
   return function(){
-    if(isEvidenceSelectionTime){
-      var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
-
-      websocket.send(JSON.stringify(evidenceRequest));
-    }
+    var evidenceRequest = {eventType: "PROVIDE_EVIDENCE_REQUEST", evidence: cardName};
+    websocket.send(JSON.stringify(evidenceRequest));
+    resetCards();
   }
+
 };
 
 function addCard(cardName){
   var hand = document.getElementById("hand");
-  var card = document.createElement("card");
+  var card = document.createElement("div");
   card.innerHTML += cardName;
   card.className += "card";
-  card.id = cardName;
-  card.addEventListener("click",  sendCardName(cardName));
+  card.id = cardName + "_card";
+
+  var img = document.createElement("img");
+  img.setAttribute("src", "images/" + cardName.replace(" ", "").replace(".", "") + ".png");
+  img.setAttribute("width", "100%");
+  card.appendChild(img);
+
   hand.appendChild(card);
 }

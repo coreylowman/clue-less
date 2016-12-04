@@ -3,11 +3,13 @@ package edu.jhu.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.jhu.server.data.CaseFile;
+import edu.jhu.server.data.ICard;
 import edu.jhu.server.data.Hallway;
 import edu.jhu.server.data.Suspect;
 
@@ -22,7 +24,8 @@ public class Game {
     INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
-    MOVE_REQUEST
+    MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
+    HAND_NOTIFICATION
   }
   
   private static class Constants {
@@ -42,6 +45,9 @@ public class Game {
     private static final String ACCUSER = "accuser";
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
+    private static final String CARDS = "cards";
+    
+    private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
 
   private int currentTurnIndex;
@@ -59,9 +65,6 @@ public class Game {
     this.players = new ArrayList<Player>();
     this.board = new Board();
     this.gameStarted = false;
-    this.timer = new Timer();
-    // todo call timer.schedule() here for starting the game
-
     this.remainingSuspects = new ArrayList<>(Suspect.getAll());
   }
 
@@ -74,15 +77,36 @@ public class Game {
   }
 
   public void start() {
+  	// If the timer is set, we need to cancel anything it had scheduled
+  	if (timer != null) {
+  		timer.cancel();
+  		timer.purge();
+  	}
+  	
+  	// Someone left while timer was going, we can't start yet
+  	if (this.players.size() < 3) {
+  	  return;
+  	}
+  	
+  	// Send game start notification
+  	notifyPlayers(makeGameStartNotification());
+  	
+  	// Initialize stuff
     this.currentTurnIndex = 0;
     this.gameStarted = true;
+
     this.secretCards = CardShuffler.shuffleAndDealCards(players);
     this.board.initialize();
+    
+    // Send hands to players and then first turn notification
+    sendHandsToPlayers();
+    sendTurnNotification();
   }
 
   public void addPlayer(Player player) {
-    players.add(player);
+    this.players.add(player);
     player.setGame(this);
+
     player.setSuspect(this.remainingSuspects.remove(0));
 
     // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
@@ -110,6 +134,31 @@ public class Game {
     }
   }
 
+  private void sendHandsToPlayers() {
+  	for (Player player : players) {
+  		// The basics
+  		JSONObject handNotification = new JSONObject();
+  		handNotification.put(Constants.EVENT_TYPE, EventType.HAND_NOTIFICATION);
+  		handNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+  		
+  		// Create array of cards of this player
+  		JSONArray handArray = new JSONArray();
+  		for (ICard card : player.getCards()) {
+  			handArray.put(card.toString());
+  		}
+  		
+  		handNotification.put(Constants.CARDS, handArray);
+  		player.sendEvent(handNotification);
+  	}
+  }
+
+  private JSONObject makeGameStartNotification() {
+  	JSONObject gameStart = new JSONObject();
+  	gameStart.put(Constants.EVENT_TYPE, EventType.GAME_START_NOTIFICATION);
+  	gameStart.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+  	return gameStart;
+  }
+
   private JSONObject makeChatMessage(String body) {
     JSONObject chat = new JSONObject();
     chat.put(Constants.EVENT_TYPE, EventType.CHAT_NOTIFICATION);
@@ -129,49 +178,113 @@ public class Game {
   private JSONObject makeMoveNotification(Suspect suspect, ILocation location) {
     JSONObject move = new JSONObject();
     move.put(Constants.EVENT_TYPE, EventType.MOVE_NOTIFICATION);
-    move.put(Constants.SUSPECT, suspect.getName());
+    move.put(Constants.SUSPECT, suspect.toString());
     move.put(Constants.LOCATION, location.toString());
     return move;
   }
-
-  private void provideEvidence(CaseFile casefile, Player suggester) {
-    Player playerWithEvidence = null;
-    for (Player player : players) {
-      if (player.getTag() != suggester.getTag() && (player.hasCard(casefile.getRoom())
-          || player.hasCard(casefile.getSuspect()) || player.hasCard(casefile.getWeapon()))) {
-        playerWithEvidence = player;
-        break;
-      }
-    }
-    if (playerWithEvidence == null) {
-      // FIXME: shouldn't this be a provide evidence outcome notification message?
-      JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
-      handleEvent(chat, null);
-    }
+  
+  private Player findPlayerWithEvidence(CaseFile casefile, Player suggester) {
+	  List<ICard> suspect = new ArrayList<ICard>();
+	  suspect.add(casefile.getRoom());
+	  Player playerWithEvidence = null;
+	  // next Player
+	  int nextPlayerIndex = this.currentTurnIndex + 1;
+	  for (int i = 0; i < players.size() - 1; i++){
+		  Player currentPlayer = players.get((i + nextPlayerIndex) % players.size());
+		  if(currentPlayer.hasCard(casefile.getRoom()) || 
+			currentPlayer.hasCard(casefile.getSuspect()) ||
+			currentPlayer.hasCard(casefile.getWeapon())) {
+				playerWithEvidence = currentPlayer;
+				break;
+		  }
+	  }	  
+	  return playerWithEvidence;
   }
-
+  
+  //This should ultimately be deleted, but I need it for
+  //testing
+  /*
+  private void spoofHand(Player player, ICard card){
+	  List<ICard> spoofHand = new ArrayList<ICard>();
+	  spoofHand.add(card);
+	  player.setCards(spoofHand);
+  }
+  */
+  
+  private void provideEvidenceNotification(Player evidenceHolder, CaseFile casefile){
+	  JSONObject evidenceNotification = new JSONObject();
+	  evidenceNotification.put(Constants.EVENT_TYPE, EventType.PROVIDE_EVIDENCE_NOTIFICATION);
+	  evidenceNotification.put(Constants.AUTHOR, Constants.GAME_AUTHOR);
+	  evidenceNotification.put(Constants.SUSPECT, casefile.getSuspect().toString());
+	  evidenceNotification.put(Constants.WEAPON, casefile.getWeapon().toString());
+	  evidenceNotification.put(Constants.ROOM, casefile.getRoom().toString());
+	  evidenceHolder.sendEvent(evidenceNotification);
+  }
+  
+  private void provideEvidence(CaseFile casefile, Player suggester) {
+	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
+	  if (playerWithEvidence == null) {
+		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
+		  notifyPlayers(chat);
+		  JSONObject allowTurnEnd = new JSONObject();
+		  allowTurnEnd.put(Constants.EVENT_TYPE, EventType.ALLOW_TURN_END);
+		  suggester.sendEvent(allowTurnEnd);
+		  
+	  } else {
+		  provideEvidenceNotification(playerWithEvidence, casefile);
+		  
+	  }
+  }
+  
   private void handleSuggestion(JSONObject accusation, Player suggester) {
-    ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
-    Suspect theAccused = Suspect.get(accusation.get(Constants.SUSPECT).toString());
-    Weapon theWeapon = Weapon.KNIFE;
-    CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
-    if (suggestedRoom instanceof Room) {
-      JSONObject suggestion = new JSONObject();
-      suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
-      suggestion.put(Constants.SUGGESTER, suggester.getTag());
-      suggestion.put(Constants.ACCUSED, theAccused.toString());
-      suggestion.put(Constants.WEAPON, theWeapon.toString());
-      suggestion.put(Constants.ROOM, suggestedRoom.toString());
-      notifyPlayers(suggestion);
-      JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
-
-      board.movePiece(theAccused, suggestedRoom);
-      notifyPlayers(move);
-      provideEvidence(casefile, suggester);
-
-    } else {
-      handleEvent(makeInvalidRequestMessage("You are not in a room."), suggester);
-    }
+	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
+	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
+	  Weapon theWeapon = Weapon.get(accusation.getString("weapon"));
+	 
+	  if (suggestedRoom instanceof Room) {
+		  		// give the second player a spoof hand
+		 /*
+		  if(players.size() > 2){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  		spoofHand(players.get(2), Suspect.get("Mrs. White"));
+		  	}
+		  	if(players.size() > 1){
+		  		currentTurnIndex = 1;
+		  		spoofHand(players.get(0), Suspect.get("Mrs. Peacock"));
+		  		spoofHand(players.get(1), Suspect.get("Professor Plum"));
+		  	}
+		  	*/
+			JSONObject suggestion = new JSONObject();
+			suggestion.put(Constants.EVENT_TYPE, EventType.SUGGESTION_NOTIFICATION);
+			suggestion.put(Constants.SUGGESTER, suggester.getTag());
+			suggestion.put(Constants.ACCUSED, theAccused.toString());
+			suggestion.put(Constants.WEAPON, theWeapon.toString());
+			suggestion.put(Constants.ROOM, suggestedRoom.toString());
+			notifyPlayers(suggestion);
+			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
+			
+			board.movePiece(theAccused, suggestedRoom);
+			notifyPlayers(move);
+			CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
+			provideEvidence(casefile, suggester);
+			
+		} else {
+			suggester.sendEvent(makeInvalidRequestMessage("You are not in a room."));
+		}
+  }
+  
+  
+  private void handleProvideEvidence(JSONObject evidence, Player player) {
+	  Player suggester = players.get(this.currentTurnIndex %  players.size());
+	  evidence.put(Constants.EVENT_TYPE, EventType.EVIDENCE_PROVIDED_NOTIFICATION);
+	  evidence.put(Constants.AUTHOR, player.getTag());
+	  suggester.sendEvent(evidence);
+	  notifyPlayers(makeChatMessage(player.getTag() + 
+			  " has disproven " +
+			  suggester.getTag() +
+			  	"'s suggestion."));
   }
 
   public void handleEvent(JSONObject event, Player player) {
@@ -181,17 +294,11 @@ public class Game {
         System.out.println("test event");
         break;
       case CHAT_NOTIFICATION:
+    	event.put("author", player.getTag());
         notifyPlayers(event);
         break;
-      case END_TURN_REQUEST:
-        handleEndTurnRequest(event);
-        break;
       case SUGGESTION_REQUEST:
-        // FIXME: what is this?
-        board.initialize();
         Player suggester = player;
-        suggester.setSuspect(Suspect.MISS_SCARLET);
-        board.movePiece(suggester.getSuspect(), Room.STUDY);
         handleSuggestion(event, suggester);
         break;
       case INVALID_REQUEST_NOTIFICATION:
@@ -206,6 +313,12 @@ public class Game {
       case MOVE_REQUEST:
         handleMoveRequest(event, player);
         break;
+	  case PROVIDE_EVIDENCE_REQUEST:
+	  	handleProvideEvidence(event, player);
+	  	break;
+      case END_TURN_REQUEST:
+    	handleEndTurnRequest(player);
+    	break;
       default:
         System.out.println("invalid event type");
         break;
@@ -215,13 +328,13 @@ public class Game {
   private void handleMoveRequest(JSONObject request, Player player) {
     // a player may move only if it is their turn
     if (!isPlayersTurn(player)) {
-      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      player.sendEvent(makeInvalidRequestMessage("It is not your turn."));
       return;
     }
     
     // a player cannot move if they have already moved
     if (playerHasMoved) {
-      handleEvent(makeInvalidRequestMessage("You have already moved."), player);
+      player.sendEvent(makeInvalidRequestMessage("You have already moved."));
       return;
     }
     
@@ -234,7 +347,7 @@ public class Game {
     
     // check the validity of the move
     if (dest == null || !board.isMoveValid(player.getSuspect(), dest)) {
-      handleEvent(makeInvalidRequestMessage("Invalid move."), player);
+      player.sendEvent(makeInvalidRequestMessage("Invalid move."));
       return;
     }
     
@@ -257,7 +370,7 @@ public class Game {
   public void handleAccusationRequest(JSONObject request, Player player) {
     // a player may make an accusation at any time as long as it is their turn
     if (!isPlayersTurn(player)) {
-      handleEvent(makeInvalidRequestMessage("It is not your turn."), player);
+      player.sendEvent(makeInvalidRequestMessage("It is not your turn."));
       return;
     }
     
@@ -267,7 +380,7 @@ public class Game {
     final Weapon weapon = Weapon.get(request.getString(Constants.WEAPON));
     
     if (room == null || suspect == null || weapon == null) {
-      handleEvent(makeInvalidRequestMessage("Invalid Case File."), player);
+      player.sendEvent(makeInvalidRequestMessage("Invalid Case File."));
       return;
     }
     
@@ -317,23 +430,28 @@ public class Game {
       // this player's turn is now over
       final JSONObject endTurnRequest = new JSONObject();
       endTurnRequest.put(Constants.EVENT_TYPE, EventType.END_TURN_REQUEST);
-      handleEvent(endTurnRequest, player);
+      handleEndTurnRequest(player);
     }
   }
 
-  public void handleEndTurnRequest(JSONObject request) {
-    // keep going until we get to a player that is allowed additional turns
-    do {
-      currentTurnIndex = (currentTurnIndex + 1) % players.size();
-    } while (players.get(currentTurnIndex).getHasLost());
+  public void handleEndTurnRequest(Player player) {
+	  if (!isPlayersTurn(player)){
+		  player.sendEvent(makeInvalidRequestMessage("It's not your turn."));
+	  }
+	  else{
+	// keep going until we get to a player that is allowed additional turns
+		  do {
+			  currentTurnIndex = (currentTurnIndex + 1) % players.size();
+		  } while (players.get(currentTurnIndex).getHasLost());
     
-    playerHasMoved = false;
+		  playerHasMoved = false;
     
-    sendTurnNotification();
+		  sendTurnNotification();
+	  }
   }
-
   private void handleJoinRequest(JSONObject request, Player author) {
-    author.setTag(request.getString(Constants.PLAYER_TAG));
+	  
+	  author.setTag(request.getString(Constants.PLAYER_TAG));
 
     JSONObject joinNotification = new JSONObject();
 
@@ -342,5 +460,24 @@ public class Game {
     joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
 
     notifyPlayers(joinNotification);
+   
+  	
+  	// Once we reach 3 players, we can start the game. So start a 5 minute
+  	//	timer!
+  	if (this.players.size() == 3 && timer == null) {
+  		timer = new Timer();
+  		
+  		// In 5 minutes, start the game.
+  		timer.schedule(new TimerTask() {
+			    @Override
+			    public void run() {
+			        start();
+			    }
+			}, Constants.START_GAME_AFTER_MS);
+  	}
+    // Start game if it's full now
+  	if (isFull()) {
+  		start();
+  	}
   }
 }

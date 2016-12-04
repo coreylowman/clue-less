@@ -72,9 +72,8 @@ public class Game {
     return this.gameStarted;
   }
 
-  //REMEMBER TO CHANGE THIS BACK TO 6
   public boolean isFull() {
-    return this.players.size() == 3;
+    return this.players.size() == 6;
   }
 
   public void start() {
@@ -241,7 +240,7 @@ public class Game {
 	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
 	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
 	  Weapon theWeapon = Weapon.get(accusation.getString("weapon"));
-	  CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
+	 
 	  if (suggestedRoom instanceof Room) {
 		  		// give the second player a spoof hand
 		 /*
@@ -268,6 +267,7 @@ public class Game {
 			
 			board.movePiece(theAccused, suggestedRoom);
 			notifyPlayers(move);
+			CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 			provideEvidence(casefile, suggester);
 			
 		} else {
@@ -460,11 +460,7 @@ public class Game {
     joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
 
     notifyPlayers(joinNotification);
-    
-    // Start game if it's full now
-  	if (isFull()) {
-  		start();
-  	}
+   
   	
   	// Once we reach 3 players, we can start the game. So start a 5 minute
   	//	timer!
@@ -478,6 +474,10 @@ public class Game {
 			        start();
 			    }
 			}, Constants.START_GAME_AFTER_MS);
+  	}
+    // Start game if it's full now
+  	if (isFull()) {
+  		start();
   	}
   }
 }

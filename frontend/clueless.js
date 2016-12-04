@@ -1,7 +1,7 @@
 var tag = "";
 var isMyTurn = true;
-var canSuggest = true;
-var canEndTurn = true;
+var canSuggest = false;
+var canEndTurn = false;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -117,7 +117,7 @@ function suggestionChat(suggestion){
 function showHand(handEvent) {
   var handChat = handEvent.author + ': Your hand contains - [' + handEvent.cards.toString() + ']';
   sendToChatBox(handChat);
-  
+
   document.getElementById("hand").innerHTML = "";
   for (var i = 0; i < handEvent.cards.length; i++) {
     addCard(handEvent.cards[i]);
@@ -133,13 +133,26 @@ function highlightCard(cardName){
 }
 
 function handleEvidenceProvided(evidence){
-  canEndTurn = true;
   alert(evidence.author + " says that the crime did not involve " + evidence.evidence + ".");
 };
 
 function handleAllowTurnEnd(){
   canEndTurn = true;
 };
+
+function handlePreventTurnEnd(){
+  canEndTurn = false;
+};
+
+function handleAllowSuggestion(){
+  canSuggest = true;
+};
+
+function handlePreventSuggestion(){
+  canSuggest = false;
+};
+
+
 
 function provideEvidenceNotification(evidence){
   alert("Please provide your evidence!");
@@ -188,6 +201,14 @@ function handleEvent(event){
     case "ALLOW_TURN_END":
       handleAllowTurnEnd();
       break;
+    case "PREVENT_TURN_END":
+      handlePreventTurnEnd();
+    case "ALLOW_SUGGEST":
+      handleAllowSuggestion();
+      break;
+    case "PREVENT_SUGGEST":
+      handlePreventSuggestion();
+    break;
     default:
       console.log("Invalid eventType received");
       break;
@@ -254,10 +275,12 @@ function handleTurnNotification(notification) {
 
 // called when End Turn button is clicked
 function endTurn() {
-  websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
-  document.getElementById("suggest_button").disabled = true;
-  document.getElementById("accuse_button").disabled = true;
-  document.getElementById("end_turn_button").disabled = true;
+  if(canEndTurn){
+    websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
+    document.getElementById("suggest_button").disabled = true;
+    document.getElementById("accuse_button").disabled = true;
+    document.getElementById("end_turn_button").disabled = true;
+  }
 }
 
 function notPlayerTurn(){
@@ -266,7 +289,7 @@ function notPlayerTurn(){
 }
 
 function alreadyDidThat(){
-       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
+       var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "Move or end your turn!"}
        handleEvent(alreadyDidThat);
 }
 
@@ -278,8 +301,6 @@ function suggest(){
       suggestion.suspect = suggestFormElements[0].value;
       suggestion.weapon = suggestFormElements[1].value;
       websocket.send(JSON.stringify(suggestion));
-      canSuggest = false;
-      canEndTurn = false;
      }else{
        alreadyDidThat();
      }

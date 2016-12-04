@@ -25,7 +25,7 @@ public class Game {
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
     MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
-    HAND_NOTIFICATION
+    HAND_NOTIFICATION, PREVENT_TURN_END, ALLOW_SUGGEST, PREVENT_SUGGEST
   }
   
   private static class Constants {
@@ -49,7 +49,15 @@ public class Game {
     
     private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
-
+  
+  // a simple event sends an event with only its type
+  private void handleSimpleEvent(Player player, EventType eventType) {
+	  JSONObject simpleEvent = new JSONObject();
+	  simpleEvent.put(Constants.EVENT_TYPE, eventType);
+	  player.sendEvent(simpleEvent);
+  }
+  
+  
   private int currentTurnIndex;
   private List<Player> players;
   private CaseFile secretCards;
@@ -227,10 +235,7 @@ public class Game {
 	  if (playerWithEvidence == null) {
 		  JSONObject chat = makeChatMessage("Nobody could provide evidence against this suggestion!");
 		  notifyPlayers(chat);
-		  JSONObject allowTurnEnd = new JSONObject();
-		  allowTurnEnd.put(Constants.EVENT_TYPE, EventType.ALLOW_TURN_END);
-		  suggester.sendEvent(allowTurnEnd);
-		  
+		  handleSimpleEvent(suggester, EventType.ALLOW_TURN_END);		  
 	  } else {
 		  provideEvidenceNotification(playerWithEvidence, casefile);
 		  
@@ -282,6 +287,8 @@ public class Game {
 	  evidence.put(Constants.EVENT_TYPE, EventType.EVIDENCE_PROVIDED_NOTIFICATION);
 	  evidence.put(Constants.AUTHOR, player.getTag());
 	  suggester.sendEvent(evidence);
+	  handleSimpleEvent(suggester, EventType.PREVENT_SUGGEST);
+	  handleSimpleEvent(suggester, EventType.ALLOW_TURN_END);
 	  notifyPlayers(makeChatMessage(player.getTag() + 
 			  " has disproven " +
 			  suggester.getTag() +
@@ -355,7 +362,8 @@ public class Game {
     // execute the move
     board.movePiece(player.getSuspect(), dest);
     playerHasMoved = true;
-    
+    handleSimpleEvent(player, EventType.ALLOW_SUGGEST);
+    handleSimpleEvent(player, EventType.ALLOW_TURN_END);
     // send move notification to all players
     final JSONObject moveNotification = makeMoveNotification(player.getSuspect(), dest);
     notifyPlayers(moveNotification);

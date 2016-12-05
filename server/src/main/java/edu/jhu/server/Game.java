@@ -229,6 +229,25 @@ public class Game {
 	  evidenceHolder.sendEvent(evidenceNotification);
   }
   
+  // in the event that a player that has lost has
+  // exonerating evidence server deals with event
+  private void handlePlayerWithEvidenceLost(CaseFile casefile, Player evidenceHolder){
+	ICard cardToSend = null;
+	if(evidenceHolder.hasCard(casefile.getRoom())){
+		cardToSend = casefile.getRoom();
+	}
+	if(evidenceHolder.hasCard(casefile.getSuspect())){
+		cardToSend = casefile.getSuspect();
+	}
+	if(evidenceHolder.hasCard(casefile.getWeapon())){
+		cardToSend = casefile.getWeapon();
+	}
+	JSONObject evidence = new JSONObject();
+	evidence.put("evidence", cardToSend.toString());
+	handleProvideEvidence(evidence, evidenceHolder);
+  }
+  
+  
   private void provideEvidence(CaseFile casefile, Player suggester) {
 	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
 	  if (playerWithEvidence == null) {
@@ -236,7 +255,12 @@ public class Game {
 		  notifyPlayers(chat);
 		  handleSimpleEvent(suggester, EventType.ALLOW_TURN_END);		  
 	  } else {
-		  provideEvidenceNotification(playerWithEvidence, casefile);
+		  if(playerWithEvidence.getHasLost()) {
+			  handlePlayerWithEvidenceLost(casefile, playerWithEvidence);
+		  }else{
+			  provideEvidenceNotification(playerWithEvidence, casefile);
+
+		  }
 		  
 	  }
   }

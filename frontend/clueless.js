@@ -1,7 +1,7 @@
 var playerTag = "";
 var isMyTurn = true;
-var canSuggest = true;
-var canEndTurn = true;
+var canSuggest = false;
+var canEndTurn = false;
 
 function establishWebsocket() {
     // if user is running mozilla then use it's built-in WebSocket
@@ -148,6 +148,20 @@ function handleAllowTurnEnd(){
   canEndTurn = true;
 };
 
+function handlePreventTurnEnd(){
+  canEndTurn = false;
+};
+
+function handleAllowSuggestion(){
+  canSuggest = true;
+};
+
+function handlePreventSuggestion(){
+  canSuggest = false;
+};
+
+
+
 function provideEvidenceNotification(evidence){
   alert("Please provide your evidence!");
   highlightCard(evidence.suspect);
@@ -194,6 +208,14 @@ function handleEvent(event){
     case "ALLOW_TURN_END":
       handleAllowTurnEnd();
       break;
+    case "PREVENT_TURN_END":
+      handlePreventTurnEnd();
+    case "ALLOW_SUGGEST":
+      handleAllowSuggestion();
+      break;
+    case "PREVENT_SUGGEST":
+      handlePreventSuggestion();
+    break;
     default:
       console.log("Invalid eventType received");
       break;
@@ -260,10 +282,12 @@ function handleTurnNotification(notification) {
 
 // called when End Turn button is clicked
 function endTurn() {
-  websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
-  document.getElementById("suggest_button").disabled = true;
-  document.getElementById("accuse_button").disabled = true;
-  document.getElementById("end_turn_button").disabled = true;
+  if(canEndTurn){
+    websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
+    document.getElementById("suggest_button").disabled = true;
+    document.getElementById("accuse_button").disabled = true;
+    document.getElementById("end_turn_button").disabled = true;
+  }
 }
 
 function notPlayerTurn(){
@@ -284,8 +308,6 @@ function suggest(){
       suggestion.suspect = suggestFormElements[0].value;
       suggestion.weapon = suggestFormElements[1].value;
       websocket.send(JSON.stringify(suggestion));
-      canSuggest = false;
-      canEndTurn = false;
      }else{
        alreadyDidThat();
      }

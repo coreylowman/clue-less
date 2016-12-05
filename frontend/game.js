@@ -189,10 +189,42 @@ function handleEvent(event){
     case "PREVENT_SUGGEST":
       handlePreventSuggestion();
     break;
+    case "ACCUSATION_NOTIFICATION":
+      handleAcccusation(event);
+      break;
+    case "SECRET_CARD_NOTIFICATION":
+      handleSecretCard(event);
+      break;
+    case "ACCUSATION_OUTCOME_NOTIFICATION":
+      handleAccusationOutcome(event);
+      break;
     default:
       console.log("Invalid eventType received");
       break;
   }
+}
+
+function handleAcccusation(accusation){
+ sendToChatBox(accusation.accuser +
+              " has accused " +
+              accusation.accused +
+              " in the " +
+              accusation.room +
+              " with the " +
+              accusation.weapon + ".");
+};
+
+function handleAccusationOutcome(outcome){
+  sendToChatBox(outcome.accuser + " " + outcome.outcome + ".");
+}
+
+function handleSecretCard(secretCard){
+  alert("It was in fact, " +
+        secretCard.accused +
+        " in the " +
+        secretCard.room +
+        " with the " +
+        secretCard.weapon + ".");
 }
 
 function handleMoveNotification(notification) {
@@ -272,6 +304,19 @@ function alreadyDidThat(){
   var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
   handleEvent(alreadyDidThat);
 }
+
+function accuse(){
+  if (isMyTurn){
+    var accusation = {eventType: "ACCUSATION_REQUEST", room: "", weapon: "", suspect:""}
+    var accuseFormElements = document.getElementById("accuse_form").elements;
+    accusation.suspect = accuseFormElements[0].value;
+    accusation.weapon = accuseFormElements[1].value;
+    accusation.room = accuseFormElements[2].value;
+    websocket.send(JSON.stringify(accusation));
+  }else{
+    notPlayerTurn();
+  }
+};
 
 function suggest(){
   if (isMyTurn){

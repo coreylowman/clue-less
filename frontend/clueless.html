@@ -99,15 +99,17 @@
     <div id="hand">
     </div>
   </div>
-  <div id="chat_container">
-    <div>
-      <div id="chat_text"></div>
+  <form>
+    <div id="chat_container">
+      <div>
+        <div id="chat_text"></div>
+      </div>
+      <div>
+        <input id="chat_input" type="text" autocomplete="off"/>
+        <input type="submit" onclick="sendChat(); return false" value="Send"/>
+      </div>
     </div>
-    <div>
-      <input id="chat_input" type="text">
-      <button onclick="sendChat(); return false">Send</button>
-    </div>
-  </div>
+  </form>
   <div id="notepad">
     <input type="checkbox" name="suspects">Mrs. Peacock<br>
     <input type="checkbox" name="suspects">Professor Plum<br>

@@ -61,9 +61,8 @@
       <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
-      <button id="suggest_button" onclick="suggest(); return false">Suggest</button>
+    <button id="suggest_button" onclick="suggest(); return false">Suggest</button>
   </form>
-
   <form id="accuse_form">
     <select id="accuse_suspect">
       <option>Mrs. Peacock</option>
@@ -101,11 +100,11 @@
   </div>
   <div id="chat_container">
     <div>
-      <textarea readonly id="chat_text"></textarea>
+      <div id="chat_text"></div>
     </div>
     <div>
       <input id="chat_input" type="text">
-      <button onclick="sendChat()">Send</button>
+      <button onclick="sendChat(); return false">Send</button>
     </div>
   </div>
   <div id="notepad">

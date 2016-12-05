@@ -22,7 +22,7 @@
 .card {
     width: 90px;
     height: 180px;
-    border: 1px solid red;
+    border: 1px solid black;
     float: left;
 }
 

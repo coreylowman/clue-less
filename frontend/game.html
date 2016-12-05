@@ -61,7 +61,7 @@
       <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
-    <button id="suggest_button" onclick="suggest()">Suggest</button>
+    <button id="suggest_button" onclick="suggest(); return false">Suggest</button>
   </form>
   <form>
     <select id="accuse_suspect">
@@ -91,7 +91,7 @@
       <option>Study</option>
       <option>Hall</option>
     </select>
-    <button id="accuse_button" onclick="accuse()">Accuse</button>
+    <button id="accuse_button" onclick="accuse(); return false">Accuse</button>
   </form>
   <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">
@@ -100,11 +100,11 @@
   </div>
   <div id="chat_container">
     <div>
-      <textarea readonly id="chat_text"></textarea>
+      <div id="chat_text"></div>
     </div>
     <div>
       <input id="chat_input" type="text">
-      <button onclick="sendChat()">Send</button>
+      <button onclick="sendChat(); return false">Send</button>
     </div>
   </div>
   <div id="notepad">

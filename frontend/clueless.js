@@ -242,7 +242,11 @@ function handleAcccusation(accusation){
 };
 
 function handleAccusationOutcome(outcome){
-  sendToChatBox(outcome.accuser + " " + outcome.outcome + ".");
+  if(outcome.outcome === "true"){
+    alert(outcome.accuser + " has won the game!");
+  }else{
+    alert(outcome.accuser + " has lost.");
+  }
 }
 
 function handleSecretCard(secretCard){

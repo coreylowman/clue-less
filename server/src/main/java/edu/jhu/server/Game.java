@@ -229,6 +229,7 @@ public class Game {
 	  evidenceHolder.sendEvent(evidenceNotification);
   }
   
+  
   private void provideEvidence(CaseFile casefile, Player suggester) {
 	  Player playerWithEvidence = findPlayerWithEvidence(casefile, suggester);
 	  if (playerWithEvidence == null) {
@@ -236,7 +237,7 @@ public class Game {
 		  notifyPlayers(chat);
 		  handleSimpleEvent(suggester, EventType.ALLOW_TURN_END);		  
 	  } else {
-		  provideEvidenceNotification(playerWithEvidence, casefile);
+			  provideEvidenceNotification(playerWithEvidence, casefile);
 		  
 	  }
   }
@@ -416,12 +417,13 @@ public class Game {
     // send accusation outcome notification to all players
     final JSONObject accusationOutcomeNotification = new JSONObject();
     accusationOutcomeNotification.put(Constants.EVENT_TYPE, EventType.ACCUSATION_OUTCOME_NOTIFICATION);
-    accusationNotification.put(Constants.ACCUSER, player.getTag());
-    accusationNotification.put(Constants.OUTCOME, String.valueOf(outcome));
+    accusationOutcomeNotification.put(Constants.ACCUSER, player.getTag());
+    accusationOutcomeNotification.put(Constants.OUTCOME, String.valueOf(outcome));
     notifyPlayers(accusationOutcomeNotification);
     
     if (outcome) {
-      // player wins, end the game
+      notifyPlayers(secretCardNotification);
+    	// player wins, end the game
       
       // TODO: actually end the game somehow
       

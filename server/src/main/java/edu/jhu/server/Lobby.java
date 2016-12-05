@@ -68,7 +68,7 @@ public class Lobby implements PlayerHolder {
           JSONObject notification = new JSONObject();
           notification.put(Constants.EVENT_TYPE, "GAME_NOTIFICATION");
           notification.put(Constants.NAME, name);
-          notifyPlayers(notification);
+          player.sendEvent(notification);
         }
         break;
       }

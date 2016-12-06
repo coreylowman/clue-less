@@ -81,7 +81,7 @@ public class Game {
   }
 
   public boolean isFull() {
-    return this.players.size() == 6;
+    return this.players.size() == 3;
   }
 
   public void start() {
@@ -242,6 +242,15 @@ public class Game {
 	  }
   }
   
+  private void allowMovedPlayerToSuggest(Suspect accused) {
+	  for(Player player : players){
+		  if (player.getSuspect().equals(accused)){
+			  handleSimpleEvent(player, EventType.ALLOW_SUGGEST);
+			  break;
+		  }
+	  }
+  }
+  
   private void handleSuggestion(JSONObject accusation, Player suggester) {
 	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
 	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
@@ -268,10 +277,12 @@ public class Game {
 			suggestion.put(Constants.ACCUSED, theAccused.toString());
 			suggestion.put(Constants.WEAPON, theWeapon.toString());
 			suggestion.put(Constants.ROOM, suggestedRoom.toString());
+			handleSimpleEvent(suggester, EventType.PREVENT_TURN_END);
 			notifyPlayers(suggestion);
 			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
 			
 			board.movePiece(theAccused, suggestedRoom);
+			allowMovedPlayerToSuggest(theAccused);
 			notifyPlayers(move);
 			CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 			provideEvidence(casefile, suggester);
@@ -455,6 +466,8 @@ public class Game {
 		  } while (players.get(currentTurnIndex).getHasLost());
     
 		  playerHasMoved = false;
+		  handleSimpleEvent(player, EventType.PREVENT_SUGGEST);
+		  handleSimpleEvent(player, EventType.ALLOW_TURN_END);
     
 		  sendTurnNotification();
 	  }

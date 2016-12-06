@@ -46,8 +46,10 @@ public class Game implements PlayerHolder {
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
     private static final String CARDS = "cards";
+    private static final String MINUTES = "minutes";
     
-    private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
+    private static final int START_GAME_AFTER_MS = 2 * 60 * 1000;
+    private static final int MINUTE_MS = 60 * 1000;
   }
   
   // a simple event sends an event with only its type
@@ -62,9 +64,12 @@ public class Game implements PlayerHolder {
   private List<Player> players;
   private CaseFile secretCards;
   private Board board;
+  private boolean playerHasMoved;
+  
+  private int timeToStart;
   private boolean gameStarted;
   private Timer timer;
-  private boolean playerHasMoved;
+  
 
   private List<Suspect> remainingSuspects;
 
@@ -491,4 +496,5 @@ public class Game implements PlayerHolder {
 		  sendTurnNotification();
 	  }
   }
+
 }

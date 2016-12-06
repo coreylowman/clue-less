@@ -3,7 +3,7 @@ function establishWebsocket() {
   window.WebSocket = window.WebSocket || window.MozWebSocket;
 
   //establish connection at localhost:3000
-  var connection = new WebSocket('ws://' + window.location.hostname + ':3000');
+  var connection = new WebSocket('ws://' + window.location.host);
 
   //takes care of any initial action upon opening of websocket
   connection.onopen = function () {

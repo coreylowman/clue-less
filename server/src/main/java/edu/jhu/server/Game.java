@@ -81,7 +81,7 @@ public class Game {
   }
 
   public boolean isFull() {
-    return this.players.size() == 3;
+    return this.players.size() == 6;
   }
 
   public void start() {

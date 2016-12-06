@@ -46,6 +46,7 @@ public class Game {
     private static final String OUTCOME = "outcome";
     private static final String LOCATION = "location";
     private static final String CARDS = "cards";
+    private static final String MINUTES = "minutes";
     
     private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
   }
@@ -476,6 +477,20 @@ public class Game {
   	//	timer!
   	if (this.players.size() == 3 && timer == null) {
   		timer = new Timer();
+  		
+      // send notification each minute that the game will start in x minutes
+      for (int i = 60 * 1000; i < Constants.START_GAME_AFTER_MS; i += 60 * 1000) {
+        int minutesToStart = (Constants.START_GAME_AFTER_MS - i) / (60 * 1000);
+        timer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            JSONObject notification = new JSONObject();
+            notification.put(Constants.EVENT_TYPE, "START_TIME_NOTIFICATION");
+            notification.put(Constants.MINUTES, minutesToStart);
+            notifyPlayers(notification);
+          }
+        }, i);
+      }
   		
   		// In 5 minutes, start the game.
   		timer.schedule(new TimerTask() {

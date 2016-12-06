@@ -48,7 +48,8 @@ public class Game {
     private static final String CARDS = "cards";
     private static final String MINUTES = "minutes";
     
-    private static final int START_GAME_AFTER_MS = 5 * 60 * 1000;
+    private static final int START_GAME_AFTER_MS = 2 * 60 * 1000;
+    private static final int MINUTE_MS = 60 * 1000;
   }
   
   // a simple event sends an event with only its type
@@ -63,9 +64,12 @@ public class Game {
   private List<Player> players;
   private CaseFile secretCards;
   private Board board;
+  private boolean playerHasMoved;
+  
+  private int timeToStart;
   private boolean gameStarted;
   private Timer timer;
-  private boolean playerHasMoved;
+  
 
   private List<Suspect> remainingSuspects;
 
@@ -460,49 +464,41 @@ public class Game {
 		  sendTurnNotification();
 	  }
   }
+
   private void handleJoinRequest(JSONObject request, Player author) {
-	  
-	  author.setTag(request.getString(Constants.PLAYER_TAG));
+    author.setTag(request.getString(Constants.PLAYER_TAG));
 
     JSONObject joinNotification = new JSONObject();
-
     joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
     joinNotification.put(Constants.PLAYER_TAG, author.getTag());
     joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
-
     notifyPlayers(joinNotification);
-   
-  	
-  	// Once we reach 3 players, we can start the game. So start a 5 minute
-  	//	timer!
-  	if (this.players.size() == 3 && timer == null) {
-  		timer = new Timer();
-  		
-      // send notification each minute that the game will start in x minutes
-      for (int i = 60 * 1000; i < Constants.START_GAME_AFTER_MS; i += 60 * 1000) {
-        int minutesToStart = (Constants.START_GAME_AFTER_MS - i) / (60 * 1000);
-        timer.schedule(new TimerTask() {
-          @Override
-          public void run() {
+
+    // Once we reach 3 players, we can start the game. So start a 5 minute
+    // timer!
+    if (this.players.size() == 3 && timer == null) {
+      timer = new Timer();
+
+      timeToStart = Constants.START_GAME_AFTER_MS;
+      timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+          if (timeToStart <= 0) {
+            start();
+          } else {
             JSONObject notification = new JSONObject();
             notification.put(Constants.EVENT_TYPE, "START_TIME_NOTIFICATION");
-            notification.put(Constants.MINUTES, minutesToStart);
+            notification.put(Constants.MINUTES, timeToStart / Constants.MINUTE_MS);
             notifyPlayers(notification);
           }
-        }, i);
-      }
-  		
-  		// In 5 minutes, start the game.
-  		timer.schedule(new TimerTask() {
-			    @Override
-			    public void run() {
-			        start();
-			    }
-			}, Constants.START_GAME_AFTER_MS);
-  	}
+          
+          timeToStart -= Constants.MINUTE_MS;
+        }
+      }, 0, Constants.MINUTE_MS);
+    }
     // Start game if it's full now
-  	if (isFull()) {
-  		start();
-  	}
+    if (isFull()) {
+      start();
+    }
   }
 }

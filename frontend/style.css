@@ -1,10 +1,25 @@
+#players {
+    position:absolute;
+    height: auto;
+    width: auto;
+    left: 5px;
+    padding: 5px;
+    top: 35%;
+    border: 1px solid black;
+}
+
+.takingTurn {
+    background-color: lightgray;
+    color: blue;
+}
+
 #notepad {
     position: absolute;
     width: 150px;
     height: auto;
     bottom: 5px;
     right: 5px;
-    border: 1px solid red;
+    border: 1px solid black;
 }
 
 #hand_container {

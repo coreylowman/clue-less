@@ -61,7 +61,7 @@
       <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
-      <button id="suggest_button" onclick="suggest(); return false">Suggest</button>
+      <button disabled id="suggest_button" onclick="suggest(); return false">Suggest</button>
   </form>
   <form id="accuse_form">
 
@@ -83,31 +83,33 @@
     </select>
     <select id="accuse_room">
       <option>Billiard Room</option>
-      <option>Consveratory</option>
+      <option>Conservatory</option>
       <option>Library</option>
       <option>Kitchen</option>
       <option>Lounge</option>
-      <option>Ball Room</option>
+      <option>Ballroom</option>
       <option>Dining Room</option>
       <option>Study</option>
       <option>Hall</option>
     </select>
-    <button id="accuse_button" onclick="accuse(); return false">Accuse</button>
+    <button disabled id="accuse_button" onclick="accuse(); return false">Accuse</button>
   </form>
-  <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
+  <button disabled id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">
     <div id="hand">
     </div>
   </div>
-  <div id="chat_container">
-    <div>
-      <div id="chat_text"></div>
+  <form>
+    <div id="chat_container">
+      <div>
+        <div id="chat_text"></div>
+      </div>
+      <div>
+        <input id="chat_input" type="text" autocomplete="off"/>
+        <input type="submit" onclick="sendChat(); return false" value="Send"/>
+      </div>
     </div>
-    <div>
-      <input id="chat_input" type="text">
-      <button onclick="sendChat(); return false">Send</button>
-    </div>
-  </div>
+  </form>
   <div id="notepad">
     <input type="checkbox" name="suspects">Mrs. Peacock<br>
     <input type="checkbox" name="suspects">Professor Plum<br>
@@ -128,7 +130,7 @@
     <input type="checkbox" name="rooms">Library<br>
     <input type="checkbox" name="rooms">Kitchen<br>
     <input type="checkbox" name="rooms">Lounge<br>
-    <input type="checkbox" name="rooms">Ball Room<br>
+    <input type="checkbox" name="rooms">Ballroom<br>
     <input type="checkbox" name="rooms">Dining Room<br>
     <input type="checkbox" name="rooms">Study<br>
     <input type="checkbox" name="rooms">Hall<br>

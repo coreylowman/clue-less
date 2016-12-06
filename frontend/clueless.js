@@ -134,6 +134,9 @@ function handleEvent(event){
     case "TEST":
       console.log("this is only a test")
       break;
+    case "START_TIME_NOTIFICATION":
+      sendToChatBox(tag("Game") + "Starting in " + bold(event.minutes) + "m!");
+      break;
     case "CHAT_NOTIFICATION":
       sendToChatBox(tag(event.author) + event.body);
       break;

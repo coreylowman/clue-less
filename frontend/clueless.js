@@ -232,13 +232,13 @@ function handleEvent(event){
 }
 
 function handleAcccusation(accusation){
- sendToChatBox(accusation.accuser +
+ sendToChatBox(tag("Game") + bold(accusation.accuser) +
               " has accused " +
-              accusation.accused +
+              bold(accusation.accused) +
               " in the " +
-              accusation.room +
+              bold(accusation.room) +
               " with the " +
-              accusation.weapon + ".");
+              bold(accusation.weapon) + ".");
 };
 
 function handleAccusationOutcome(outcome){

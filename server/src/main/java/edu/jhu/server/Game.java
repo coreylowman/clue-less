@@ -25,7 +25,7 @@ public class Game {
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
     MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
-    HAND_NOTIFICATION, PREVENT_TURN_END, ALLOW_SUGGEST, PREVENT_SUGGEST
+    HAND_NOTIFICATION, PREVENT_TURN_END, ALLOW_SUGGEST, PREVENT_SUGGEST, DISCONNECT_NOTIFICATION
   }
   
   private static class Constants {
@@ -120,6 +120,18 @@ public class Game {
     // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
     // the WebSocket session might not be set up here, and JOIN_REQUEST allows
     // the player to set their tag.
+  }
+  
+  public void disconnectPlayer(Player player) {
+	  JSONObject disconnect = new JSONObject();
+	  disconnect.put(Constants.EVENT_TYPE, EventType.DISCONNECT_NOTIFICATION);
+	  disconnect.put(Constants.PLAYER_TAG, player.getTag());
+	  notifyPlayers(disconnect);
+	  if (this.gameStarted) {
+		  player.setHasLost(true);
+	  } else {
+		  players.remove(player);
+	  }
   }
 
   public void sendTurnNotification() {
@@ -462,6 +474,7 @@ public class Game {
 
   private void handleJoinRequest(JSONObject request, Player author) {
     author.setTag(request.getString(Constants.PLAYER_TAG));
+    author.setCanSendTo(true);
 
     JSONObject joinNotification;
     // message the player who just joined who is already in the game

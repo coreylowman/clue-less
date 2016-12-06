@@ -239,10 +239,18 @@ function handleEvent(event){
     case "ACCUSATION_OUTCOME_NOTIFICATION":
       handleAccusationOutcome(event);
       break;
+    case "DISCONNECT_NOTIFICATION":
+      handleDisconnect(event);
+      break;
     default:
       console.log("Invalid eventType received");
       break;
   }
+}
+
+function handleDisconnect(disconnect) {
+  sendToChatBox(tag("Game") + disconnect.playerTag +
+    " has left".
 }
 
 function handleAcccusation(accusation){

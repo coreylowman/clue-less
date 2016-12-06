@@ -19,9 +19,14 @@ public class Player extends WebSocketAdapter {
   private List<ICard> cards;
   private Suspect suspect;
   private boolean hasLost = false;
+  private boolean canSendTo = false;
 
   public Player(String tag) {
     this.tag = tag;
+  }
+  
+  public void setCanSendTo(boolean canSendTo) {
+	  this.canSendTo = canSendTo;
   }
   
   public boolean getHasLost() {
@@ -73,7 +78,9 @@ public class Player extends WebSocketAdapter {
 
   public void sendEvent(JSONObject event) {
     try {
+    	if (canSendTo) {
       session.getRemote().sendString(event.toString());
+    	}
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -83,6 +90,8 @@ public class Player extends WebSocketAdapter {
   @Override
   public void onWebSocketClose(int statusCode, String reason) {
     log("WebSocket closed.");
+    this.canSendTo = false;
+    this.game.disconnectPlayer(this);
   }
 
   @Override

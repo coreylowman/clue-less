@@ -44,6 +44,8 @@
                 <td id="Kitchen" class="room">Kitchen</td>
             </tr>
         </table>
+  <div id="players">
+  </div>
   <form id="suggest_form">
     <select id="suggest_suspect">
       <option>Mrs. Peacock</option>
@@ -61,7 +63,7 @@
       <option>Lead Pipe</option>
       <option>Wrench</option>
     </select>
-      <button id="suggest_button" onclick="suggest(); return false">Suggest</button>
+      <button disabled id="suggest_button" onclick="suggest(); return false">Suggest</button>
   </form>
   <form id="accuse_form">
 
@@ -92,9 +94,9 @@
       <option>Study</option>
       <option>Hall</option>
     </select>
-    <button id="accuse_button" onclick="accuse(); return false">Accuse</button>
+    <button disabled id="accuse_button" onclick="accuse(); return false">Accuse</button>
   </form>
-  <button id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
+  <button disabled id="end_turn_button" onclick="endTurn(); return false">End Turn</button>
   <div id="hand_container">
     <div id="hand">
     </div>
@@ -126,7 +128,7 @@
     <input type="checkbox" name="weapons">Wrench<br>
     <br>
     <input type="checkbox" name="rooms">Billiard Room<br>
-    <input type="checkbox" name="rooms">Consveratory<br>
+    <input type="checkbox" name="rooms">Conservatory<br>
     <input type="checkbox" name="rooms">Library<br>
     <input type="checkbox" name="rooms">Kitchen<br>
     <input type="checkbox" name="rooms">Lounge<br>

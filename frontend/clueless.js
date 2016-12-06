@@ -242,6 +242,7 @@ function handleTurnNotification(notification) {
     // make valid locations clickable and enable all turn buttons
     notification.validMoves.forEach(function(val) {
       highlightLocation(getLocationName(val));
+      isMyTurn = true;
     });
 
     document.getElementById("suggest_button").disabled = false;
@@ -281,10 +282,13 @@ function resetLocations() {
 // called when End Turn button is clicked
 function endTurn() {
   if(canEndTurn){
+    isMyTurn = false;
     websocket.send(JSON.stringify({eventType: "END_TURN_REQUEST"}));
     document.getElementById("suggest_button").disabled = true;
     document.getElementById("accuse_button").disabled = true;
     document.getElementById("end_turn_button").disabled = true;
+  }else{
+    notTimeForThat();
   }
 }
 
@@ -293,9 +297,9 @@ function notPlayerTurn(){
   handleEvent(event);
 }
 
-function alreadyDidThat(){
-  var alreadyDidThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "You already did that this turn!"}
-  handleEvent(alreadyDidThat);
+function notTimeForThat(){
+  var notTimeForThat = {eventType: "INVALID_REQUEST_NOTIFICATION", reason: "It's not time for that right now!"}
+  handleEvent(notTimeForThat);
 }
 
 function accuse(){
@@ -314,13 +318,14 @@ function accuse(){
 function suggest(){
   if (isMyTurn){
     if(canSuggest){
+      resetLocations();
       var suggestion = {eventType: "SUGGESTION_REQUEST", suspect: "", weapon: ""};
       var suggestFormElements = document.getElementById("suggest_form").elements;
       suggestion.suspect = suggestFormElements[0].value;
       suggestion.weapon = suggestFormElements[1].value;
       websocket.send(JSON.stringify(suggestion));
      }else{
-       alreadyDidThat();
+       notTimeForThat();
      }
   }else{
     notPlayerTurn();

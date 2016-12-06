@@ -115,20 +115,29 @@ public class Game implements PlayerHolder {
     // todo
   }
 
-  public void addPlayer(Player player) {
-    this.players.add(player);
-    player.setPlayerHolder(this);
+  public void addPlayer(Player newPlayer) {
+    this.players.add(newPlayer);
+    newPlayer.setPlayerHolder(this);
+    newPlayer.setSuspect(this.remainingSuspects.remove(0));
 
-    player.setSuspect(this.remainingSuspects.remove(0));
+    JSONObject joinNotification;
+    // message the player who just joined who is already in the game
+    for (Player player : players) {
+      if (player == newPlayer)
+        continue;
+      joinNotification = new JSONObject();
+      joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+      joinNotification.put(Constants.PLAYER_TAG, player.getTag());
+      joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
+      newPlayer.sendEvent(joinNotification);
+    }
 
-    JSONObject joinNotification = new JSONObject();
-
+    joinNotification = new JSONObject();
     joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
-    joinNotification.put(Constants.PLAYER_TAG, player.getTag());
-    joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
-
+    joinNotification.put(Constants.PLAYER_TAG, newPlayer.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, newPlayer.getSuspect().toString());
     notifyPlayers(joinNotification);
-   
+    
     // Once we reach 3 players, we can start the game. So start a 5 minute
     //  timer!
     if (this.players.size() == 3 && timer == null) {

@@ -468,7 +468,19 @@ public class Game {
   private void handleJoinRequest(JSONObject request, Player author) {
     author.setTag(request.getString(Constants.PLAYER_TAG));
 
-    JSONObject joinNotification = new JSONObject();
+    JSONObject joinNotification;
+    // message the player who just joined who is already in the game
+    for (Player player : players) {
+      if (player == author)
+        continue;
+      joinNotification = new JSONObject();
+      joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+      joinNotification.put(Constants.PLAYER_TAG, player.getTag());
+      joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
+      author.sendEvent(joinNotification);
+    }
+
+    joinNotification = new JSONObject();
     joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
     joinNotification.put(Constants.PLAYER_TAG, author.getTag());
     joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());

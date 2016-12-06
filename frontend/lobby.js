@@ -19,9 +19,8 @@ function createGame() {
 
 function joinGame(name) {
   parent.tag = prompt("Please enter your name");
+  parent.name = name;
   parent.goto("game.html");
-  var joinRequest = {eventType: "JOIN_REQUEST", playerTag: parent.tag, game: name };
-  websocket.send(JSON.stringify(joinRequest));
 }
 
 function createGameElement(name) {

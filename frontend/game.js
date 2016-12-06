@@ -11,6 +11,10 @@ websocket.onmessage = function(message){
   handleEvent(JSON.parse(message.data));
 };
 
+// now that the we're able to handle server notifications, send the join request
+var joinRequest = {eventType: "JOIN_REQUEST", playerTag: parent.tag, game: parent.name };
+websocket.send(JSON.stringify(joinRequest));
+
 // if a room is passed in, nothing changes
 // if a hallway is passed in and the names are reversed (e.g. Hallway_Study instead
 // of Study_Hallway, then it reverses them)

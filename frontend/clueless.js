@@ -114,6 +114,20 @@ function handlePreventSuggestion(){
   canSuggest = false;
 };
 
+function handleJoinNotification(event) {
+  sendToChatBox(tag("Game") + bold(event.playerTag + " (" + event.playerSuspect + ")") + " has joined!");
+
+  var div = document.createElement("div");
+  div.setAttribute("id", "players_" + event.playerTag);
+  div.innerHTML = "";
+  if (playerTag === event.playerTag)
+    div.innerHTML += "> ";
+  div.innerHTML += event.playerTag + " (" + event.playerSuspect + ")";
+
+  var players = document.getElementById("players");
+  players.appendChild(div);
+}
+
 function handleEvent(event){
   console.log(event);
   switch(event.eventType){
@@ -124,7 +138,7 @@ function handleEvent(event){
       sendToChatBox(tag(event.author) + event.body);
       break;
     case "JOIN_NOTIFICATION":
-      sendToChatBox(tag("Game") + bold(event.playerTag + " (" + event.playerSuspect + ")") + " has joined!");
+      handleJoinNotification(event);
       break;
     case "INVALID_REQUEST_NOTIFICATION":
       alert("You cannot do that. " + event.reason);
@@ -177,13 +191,13 @@ function handleEvent(event){
 }
 
 function handleAcccusation(accusation){
- sendToChatBox(accusation.accuser +
+ sendToChatBox(tag("Game") + bold(accusation.accuser) +
               " has accused " +
-              accusation.accused +
+              bold(accusation.accused) +
               " in the " +
-              accusation.room +
+              bold(accusation.room) +
               " with the " +
-              accusation.weapon + ".");
+              bold(accusation.weapon) + ".");
 };
 
 function handleAccusationOutcome(outcome){
@@ -214,10 +228,15 @@ function handleMoveNotification(notification) {
 function handleTurnNotification(notification) {
   sendToChatBox(tag("Game") + "It's " + bold(notification.playerTag) + "'s turn.");
 
+  // update player turn element
+  var takingTurn = document.getElementsByClassName("takingTurn");
+  for(var i = 0; i < takingTurn.length; i++){
+    takingTurn[i].className = "";
+  }
+  document.getElementById("players_" + notification.playerTag).className = "takingTurn";
+
   if (notification.playerTag === playerTag) {
     // make valid locations clickable and enable all turn buttons
-    console.log(notification.validMoves);
-
     notification.validMoves.forEach(function(val) {
       highlightLocation(getLocationName(val));
     });

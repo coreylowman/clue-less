@@ -303,7 +303,8 @@ function suggest(){
       var suggestFormElements = document.getElementById("suggest_form").elements;
       suggestion.suspect = suggestFormElements[0].value;
       suggestion.weapon = suggestFormElements[1].value;
-      websocket.send(JSON.stringify(suggestion));
+      websocket.send(JSON.stringify(suggestion))
+      document.getElementById("suggest_button").disabled = true;
      }else{
        notTimeForThat();
      }

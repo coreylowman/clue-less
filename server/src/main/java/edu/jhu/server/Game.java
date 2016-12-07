@@ -142,23 +142,34 @@ public class Game implements PlayerHolder {
     joinNotification.put(Constants.PLAYER_TAG, newPlayer.getTag());
     joinNotification.put(Constants.PLAYER_SUSPECT, newPlayer.getSuspect().toString());
     notifyPlayers(joinNotification);
-    
+
     // Once we reach 3 players, we can start the game. So start a 5 minute
-    //  timer!
+    // timer!
     if (this.players.size() == 3 && timer == null) {
-        timer = new Timer();
-        
-        // In 5 minutes, start the game.
-        timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    start();
-                }
-            }, Constants.START_GAME_AFTER_MS);
+      timer = new Timer();
+
+      timeToStart = Constants.START_GAME_AFTER_MS;
+      // In 5 minutes, start the game.
+      timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+          if (timeToStart <= 0) {
+            start();
+          } else {
+            JSONObject notification = new JSONObject();
+            notification.put(Constants.EVENT_TYPE, "START_TIME_NOTIFICATION");
+            notification.put(Constants.MINUTES, timeToStart / Constants.MINUTE_MS);
+            notifyPlayers(notification);
+          }
+
+          timeToStart -= Constants.MINUTE_MS;
+        }
+      }, 0, Constants.MINUTE_MS);
     }
+
     // Start game if it's full now
     if (isFull()) {
-        start();
+      start();
     }
   }
   
@@ -294,6 +305,15 @@ public class Game implements PlayerHolder {
 	  }
   }
   
+  private void allowMovedPlayerToSuggest(Suspect accused) {
+	  for(Player player : players){
+		  if (player.getSuspect().equals(accused)){
+			  handleSimpleEvent(player, EventType.ALLOW_SUGGEST);
+			  break;
+		  }
+	  }
+  }
+  
   private void handleSuggestion(JSONObject accusation, Player suggester) {
 	  ILocation suggestedRoom = board.getLocationOf(suggester.getSuspect());
 	  Suspect theAccused = Suspect.get(accusation.get("suspect").toString());
@@ -320,10 +340,13 @@ public class Game implements PlayerHolder {
 			suggestion.put(Constants.ACCUSED, theAccused.toString());
 			suggestion.put(Constants.WEAPON, theWeapon.toString());
 			suggestion.put(Constants.ROOM, suggestedRoom.toString());
+			handleSimpleEvent(suggester, EventType.PREVENT_TURN_END);
+			handleSimpleEvent(suggester, EventType.PREVENT_SUGGEST);
 			notifyPlayers(suggestion);
 			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
 			
 			board.movePiece(theAccused, suggestedRoom);
+			allowMovedPlayerToSuggest(theAccused);
 			notifyPlayers(move);
 			CaseFile casefile = new CaseFile((Room) suggestedRoom, theAccused, theWeapon);
 			provideEvidence(casefile, suggester);
@@ -504,6 +527,8 @@ public class Game implements PlayerHolder {
 		  } while (players.get(currentTurnIndex).getHasLost());
     
 		  playerHasMoved = false;
+		  handleSimpleEvent(player, EventType.PREVENT_SUGGEST);
+		  handleSimpleEvent(player, EventType.ALLOW_TURN_END);
     
 		  sendTurnNotification();
 	  }

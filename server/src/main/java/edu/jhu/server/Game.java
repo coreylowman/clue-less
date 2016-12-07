@@ -283,6 +283,7 @@ public class Game {
 			suggestion.put(Constants.WEAPON, theWeapon.toString());
 			suggestion.put(Constants.ROOM, suggestedRoom.toString());
 			handleSimpleEvent(suggester, EventType.PREVENT_TURN_END);
+			handleSimpleEvent(suggester, EventType.PREVENT_SUGGEST);
 			notifyPlayers(suggestion);
 			JSONObject move = makeMoveNotification(theAccused, suggestedRoom);
 			

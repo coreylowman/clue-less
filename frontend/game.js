@@ -77,6 +77,7 @@ function handleEvidenceProvided(evidence){
 
 function handleAllowTurnEnd(){
   canEndTurn = true;
+
 };
 
 function handlePreventTurnEnd(){
@@ -84,10 +85,12 @@ function handlePreventTurnEnd(){
 };
 
 function handleAllowSuggestion(){
+  document.getElementById("suggest_button").disabled = false;
   canSuggest = true;
 };
 
 function handlePreventSuggestion(){
+  document.getElementById("suggest_button").disabled = true;
   canSuggest = false;
 };
 

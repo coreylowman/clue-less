@@ -10,7 +10,6 @@
 
 .takingTurn {
     background-color: lightgray;
-    color: blue;
 }
 
 #notepad {
@@ -108,4 +107,15 @@ td {
     -moz-border-radius: 25px;
     border-radius: 25px;
     border: solid 1px;
+}
+
+.miniSuspect {
+    margin: auto;
+    width: 9px;
+    height: 9px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: solid 1px;
+    display: inline-block;
 }

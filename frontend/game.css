@@ -15,11 +15,11 @@
 	background-image: url("images/Lounge.png");
 	background-size: cover;
 }
-#BilliardRoom {
+.BilliardRoom {
 	background-image: url("images/BilliardRoom.png");
 	background-size: cover;
 }
-#DiningRoom {
+.DiningRoom {
 	background-image: url("images/DiningRoom.png");
 	background-size: cover;
 }

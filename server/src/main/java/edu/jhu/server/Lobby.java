@@ -37,22 +37,22 @@ public class Lobby implements PlayerHolder {
   }
 
   public void createGame(String name) {
-    availableGames.put(name, new Game());
+    availableGames.put(name, new Game(name, this));
+  }
+
+  public void removeGame(String name) {
+    availableGames.remove(name);
+
+    JSONObject notification = new JSONObject();
+    notification.put(Constants.EVENT_TYPE, "GAME_REMOVED_NOTIFICATION");
+    notification.put(Constants.NAME, name);
+    notifyPlayers(notification);
   }
 
   public void joinGame(String name, Player player) {
     Game game = availableGames.get(name);
     game.addPlayer(player);
     noGamePlayers.remove(player);
-
-    if (game.isStarted() || game.isFull()) {
-      availableGames.remove(name);
-
-      JSONObject notification = new JSONObject();
-      notification.put(Constants.EVENT_TYPE, "GAME_REMOVED_NOTIFICATION");
-      notification.put(Constants.NAME, name);
-      notifyPlayers(notification);
-    }
   }
 
   public void notifyPlayers(JSONObject event) {

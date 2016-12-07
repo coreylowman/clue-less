@@ -88,6 +88,7 @@ td {
     border: 1px solid black;
     height: 44%;
     width: 99%;
+    background-image: url("images/walkway.png")
 }
 
 .selectable {

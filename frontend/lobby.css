@@ -1,0 +1,39 @@
+#gameList {
+    position: absolute;
+    left: 40%;
+    top:25%;
+    background: #ffffff;
+    list-style-type: none;
+    padding: 0px;
+}
+
+.game {
+    width: 200px;
+    height: 50px;
+    border: 1px solid black;
+    line-height: 50px;
+}
+
+.gameName {
+    float: left;
+    width: 50%;
+}
+
+.nameInput {
+    width: 50%;
+}
+
+.join {
+    position: relative;
+    float: right;
+    top: 25%;
+    right: 2px;
+}
+
+ul {
+    margin: 0px;
+}
+
+li {
+    margin: 2px;
+}

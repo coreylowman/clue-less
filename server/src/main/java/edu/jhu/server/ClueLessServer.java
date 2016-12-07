@@ -2,7 +2,10 @@ package edu.jhu.server;
 
 import java.net.InetSocketAddress;
 
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
@@ -12,11 +15,11 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 public class ClueLessServer {
 
   static int id;
-  static Game currentGame;
+  static Lobby lobby;
 
   public static void main(String[] args) throws Exception {
     id = 0;
-    currentGame = new Game();
+    lobby = new Lobby();
 
     try {
       WebSocketHandler wsHandler = new WebSocketHandler() {
@@ -26,20 +29,21 @@ public class ClueLessServer {
           factory.setCreator(new WebSocketCreator() {
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
               Player player = new Player("player" + String.valueOf(id++));
-              if (currentGame.isStarted() || currentGame.isFull()) {
-                currentGame = new Game();
-              }
-
-              currentGame.addPlayer(player);
-
+              lobby.addPlayer(player);
               return player;
             }
           });
         }
       };
 
+      ResourceHandler resHandler = new ResourceHandler();
+      resHandler.setResourceBase("../frontend");
+
+      HandlerList handlers = new HandlerList();
+      handlers.setHandlers(new Handler[] {wsHandler, resHandler});
+
       Server server = new Server(new InetSocketAddress(3000));
-      server.setHandler(wsHandler);
+      server.setHandler(handlers);
       server.start();
       server.join();
     } catch (Throwable t) {

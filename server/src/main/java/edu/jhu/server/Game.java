@@ -142,23 +142,34 @@ public class Game implements PlayerHolder {
     joinNotification.put(Constants.PLAYER_TAG, newPlayer.getTag());
     joinNotification.put(Constants.PLAYER_SUSPECT, newPlayer.getSuspect().toString());
     notifyPlayers(joinNotification);
-    
+
     // Once we reach 3 players, we can start the game. So start a 5 minute
-    //  timer!
+    // timer!
     if (this.players.size() == 3 && timer == null) {
-        timer = new Timer();
-        
-        // In 5 minutes, start the game.
-        timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    start();
-                }
-            }, Constants.START_GAME_AFTER_MS);
+      timer = new Timer();
+
+      timeToStart = Constants.START_GAME_AFTER_MS;
+      // In 5 minutes, start the game.
+      timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+          if (timeToStart <= 0) {
+            start();
+          } else {
+            JSONObject notification = new JSONObject();
+            notification.put(Constants.EVENT_TYPE, "START_TIME_NOTIFICATION");
+            notification.put(Constants.MINUTES, timeToStart / Constants.MINUTE_MS);
+            notifyPlayers(notification);
+          }
+
+          timeToStart -= Constants.MINUTE_MS;
+        }
+      }, 0, Constants.MINUTE_MS);
     }
+
     // Start game if it's full now
     if (isFull()) {
-        start();
+      start();
     }
   }
 

@@ -15,7 +15,7 @@ import edu.jhu.server.data.Suspect;
 public class Player extends WebSocketAdapter {
   private Session session;
   private String tag;
-  private Game game;
+  private PlayerHolder playerHolder;
   private List<ICard> cards;
   private Suspect suspect;
   private boolean hasLost = false;
@@ -23,10 +23,11 @@ public class Player extends WebSocketAdapter {
   public Player(String tag) {
     this.tag = tag;
   }
-  
+
   public boolean getHasLost() {
     return hasLost;
   }
+
   public void setHasLost(boolean hasLost) {
     this.hasLost = hasLost;
   }
@@ -35,8 +36,8 @@ public class Player extends WebSocketAdapter {
     return this.tag;
   }
 
-  public void setGame(Game game) {
-    this.game = game;
+  public void setPlayerHolder(PlayerHolder playerHolder) {
+    this.playerHolder = playerHolder;
   }
 
   public void setTag(String tag) {
@@ -83,6 +84,7 @@ public class Player extends WebSocketAdapter {
   @Override
   public void onWebSocketClose(int statusCode, String reason) {
     log("WebSocket closed.");
+    playerHolder.removePlayer(this);
   }
 
   @Override
@@ -100,6 +102,6 @@ public class Player extends WebSocketAdapter {
   public void onWebSocketText(final String message) {
     log("Message: " + message);
     JSONObject JSONMessage = new JSONObject(message);
-    game.handleEvent(JSONMessage, this);
+    playerHolder.handleEvent(JSONMessage, this);
   }
 }

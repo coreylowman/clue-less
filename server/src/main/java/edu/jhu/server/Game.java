@@ -18,10 +18,10 @@ import edu.jhu.server.data.ILocation;
 import edu.jhu.server.data.Room;
 import edu.jhu.server.data.Weapon;
 
-public class Game {
+public class Game implements PlayerHolder {
   private static enum EventType {
     TEST, CHAT_NOTIFICATION, GAME_START_NOTIFICATION, SUGGESTION_REQUEST, TURN_NOTIFICATION,
-    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, JOIN_REQUEST, END_TURN_REQUEST,
+    INVALID_REQUEST_NOTIFICATION, PROVIDE_EVIDENCE_REQUEST, END_TURN_REQUEST,
     MOVE_NOTIFICATION, SUGGESTION_NOTIFICATION, JOIN_NOTIFICATION, ACCUSATION_REQUEST,
     ACCUSATION_NOTIFICATION, SECRET_CARD_NOTIFICATION, ACCUSATION_OUTCOME_NOTIFICATION,
     MOVE_REQUEST, PROVIDE_EVIDENCE_NOTIFICATION, ALLOW_TURN_END, EVIDENCE_PROVIDED_NOTIFICATION,
@@ -115,16 +115,51 @@ public class Game {
     sendHandsToPlayers();
     sendTurnNotification();
   }
+  
+  public void removePlayer(Player player) {
+    // todo
+  }
 
-  public void addPlayer(Player player) {
-    this.players.add(player);
-    player.setGame(this);
+  public void addPlayer(Player newPlayer) {
+    this.players.add(newPlayer);
+    newPlayer.setPlayerHolder(this);
+    newPlayer.setSuspect(this.remainingSuspects.remove(0));
 
-    player.setSuspect(this.remainingSuspects.remove(0));
+    JSONObject joinNotification;
+    // message the player who just joined who is already in the game
+    for (Player player : players) {
+      if (player == newPlayer)
+        continue;
+      joinNotification = new JSONObject();
+      joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+      joinNotification.put(Constants.PLAYER_TAG, player.getTag());
+      joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
+      newPlayer.sendEvent(joinNotification);
+    }
 
-    // note: don't handle player joining here. handle when a JOIN_REQUEST is sent.
-    // the WebSocket session might not be set up here, and JOIN_REQUEST allows
-    // the player to set their tag.
+    joinNotification = new JSONObject();
+    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
+    joinNotification.put(Constants.PLAYER_TAG, newPlayer.getTag());
+    joinNotification.put(Constants.PLAYER_SUSPECT, newPlayer.getSuspect().toString());
+    notifyPlayers(joinNotification);
+    
+    // Once we reach 3 players, we can start the game. So start a 5 minute
+    //  timer!
+    if (this.players.size() == 3 && timer == null) {
+        timer = new Timer();
+        
+        // In 5 minutes, start the game.
+        timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    start();
+                }
+            }, Constants.START_GAME_AFTER_MS);
+    }
+    // Start game if it's full now
+    if (isFull()) {
+        start();
+    }
   }
 
   public void sendTurnNotification() {
@@ -329,9 +364,6 @@ public class Game {
       case INVALID_REQUEST_NOTIFICATION:
         player.sendEvent(event);
         break;
-      case JOIN_REQUEST:
-        handleJoinRequest(event, player);
-        break;
       case ACCUSATION_REQUEST:
         handleAccusationRequest(event, player);
         break;
@@ -479,52 +511,4 @@ public class Game {
 	  }
   }
 
-  private void handleJoinRequest(JSONObject request, Player author) {
-    author.setTag(request.getString(Constants.PLAYER_TAG));
-
-    JSONObject joinNotification;
-    // message the player who just joined who is already in the game
-    for (Player player : players) {
-      if (player == author)
-        continue;
-      joinNotification = new JSONObject();
-      joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
-      joinNotification.put(Constants.PLAYER_TAG, player.getTag());
-      joinNotification.put(Constants.PLAYER_SUSPECT, player.getSuspect().toString());
-      author.sendEvent(joinNotification);
-    }
-
-    joinNotification = new JSONObject();
-    joinNotification.put(Constants.EVENT_TYPE, EventType.JOIN_NOTIFICATION);
-    joinNotification.put(Constants.PLAYER_TAG, author.getTag());
-    joinNotification.put(Constants.PLAYER_SUSPECT, author.getSuspect().toString());
-    notifyPlayers(joinNotification);
-
-    // Once we reach 3 players, we can start the game. So start a 5 minute
-    // timer!
-    if (this.players.size() == 3 && timer == null) {
-      timer = new Timer();
-
-      timeToStart = Constants.START_GAME_AFTER_MS;
-      timer.schedule(new TimerTask() {
-        @Override
-        public void run() {
-          if (timeToStart <= 0) {
-            start();
-          } else {
-            JSONObject notification = new JSONObject();
-            notification.put(Constants.EVENT_TYPE, "START_TIME_NOTIFICATION");
-            notification.put(Constants.MINUTES, timeToStart / Constants.MINUTE_MS);
-            notifyPlayers(notification);
-          }
-          
-          timeToStart -= Constants.MINUTE_MS;
-        }
-      }, 0, Constants.MINUTE_MS);
-    }
-    // Start game if it's full now
-    if (isFull()) {
-      start();
-    }
-  }
 }

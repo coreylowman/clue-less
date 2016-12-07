@@ -74,7 +74,12 @@ td {
 }
 
 .room {
+    height: 100%;
+    width: 100%;
     border: 1px solid black;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
 }
 
 .vert_hallway {

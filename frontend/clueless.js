@@ -240,9 +240,9 @@ function handleTurnNotification(notification) {
 
   if (notification.playerTag === playerTag) {
     // make valid locations clickable and enable all turn buttons
+    isMyTurn = true;
     notification.validMoves.forEach(function(val) {
       highlightLocation(getLocationName(val));
-      isMyTurn = true;
     });
 
     document.getElementById("suggest_button").disabled = false;

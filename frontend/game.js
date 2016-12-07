@@ -95,11 +95,22 @@ function handleJoinNotification(event) {
   sendToChatBox(tag("Game") + bold(event.playerTag + " (" + event.playerSuspect + ")") + " has joined!");
 
   var div = document.createElement("div");
-  div.setAttribute("id", "players_" + event.playerTag);
-  div.innerHTML = "";
+
+  var playerSuspectDiv = document.getElementById(event.playerSuspect).cloneNode();
+  playerSuspectDiv.id = "";
+  playerSuspectDiv.className = "miniSuspect";
+  playerSuspectDiv.style.display = "inline-block";
+  div.appendChild(playerSuspectDiv);
+
+  var playerNameDiv = document.createElement("div");
+  playerNameDiv.setAttribute("id", "players_" + event.playerTag);
   if (playerTag === event.playerTag)
-    div.innerHTML += "> ";
-  div.innerHTML += event.playerTag + " (" + event.playerSuspect + ")";
+    playerNameDiv.innerHTML += " > ";
+  else
+    playerNameDiv.innerHTML = "   ";
+  playerNameDiv.innerHTML += event.playerTag + " (" + event.playerSuspect + ")";
+  playerNameDiv.style.display = "inline";
+  div.appendChild(playerNameDiv);
 
   var players = document.getElementById("players");
   players.appendChild(div);

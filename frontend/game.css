@@ -82,12 +82,19 @@ td {
     height: 100%;
     width: 33%;
     margin: auto;
+    display: flex;
+    jusitfy-content: center;
+    align-items:center;
+
 }
 
 .horizontal_hallway {
     border: 1px solid black;
     height: 44%;
     width: 99%;
+    display: flex;
+    jusitfy-content: center;
+    align-items:center;
 }
 
 .selectable {

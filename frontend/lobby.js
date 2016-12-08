@@ -57,7 +57,7 @@ function handleEvent(event) {
       gameList.insertBefore(game, creationNode);
       break;
     case "GAME_REMOVED_NOTIFICATION":
-      gameList.removeChild(document.getElementById(event.name));
+      gameList.removeChild(document.getElementById("game_" + event.name));
       break;
     default:
       break;

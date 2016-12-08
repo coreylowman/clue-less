@@ -95,7 +95,6 @@ function handleJoinNotification(event) {
   sendToChatBox(tag("Game") + bold(event.playerTag + " (" + event.playerSuspect + ")") + " has joined!");
 
   var div = document.createElement("div");
-
   var playerSuspectDiv = document.getElementById(event.playerSuspect).cloneNode();
   playerSuspectDiv.id = "";
   playerSuspectDiv.className = "miniSuspect";
@@ -240,7 +239,7 @@ function handleTurnNotification(notification) {
 }
 
 function highlightLocation(locationName) {
-  var location = document.getElementById(locationName);
+	var location = document.getElementById(locationName);
   if(location !== null){
     location.className += " selectable";
     location.onclick =  sendLocationName(locationName);

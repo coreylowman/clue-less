@@ -6,17 +6,17 @@
 	<link rel="stylesheet" href="game.css">
 	<script src="game.js" defer></script>
     </head>
-    <body>
+    <body style="background-image:url(images/Mansion.jpg); background-size: cover">
   <table id="board" width="800" height="600">
             <tr>
-                <td id="Study" class="room"><div class="roomName">Study</div></td>
-                <td><div id="Study_Hall" class="horizontal_hallway"></div></td>
+                <td id="Study" class="room selectable"><div class="roomName">Study</div></td>
+                <td><div id="Study_Hall" class="horizontal_hallway selectable"></div></td>
                 <td id="Hall" class="room"><div class="roomName">Hall</div></td>
                 <td><div id="Hall_Lounge" class="horizontal_hallway"><div id="Miss Scarlet" style="background-color: red;" class="suspect"></div></div></td>
                 <td id="Lounge" class="room"><div class="roomName">Lounge</div></td>
             </tr>
             <tr>
-                <td><div id="Study_Library" class="vert_hallway"><div id="Professor Plum" style="background-color: purple;" class="suspect"></div></div></td>
+                <td><div id="Study_Library" class="vert_hallway selectable"><div id="Professor Plum" style="background-color: purple;" class="suspect"></div></div></td>
                 <td></td>
                 <td><div id="Hall_Billiard Room" class="vert_hallway"></div></td>
                 <td></td>
@@ -25,9 +25,9 @@
             <tr>
                 <td id="Library" class="room"><div class="roomName">Library</div></td>
                 <td><div id="Library_Billiard Room" class="horizontal_hallway"></div></td>
-                <td id="Billiard Room" class="room"><div class="roomName">Billiard Room</div></td>
+                <td id="Billiard Room" class="room BilliardRoom"><div class="roomName">Billiard Room</div></td>
                 <td><div id="Billiard Room_Dining Room" class="horizontal_hallway"></div></td>
-                <td id="Dining Room" class="room"><div class="roomName">Dining Room</div></td>
+                <td id="Dining Room" class="room DiningRoom"><div class="roomName">Dining Room</div></td>
                 </tr>
             <tr>
                 <td><div id="Library_Conservatory" class="vert_hallway"><div id="Mrs. Peacock" style="background-color: blue;" class="suspect"></div></div></td>

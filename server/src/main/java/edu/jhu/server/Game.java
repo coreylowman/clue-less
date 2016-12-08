@@ -59,6 +59,8 @@ public class Game implements PlayerHolder {
 	  player.sendEvent(simpleEvent);
   }
   
+  private String name;
+  private Lobby lobby;
   
   private int currentTurnIndex;
   private List<Player> players;
@@ -73,7 +75,9 @@ public class Game implements PlayerHolder {
 
   private List<Suspect> remainingSuspects;
 
-  public Game() {
+  public Game(String name, Lobby lobby) {
+    this.name = name;
+    this.lobby = lobby;
     this.currentTurnIndex = 0;
     this.players = new ArrayList<Player>();
     this.board = new Board();
@@ -100,6 +104,8 @@ public class Game implements PlayerHolder {
   	if (this.players.size() < 3) {
   	  return;
   	}
+  	
+  	lobby.removeGame(name);
   	
   	// Send game start notification
   	notifyPlayers(makeGameStartNotification());

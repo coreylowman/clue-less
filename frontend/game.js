@@ -357,6 +357,8 @@ function showHand(handEvent) {
   document.getElementById("hand").innerHTML = "";
   for (var i = 0; i < handEvent.cards.length; i++) {
     addCard(handEvent.cards[i]);
+    var notepadItem = document.getElementById("opt_" + handEvent.cards[i]);
+    notepadItem.checked = true;
   }
 }
 

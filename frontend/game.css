@@ -35,12 +35,7 @@
 	background-image: url("images/Kitchen.png");
 	background-size: cover;
 }
-.roomName {
-  color: white;
-  text-shadow: 0 1px black;
-  background: rgba(0,0,0,0.6);
-  padding: 4px 8px;
-}
+
 #players {
     position:absolute;
     height: auto;
@@ -85,6 +80,7 @@
     float: left;
     padding: 3px;
     background: rgba(255, 255, 255, 0.75);
+    margin-left: 5px;
 }
 
 #chat_container {
@@ -132,8 +128,15 @@ td {
 }
 
 .roomName {
+    color: white;
+    padding: 4px 8px;
     flex-basis: 100%;
     align-self: flex-start;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000; 
 }
 
 .vert_hallway {

@@ -82,6 +82,7 @@
     height: 180px;
     border: 1px solid black;
     float: left;
+    background: rgba(255, 255, 255, 0.75);
 }
 
 #chat_container {

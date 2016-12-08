@@ -129,14 +129,11 @@ td {
 
 .roomName {
     color: white;
+    text-shadow: 0 1px black;
+    background: rgba(0,0,0,0.6);
     padding: 4px 8px;
     flex-basis: 100%;
     align-self: flex-start;
-    text-shadow:
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000; 
 }
 
 .vert_hallway {

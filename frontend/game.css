@@ -49,6 +49,7 @@
     padding: 5px;
     top: 35%;
     border: 1px solid black;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .takingTurn {

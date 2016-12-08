@@ -69,7 +69,7 @@
 #hand_container {
     position:absolute;
     left: 40%;
-    bottom: 5px;
+    bottom: 7px;
     height: 182px;
 }
 
@@ -83,6 +83,7 @@
     height: 180px;
     border: 1px solid black;
     float: left;
+    padding: 3px;
     background: rgba(255, 255, 255, 0.75);
 }
 
@@ -117,30 +118,56 @@ td {
     width: 20%;
     padding: 0px;
     margin: 0px;
-    overflow: hidden;
 }
 
 .room {
+    padding: 3px;
+    height: 100%;
+    width: 100%;
     border: 1px solid black;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-content: flex-start;
+}
+
+.roomName {
+    flex-basis: 100%;
+    align-self: flex-start;
 }
 
 .vert_hallway {
+    padding: 3px;
     border: 1px solid black;
-    height: 100%;
+    height: 102%;
     width: 33%;
-    margin: auto;
+    margin-bottom: 0px;
+    margin-left: 33%;
+    margin-right: 33%;
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    align-content: center;
     background-image: url("images/Walkway_Vert.png")
 }
 
 .horizontal_hallway {
+    padding: 3px;
     border: 1px solid black;
+    margin-left: 7px;
     height: 44%;
-    width: 99%;
+    width: 91%;
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    align-content: center;
     background-image: url("images/Walkway_Horiz.png")
 }
 
 .selectable {
     border: 2px solid blue;
+    padding: 2px;
+    cursor: pointer;
 }
 .selectable:hover {
     border: 4px solid blue;

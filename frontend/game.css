@@ -35,6 +35,12 @@
 	background-image: url("images/Kitchen.png");
 	background-size: cover;
 }
+.roomName {
+  color: white;
+  text-shadow: 0 1px black;
+  background: rgba(0,0,0,0.6);
+  padding: 4px 8px;
+}
 #players {
     position:absolute;
     height: auto;

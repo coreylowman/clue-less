@@ -73,6 +73,7 @@ function suggestionChat(suggestion){
 function handleEvidenceProvided(evidence){
   canEndTurn = true;
   sendToChatBox(tag("Game") + bold(evidence.author) + " says that the crime did not involve " + bold(evidence.evidence) + ".");
+  document.getElementById("opt_" + evidence.evidence).checked = true;
 };
 
 function handleAllowTurnEnd(){

@@ -1,3 +1,46 @@
+#Study {
+	background-image: url("images/Study.png");
+	background-size: cover;
+}
+#Hall {
+	background-image: url("images/Hall.png");
+	background-size: cover;
+}
+#Library {
+	background-image: url("images/Library.png");
+	background-size: cover;
+
+}
+#Lounge {
+	background-image: url("images/Lounge.png");
+	background-size: cover;
+}
+.BilliardRoom {
+	background-image: url("images/BilliardRoom.png");
+	background-size: cover;
+}
+.DiningRoom {
+	background-image: url("images/DiningRoom.png");
+	background-size: cover;
+}
+#Conservatory {
+	background-image: url("images/Conservatory.png");
+	background-size: cover;
+}
+#Ballroom {
+	background-image: url("images/Ballroom.png");
+	background-size: cover;
+}
+#Kitchen {
+	background-image: url("images/Kitchen.png");
+	background-size: cover;
+}
+.roomName {
+  color: white;
+  text-shadow: 0 1px black;
+  background: rgba(0,0,0,0.6);
+  padding: 4px 8px;
+}
 #players {
     position:absolute;
     height: auto;
@@ -6,6 +49,7 @@
     padding: 5px;
     top: 35%;
     border: 1px solid black;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .takingTurn {
@@ -19,6 +63,7 @@
     bottom: 5px;
     right: 5px;
     border: 1px solid black;
+    background: rgba(255, 255, 255, 0.75);
 }
 
 #hand_container {
@@ -38,12 +83,14 @@
     height: 180px;
     border: 1px solid black;
     float: left;
+    background: rgba(255, 255, 255, 0.75);
 }
 
 #chat_container {
     position: absolute;
     bottom: 5px;
     left: 5px;
+    background: rgba(255, 255, 255, 0.75);
 }
 #chat_text {
     height:150px;
@@ -82,21 +129,21 @@ td {
     height: 100%;
     width: 33%;
     margin: auto;
+    background-image: url("images/Walkway_Vert.png")
 }
 
 .horizontal_hallway {
     border: 1px solid black;
     height: 44%;
     width: 99%;
+    background-image: url("images/Walkway_Horiz.png")
 }
 
 .selectable {
-    border: 1px solid blue;
-    border-width: 1px;
-    border-color: blue;
+    border: 2px solid blue;
 }
 .selectable:hover {
-    border: 2px solid blue;
+    border: 4px solid blue;
     padding: 0px;
 }
 .suspect {
